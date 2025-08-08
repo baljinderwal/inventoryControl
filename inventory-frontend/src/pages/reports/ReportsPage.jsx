@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getProducts } from '../../services/productService';
-import { Parser } from 'json2csv';
+import { Parser } from '@json2csv/plainjs';
 
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';

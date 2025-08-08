@@ -11,6 +11,8 @@ import Typography from '@mui/material/Typography';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import WarehouseIcon from '@mui/icons-material/Warehouse';
+import BusinessIcon from '@mui/icons-material/Business';
+import SummarizeIcon from '@mui/icons-material/Summarize'; // Import new icon
 
 const drawerWidth = 240;
 
@@ -18,6 +20,8 @@ const navigation = [
   { name: 'Dashboard', href: '/', icon: <AssessmentIcon /> },
   { name: 'Products', href: '/products', icon: <InventoryIcon /> },
   { name: 'Stock', href: '/stock', icon: <WarehouseIcon /> },
+  { name: 'Suppliers', href: '/suppliers', icon: <BusinessIcon /> },
+  { name: 'Reports', href: '/reports', icon: <SummarizeIcon /> }, // Add new link
 ];
 
 const Sidebar = () => {

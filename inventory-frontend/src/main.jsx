@@ -3,9 +3,14 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import { AuthProvider } from './utils/AuthContext';
+import { NotificationProvider } from './utils/NotificationContext';
 import './index.css';
+
+// Create a client
+const queryClient = new QueryClient();
 
 // A simple default theme
 const theme = createTheme({
@@ -24,14 +29,17 @@ const theme = createTheme({
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
-      {/* CssBaseline kickstarts an elegant, consistent, and simple baseline to build upon. */}
-      <CssBaseline />
-      <BrowserRouter>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </BrowserRouter>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <NotificationProvider>
+          <CssBaseline />
+          <BrowserRouter>
+            <AuthProvider>
+              <App />
+            </AuthProvider>
+          </BrowserRouter>
+        </NotificationProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   </React.StrictMode>
 );

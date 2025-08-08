@@ -1,10 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import Table from '../../components/ui/Table';
+import MuiTable from '../../components/ui/Table';
 import SearchBar from '../../components/ui/SearchBar';
-import Button from '../../components/ui/Button';
+import Button from '@mui/material/Button';
 import Modal from '../../components/ui/Modal';
 import AddProductForm from './AddProductForm';
 import { products as initialProducts } from '../../utils/dummyData';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 const ProductsPage = () => {
   const [products, setProducts] = useState(initialProducts);
@@ -22,23 +24,23 @@ const ProductsPage = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-2xl font-semibold text-gray-800">Products</h3>
-        <Button onClick={() => setIsModalOpen(true)}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h4">
+          Products
+        </Typography>
+        <Button variant="contained" onClick={() => setIsModalOpen(true)}>
           Add Product
         </Button>
-      </div>
+      </Box>
 
-      <div className="mb-4">
+      <Box sx={{ mb: 2 }}>
         <SearchBar
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
-      </div>
+      </Box>
 
-      <div className="bg-white rounded-lg shadow-md">
-        <Table headers={tableHeaders} data={filteredProducts} />
-      </div>
+      <MuiTable headers={tableHeaders} data={filteredProducts} />
 
       <Modal
         isOpen={isModalOpen}

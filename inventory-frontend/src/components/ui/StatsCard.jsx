@@ -1,16 +1,29 @@
 import React from 'react';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import Avatar from '@mui/material/Avatar';
+import Box from '@mui/material/Box';
 
 const StatsCard = ({ title, value, icon }) => {
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md flex items-center">
-      <div className="p-3 bg-indigo-500 text-white rounded-full mr-4">
-        {icon}
-      </div>
-      <div>
-        <p className="text-sm font-medium text-gray-500 uppercase">{title}</p>
-        <p className="text-2xl font-semibold text-gray-900">{value}</p>
-      </div>
-    </div>
+    <Card>
+      <CardContent>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
+            {icon}
+          </Avatar>
+          <Box>
+            <Typography color="text.secondary" gutterBottom>
+              {title}
+            </Typography>
+            <Typography variant="h5" component="div">
+              {value}
+            </Typography>
+          </Box>
+        </Box>
+      </CardContent>
+    </Card>
   );
 };
 

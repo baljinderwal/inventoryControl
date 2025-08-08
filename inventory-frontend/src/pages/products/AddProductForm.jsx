@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import Button from '../../components/ui/Button';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import DialogActions from '@mui/material/DialogActions';
+import Box from '@mui/material/Box';
 
 const AddProductForm = ({ onClose }) => {
   const [formData, setFormData] = useState({
@@ -21,32 +24,61 @@ const AddProductForm = ({ onClose }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
-        <input type="text" name="name" id="name" value={formData.name} onChange={handleChange} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-      </div>
-      <div>
-        <label htmlFor="sku" className="block text-sm font-medium text-gray-700">SKU</label>
-        <input type="text" name="sku" id="sku" value={formData.sku} onChange={handleChange} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-      </div>
-      <div>
-        <label htmlFor="price" className="block text-sm font-medium text-gray-700">Price</label>
-        <input type="number" name="price" id="price" value={formData.price} onChange={handleChange} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-      </div>
-      <div>
-        <label htmlFor="stock" className="block text-sm font-medium text-gray-700">Stock</label>
-        <input type="number" name="stock" id="stock" value={formData.stock} onChange={handleChange} required className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
-      </div>
-      <div className="flex justify-end space-x-2">
-        <Button type="button" onClick={onClose} className="bg-gray-200 text-gray-700 hover:bg-gray-300">
-          Cancel
-        </Button>
-        <Button type="submit">
-          Add Product
-        </Button>
-      </div>
-    </form>
+    <Box component="form" onSubmit={handleSubmit}>
+      <TextField
+        autoFocus
+        margin="dense"
+        id="name"
+        name="name"
+        label="Product Name"
+        type="text"
+        fullWidth
+        variant="standard"
+        value={formData.name}
+        onChange={handleChange}
+        required
+      />
+      <TextField
+        margin="dense"
+        id="sku"
+        name="sku"
+        label="SKU"
+        type="text"
+        fullWidth
+        variant="standard"
+        value={formData.sku}
+        onChange={handleChange}
+        required
+      />
+      <TextField
+        margin="dense"
+        id="price"
+        name="price"
+        label="Price"
+        type="number"
+        fullWidth
+        variant="standard"
+        value={formData.price}
+        onChange={handleChange}
+        required
+      />
+      <TextField
+        margin="dense"
+        id="stock"
+        name="stock"
+        label="Stock"
+        type="number"
+        fullWidth
+        variant="standard"
+        value={formData.stock}
+        onChange={handleChange}
+        required
+      />
+      <DialogActions>
+        <Button onClick={onClose}>Cancel</Button>
+        <Button type="submit" variant="contained">Add Product</Button>
+      </DialogActions>
+    </Box>
   );
 };
 

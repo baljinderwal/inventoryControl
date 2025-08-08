@@ -1,19 +1,23 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
+import Box from '@mui/material/Box';
+import Toolbar from '@mui/material/Toolbar';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 
 const Layout = () => {
   return (
-    <div className="flex h-screen bg-gray-100">
+    <Box sx={{ display: 'flex' }}>
+      <Topbar />
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-4 md:p-6">
-          <Outlet />
-        </main>
-      </div>
-    </div>
+      <Box
+        component="main"
+        sx={{ flexGrow: 1, p: 3, width: { md: `calc(100% - 240px)` } }}
+      >
+        <Toolbar /> {/* Spacer for the fixed AppBar */}
+        <Outlet />
+      </Box>
+    </Box>
   );
 };
 

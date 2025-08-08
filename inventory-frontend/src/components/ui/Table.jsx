@@ -1,43 +1,40 @@
 import React from 'react';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 
-const Table = ({ headers, data }) => {
+const MuiTable = ({ headers, data }) => {
   return (
-    <div className="overflow-x-auto">
-      <div className="inline-block min-w-full align-middle">
-        <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-          <table className="min-w-full divide-y divide-gray-300">
-            <thead className="bg-gray-50">
-              <tr>
-                {headers.map((header) => (
-                  <th
-                    key={header}
-                    scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >
-                    {header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 bg-white">
-              {data.map((row, rowIndex) => (
-                <tr key={rowIndex}>
-                  {Object.values(row).map((cell, cellIndex) => (
-                    <td
-                      key={cellIndex}
-                      className="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
-                    >
-                      {cell}
-                    </td>
-                  ))}
-                </tr>
+    <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            {headers.map((header) => (
+              <TableCell key={header} sx={{ fontWeight: 'bold' }}>
+                {header}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {data.map((row, rowIndex) => (
+            <TableRow
+              key={rowIndex}
+              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+            >
+              {Object.values(row).map((cell, cellIndex) => (
+                <TableCell key={cellIndex}>{cell}</TableCell>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 
-export default Table;
+export default MuiTable;

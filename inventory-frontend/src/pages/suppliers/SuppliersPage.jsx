@@ -26,7 +26,7 @@ const SuppliersPage = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [supplierToDelete, setSupplierToDelete] = useState(null);
 
-  const { data: suppliers, isLoading, isError, error } = useQuery({
+  const { data: suppliers = [], isLoading, isError, error } = useQuery({
     queryKey: ['suppliers'],
     queryFn: getSuppliers,
   });

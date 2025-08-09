@@ -19,7 +19,7 @@ const StockPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const { data: products, isLoading, isError, error } = useQuery({
+  const { data: products = [], isLoading, isError, error } = useQuery({
     queryKey: ['products'], // We use the same query key to leverage caching
     queryFn: getStockLevels,
   });

@@ -12,13 +12,13 @@ import Alert from '@mui/material/Alert';
 import DownloadIcon from '@mui/icons-material/Download';
 
 const ReportsPage = () => {
-  const { data: products, isLoading, isError, error } = useQuery({
+  const { data: products = [], isLoading, isError, error } = useQuery({
     queryKey: ['products'],
     queryFn: getProducts,
   });
 
   const stockValueReport = useMemo(() => {
-    if (!products) return { totalValue: 0, reportData: [] };
+    if (!Array.isArray(products)) return { totalValue: 0, reportData: [] };
 
     const reportData = products.map(p => ({
       ...p,

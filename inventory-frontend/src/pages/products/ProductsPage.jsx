@@ -28,7 +28,7 @@ const ProductsPage = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
 
-  const { data: products, isLoading, isError, error } = useQuery({
+  const { data: products = [], isLoading, isError, error } = useQuery({
     queryKey: ['products'],
     queryFn: getProducts,
   });
@@ -45,7 +45,7 @@ const ProductsPage = () => {
   });
 
   const filteredProducts = useMemo(() => {
-    if (!products) return [];
+    if (!Array.isArray(products)) return [];
     return products.filter((product) =>
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.sku.toLowerCase().includes(searchQuery.toLowerCase())

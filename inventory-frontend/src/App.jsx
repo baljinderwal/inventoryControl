@@ -3,7 +3,9 @@ import { Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/auth/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import ProductsPage from './pages/products/ProductsPage';
-import StockPage from './pages/stock/StockPage'; // Import the new page
+import StockPage from './pages/stock/StockPage';
+import SuppliersPage from './pages/suppliers/SuppliersPage';
+import ReportsPage from './pages/reports/ReportsPage'; // Import new page
 import Layout from './components/layout/Layout';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -15,7 +17,9 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/products" element={<ProductsPage />} />
-          <Route path="/stock" element={<StockPage />} /> {/* Add the new route */}
+          <Route path="/stock" element={<StockPage />} />
+          <Route path="/suppliers" element={<SuppliersPage />} />
+          <Route path="/reports" element={<ReportsPage />} /> {/* Add new route */}
         </Route>
       </Route>
     </Routes>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../utils/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Button,
   TextField,
@@ -24,6 +24,8 @@ const LoginPage = () => {
 
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/';
 
   const validateForm = () => {
     if (!email || !password) {
@@ -47,7 +49,7 @@ const LoginPage = () => {
     try {
       setLoading(true);
       await login(email, password);
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (err) {
       setError('Invalid credentials. Please try again.');
     } finally {

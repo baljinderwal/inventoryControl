@@ -16,7 +16,8 @@ export const addProduct = async (product) => {
 };
 
 export const updateProduct = async (id, product) => {
-  const response = await api.put(`/products/${id}`, product);
+  // Using PATCH is better for partial updates
+  const response = await api.patch(`/products/${id}`, product);
   return response.data;
 };
 

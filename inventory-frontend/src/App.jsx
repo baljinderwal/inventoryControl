@@ -5,7 +5,8 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import ProductsPage from './pages/products/ProductsPage';
 import StockPage from './pages/stock/StockPage';
 import SuppliersPage from './pages/suppliers/SuppliersPage';
-import ReportsPage from './pages/reports/ReportsPage'; // Import new page
+import ReportsPage from './pages/reports/ReportsPage';
+import OrdersPage from './pages/orders/OrdersPage'; // Import OrdersPage
 import Layout from './components/layout/Layout';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -19,7 +20,8 @@ function App() {
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/stock" element={<StockPage />} />
           <Route path="/suppliers" element={<SuppliersPage />} />
-          <Route path="/reports" element={<ReportsPage />} /> {/* Add new route */}
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/orders" element={<OrdersPage />} /> {/* Add Orders Route */}
         </Route>
       </Route>
     </Routes>

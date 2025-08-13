@@ -139,7 +139,7 @@ const LoginPage = () => {
         minHeight: '100vh',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        background: 'linear-gradient(135deg, #6a11cb 0%, #2575fc 100%)',
         position: 'relative',
         overflow: 'hidden',
       }}

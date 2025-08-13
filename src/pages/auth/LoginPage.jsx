@@ -33,7 +33,7 @@ const LoginPage = () => {
   const [isCapsLockOn, setIsCapsLockOn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
-  const [animateShake, setAnimateShake] = useState(0);
+  const [animateShake, setAnimateShake] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
   const { login } = useAuth();
@@ -105,7 +105,8 @@ const LoginPage = () => {
     }));
 
     if (emailError || passwordError) {
-      setAnimateShake(c => c + 1);
+      setAnimateShake(true);
+      setTimeout(() => setAnimateShake(false), 500);
       return;
     }
 
@@ -121,6 +122,15 @@ const LoginPage = () => {
   };
 
   const isFormValid = form.email.valid && form.password.valid;
+
+  const formVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+    shake: {
+      x: [0, -10, 10, -10, 10, 0],
+      transition: { duration: 0.5 },
+    },
+  };
 
   return (
     <Box
@@ -160,16 +170,9 @@ const LoginPage = () => {
       />
       <Container component="main" maxWidth="xs" sx={{ zIndex: 1 }}>
         <motion.div
-          initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          variants={{
-            shake: {
-              x: [0, -10, 10, -10, 10, 0],
-              transition: { duration: 0.5 }
-            }
-          }}
-          animate={animateShake ? "shake" : ""}
+          variants={formVariants}
+          initial={shouldReduceMotion ? 'visible' : 'hidden'}
+          animate={animateShake ? 'shake' : 'visible'}
         >
           <Paper
             elevation={8}
@@ -191,7 +194,6 @@ const LoginPage = () => {
               <Lock
                 sx={{
                   fontSize: 40,
-                  color: 'primary.main',
                   mb: 2,
                   background: 'linear-gradient(135deg, #667eea, #764ba2)',
                   color: 'white',

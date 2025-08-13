@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getSuppliers } from '../../services/supplierService';
 import { getProducts } from '../../services/productService';
-import { addPO, updatePO } from '../../services/poService';
+import { addOrder, updateOrder } from '../../services/orderService';
 import { useNotification } from '../../utils/NotificationContext';
 import AppDialog from '../../components/ui/AppDialog';
 import {
@@ -16,60 +16,35 @@ import {
   Box,
   Typography,
   CircularProgress,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
-  Badge,
 } from '@mui/material';
-import { Add, Delete, Lightbulb } from '@mui/icons-material';
+import { Add, Delete } from '@mui/icons-material';
 
-const AddEditPOForm = ({ open, onClose, po }) => {
-  const isEditMode = Boolean(po);
+const AddEditOrderForm = ({ open, onClose, order }) => {
+  const isEditMode = Boolean(order);
   const queryClient = useQueryClient();
-  const { showNotification } = useNotification();
+  const showNotification = useNotification();
 
   const [supplierId, setSupplierId] = useState('');
   const [productsList, setProductsList] = useState([{ productId: '', quantity: 1 }]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => {
     if (isEditMode) {
-      setSupplierId(po.supplierId || '');
-      setProductsList(po.products.map(p => ({ productId: p.productId, quantity: p.quantity })));
+      setSupplierId(order.supplierId || '');
+      setProductsList(order.products.map(p => ({ productId: p.productId, quantity: p.quantity })));
     } else {
       // Reset form for new entry
       setSupplierId('');
       setProductsList([{ productId: '', quantity: 1 }]);
     }
-  }, [po, isEditMode, open]); // re-run when dialog opens
+  }, [order, isEditMode, open]); // re-run when dialog opens
 
   const { data: suppliers, isLoading: isLoadingSuppliers } = useQuery({ queryKey: ['suppliers'], queryFn: getSuppliers });
   const { data: products, isLoading: isLoadingProducts } = useQuery({ queryKey: ['products'], queryFn: getProducts });
 
-  const lowStockProducts = React.useMemo(() => {
-    if (!products) return [];
-    return products.filter(p => p.stock <= p.lowStockThreshold);
-  }, [products]);
-
-  const handleAddFromSuggestion = (product) => {
-    // Avoid adding duplicates, if the product is already in the list, do nothing.
-    if (productsList.some(p => p.productId === product.id)) {
-      showNotification(`${product.name} is already in the list.`, 'info');
-      return;
-    }
-    // If the first item is an empty placeholder, replace it. Otherwise, add a new item.
-    if (productsList.length === 1 && !productsList[0].productId) {
-      setProductsList([{ productId: product.id, quantity: product.lowStockThreshold * 2 || 20 }]);
-    } else {
-      setProductsList([...productsList, { productId: product.id, quantity: product.lowStockThreshold * 2 || 20 }]);
-    }
-  };
-
   const mutationOptions = {
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['purchaseOrders'] });
-      showNotification(`Purchase Order ${isEditMode ? 'updated' : 'created'} successfully!`, 'success');
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      showNotification(`Order ${isEditMode ? 'updated' : 'created'} successfully!`, 'success');
       onClose();
     },
     onError: (error) => {
@@ -77,13 +52,13 @@ const AddEditPOForm = ({ open, onClose, po }) => {
     },
   };
 
-  const addPOMutation = useMutation({
-    mutationFn: addPO,
+  const addOrderMutation = useMutation({
+    mutationFn: addOrder,
     ...mutationOptions,
   });
 
-  const updatePOMutation = useMutation({
-    mutationFn: (poData) => updatePO(po.id, poData),
+  const updateOrderMutation = useMutation({
+    mutationFn: (orderData) => updateOrder(order.id, orderData),
     ...mutationOptions,
   });
 
@@ -106,7 +81,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const poData = {
+    const orderData = {
       supplierId: parseInt(supplierId),
       status: 'Pending',
       products: productsList.map(item => ({
@@ -116,25 +91,25 @@ const AddEditPOForm = ({ open, onClose, po }) => {
     };
 
     if (!isEditMode) {
-      poData.createdAt = new Date().toISOString();
+      orderData.createdAt = new Date().toISOString();
     }
 
-    if (!poData.supplierId || poData.products.length === 0) {
+    if (!orderData.supplierId || orderData.products.length === 0) {
       showNotification('Please select a supplier and add at least one valid product.', 'warning');
       return;
     }
 
     if (isEditMode) {
-      updatePOMutation.mutate(poData);
+      updateOrderMutation.mutate(orderData);
     } else {
-      addPOMutation.mutate(poData);
+      addOrderMutation.mutate(orderData);
     }
   };
 
-  const isLoading = addPOMutation.isLoading || updatePOMutation.isLoading;
+  const isLoading = addOrderMutation.isLoading || updateOrderMutation.isLoading;
 
   return (
-    <AppDialog title={isEditMode ? `Edit PO #${po.id}` : "Create New Purchase Order"} open={open} onClose={onClose} maxWidth="md">
+    <AppDialog title={isEditMode ? `Edit Order #${order.id}` : "Create New Purchase Order"} open={open} onClose={onClose} maxWidth="md">
       <form onSubmit={handleSubmit}>
         <FormControl fullWidth margin="normal" required disabled={isEditMode}>
           <InputLabel>Supplier</InputLabel>
@@ -148,41 +123,6 @@ const AddEditPOForm = ({ open, onClose, po }) => {
             ))}
           </Select>
         </FormControl>
-
-        {!isEditMode && (
-          <Box sx={{ my: 2 }}>
-            <Button
-              startIcon={<Badge badgeContent={lowStockProducts.length} color="warning"><Lightbulb /></Badge>}
-              onClick={() => setShowSuggestions(!showSuggestions)}
-              disabled={lowStockProducts.length === 0}
-            >
-              {showSuggestions ? 'Hide' : 'Show'} Reorder Suggestions
-            </Button>
-            {showSuggestions && (
-              <Paper variant="outlined" sx={{ mt: 1 }}>
-                <List dense>
-                  {lowStockProducts.map((p, index) => (
-                    <React.Fragment key={p.id}>
-                      <ListItem
-                        secondaryAction={
-                          <Button edge="end" size="small" onClick={() => handleAddFromSuggestion(p)}>
-                            Add
-                          </Button>
-                        }
-                      >
-                        <ListItemText
-                          primary={p.name}
-                          secondary={`Stock: ${p.stock} | Threshold: ${p.lowStockThreshold}`}
-                        />
-                      </ListItem>
-                      {index < lowStockProducts.length - 1 && <Divider />}
-                    </React.Fragment>
-                  ))}
-                </List>
-              </Paper>
-            )}
-          </Box>
-        )}
 
         <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Products</Typography>
 
@@ -222,7 +162,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
           <Button onClick={onClose} color="inherit">Cancel</Button>
           <Button type="submit" variant="contained" disabled={isLoading}>
-            {isLoading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update PO' : 'Create PO')}
+            {isLoading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Update Order' : 'Create Order')}
           </Button>
         </Box>
       </form>
@@ -230,4 +170,4 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   );
 };
 
-export default AddEditPOForm;
+export default AddEditOrderForm;

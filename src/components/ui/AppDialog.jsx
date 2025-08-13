@@ -6,9 +6,9 @@ import DialogActions from '@mui/material/DialogActions';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
 
-const AppDialog = ({ open, onClose, title, children }) => {
+const Modal = ({ isOpen, onClose, title, children }) => {
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle sx={{ m: 0, p: 2 }}>
         {title}
         <IconButton
@@ -31,4 +31,4 @@ const AppDialog = ({ open, onClose, title, children }) => {
   );
 };
 
-export default AppDialog;
+export default Modal;

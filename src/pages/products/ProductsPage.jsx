@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getProducts, deleteProduct } from '../../services/productService';
 import { useNotification } from '../../utils/NotificationContext';
-import { Parser } from '@json2csv/plainjs';
 
 import MuiTable from '../../components/ui/Table';
 import SearchBar from '../../components/ui/SearchBar';
@@ -18,8 +17,6 @@ import Alert from '@mui/material/Alert';
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import DownloadIcon from '@mui/icons-material/Download';
-import Stack from '@mui/material/Stack';
 
 const ProductsPage = () => {
   const queryClient = useQueryClient();
@@ -54,20 +51,6 @@ const ProductsPage = () => {
       product.sku.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [products, searchQuery]);
-
-  const handleExport = () => {
-    if (!filteredProducts) return;
-    const fields = ['id', 'name', 'sku', 'category', 'price', 'costPrice', 'stock', 'lowStockThreshold', 'createdAt'];
-    const parser = new Parser({ fields });
-    const csv = parser.parse(filteredProducts);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.setAttribute('download', 'products.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   const handleAddClick = () => {
     setProductToEdit(null);
@@ -125,17 +108,7 @@ const ProductsPage = () => {
     <div>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4">Products</Typography>
-        <Stack direction="row" spacing={2}>
-          <Button
-            variant="outlined"
-            startIcon={<DownloadIcon />}
-            onClick={handleExport}
-            disabled={!filteredProducts || filteredProducts.length === 0}
-          >
-            Export as CSV
-          </Button>
-          <Button variant="contained" onClick={handleAddClick}>Add Product</Button>
-        </Stack>
+        <Button variant="contained" onClick={handleAddClick}>Add Product</Button>
       </Box>
 
       <Box sx={{ mb: 2 }}>

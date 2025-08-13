@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
@@ -14,6 +15,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import PeopleIcon from '@mui/icons-material/People';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { useAuth } from '../../utils/AuthContext';
 
 const drawerWidth = 240;
@@ -23,8 +25,9 @@ const navigation = [
   { name: 'Products', href: '/products', icon: <InventoryIcon />, roles: ['Admin', 'Manager', 'Staff'] },
   { name: 'Stock', href: '/stock', icon: <WarehouseIcon />, roles: ['Admin', 'Manager', 'Staff'] },
   { name: 'Suppliers', href: '/suppliers', icon: <BusinessIcon />, roles: ['Admin', 'Manager'] },
-  { name: 'Purchase Orders', href: '/purchase-orders', icon: <ShoppingCartIcon />, roles: ['Admin', 'Manager', 'Staff'] },
-  { name: 'Reports', href: '/reports', icon: <SummarizeIcon />, roles: ['Admin', 'Manager'] },
+  { name: 'Orders', href: '/orders', icon: <ShoppingCartIcon />, roles: ['Admin', 'Manager', 'Staff'] },
+  { name: 'Reports', href: '/reports', icon: <SummarizeIcon />, roles: ['Admin', 'Manager'], end: true },
+  { name: 'Profitability', href: '/reports/profitability', icon: <TrendingUpIcon />, roles: ['Admin', 'Manager'] },
   { name: 'Users', href: '/users', icon: <PeopleIcon />, roles: ['Admin'] },
 ];
 
@@ -53,22 +56,23 @@ const Sidebar = () => {
           Inv-Ctrl
         </Typography>
       </Toolbar>
-      <List component="nav">
+      <List>
         {filteredNavigation.map((item) => (
-          <ListItemButton
-            key={item.name}
-            component={NavLink}
-            to={item.href}
-            sx={{
-              '&.active': {
-                backgroundColor: 'action.selected',
-                fontWeight: 'fontWeightBold',
-              },
-            }}
-          >
-            <ListItemIcon>{item.icon}</ListItemIcon>
-            <ListItemText primary={item.name} />
-          </ListItemButton>
+          <ListItem key={item.name} disablePadding>
+            <ListItemButton
+              component={NavLink}
+              to={item.href}
+              end={item.end}
+              sx={{
+                '&.active': {
+                  backgroundColor: 'rgba(0, 0, 0, 0.08)',
+                },
+              }}
+            >
+              <ListItemIcon>{item.icon}</ListItemIcon>
+              <ListItemText primary={item.name} />
+            </ListItemButton>
+          </ListItem>
         ))}
       </List>
     </Drawer>

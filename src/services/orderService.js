@@ -1,6 +1,6 @@
 import api from './api';
 
-export const getPOs = async () => {
+export const getOrders = async () => {
   // Use _expand to automatically embed the supplier details in each order
   // Also sort by creation date descending to show newest first
   // const response = await api.get('/orders?_expand=supplier&_sort=createdAt&_order=desc');
@@ -13,28 +13,28 @@ export const getPOs = async () => {
   return data.orders || [];
 };
 
-export const getPO = async (id) => {
+export const getOrder = async (id) => {
   // const response = await api.get(`/orders/${id}?_expand=supplier`);
   // return response.data;
 
   // For the sake of this example, we will fetch a single order from a public db.json file
+
   const response = await fetch('/db.json');
   const data = await response.json();
-  const order = data.orders.find(o => o.id === id);
-  return order || null;
+  return data.orders[0] || [];
 };
 
-export const addPO = async (poData) => {
-  const response = await api.post('/orders', poData);
+export const addOrder = async (order) => {
+  const response = await api.post('/orders', order);
   return response.data;
 };
 
-export const updatePO = async (poId, poData) => {
-  const response = await api.patch(`/orders/${poId}`, poData);
+export const updateOrder = async (orderId, orderData) => {
+  const response = await api.patch(`/orders/${orderId}`, orderData);
   return response.data;
 };
 
-export const deletePO = async (id) => {
+export const deleteOrder = async (id) => {
   const response = await api.delete(`/orders/${id}`);
   return response.data;
 };

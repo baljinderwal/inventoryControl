@@ -2,15 +2,19 @@ import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../utils/AuthContext';
 
-const PrivateRoute = () => {
-  const { isAuthenticated } = useAuth();
+const PrivateRoute = ({ roles }) => {
+  const { isAuthenticated, user } = useAuth();
   const location = useLocation();
 
-  return isAuthenticated ? (
-    <Outlet />
-  ) : (
-    <Navigate to="/login" state={{ from: location }} replace />
-  );
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (roles && !roles.includes(user.role)) {
+    return <Navigate to="/" state={{ from: location }} replace />;
+  }
+
+  return <Outlet />;
 };
 
 export default PrivateRoute;

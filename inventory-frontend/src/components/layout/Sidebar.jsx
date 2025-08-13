@@ -13,25 +13,37 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import WarehouseIcon from '@mui/icons-material/Warehouse';
 import BusinessIcon from '@mui/icons-material/Business';
 import SummarizeIcon from '@mui/icons-material/Summarize';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'; // Import Orders icon
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import PeopleIcon from '@mui/icons-material/People';
+import { useAuth } from '../../utils/AuthContext';
 
 const drawerWidth = 240;
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: <AssessmentIcon /> },
-  { name: 'Products', href: '/products', icon: <InventoryIcon /> },
-  { name: 'Stock', href: '/stock', icon: <WarehouseIcon /> },
-  { name: 'Suppliers', href: '/suppliers', icon: <BusinessIcon /> },
-  { name: 'Orders', href: '/orders', icon: <ShoppingCartIcon /> }, // Add Orders link
-  { name: 'Reports', href: '/reports', icon: <SummarizeIcon /> },
+  { name: 'Dashboard', href: '/', icon: <AssessmentIcon />, roles: ['Admin', 'Manager', 'Staff'] },
+  { name: 'Products', href: '/products', icon: <InventoryIcon />, roles: ['Admin', 'Manager', 'Staff'] },
+  { name: 'Stock', href: '/stock', icon: <WarehouseIcon />, roles: ['Admin', 'Manager', 'Staff'] },
+  { name: 'Suppliers', href: '/suppliers', icon: <BusinessIcon />, roles: ['Admin', 'Manager'] },
+  { name: 'Orders', href: '/orders', icon: <ShoppingCartIcon />, roles: ['Admin', 'Manager', 'Staff'] },
+  { name: 'Reports', href: '/reports', icon: <SummarizeIcon />, roles: ['Admin', 'Manager'] },
+  { name: 'Users', href: '/users', icon: <PeopleIcon />, roles: ['Admin'] },
 ];
 
 const Sidebar = () => {
+  const { user } = useAuth();
+
+  const filteredNavigation = navigation.filter(item => {
+    if (!item.roles || !user) {
+      return false;
+    }
+    return item.roles.includes(user.role);
+  });
+
   return (
     <Drawer
       variant="permanent"
       sx={{
-        display: { xs: 'none', md: 'block' }, // Hide on small screens
+        display: { xs: 'none', md: 'block' },
         width: drawerWidth,
         flexShrink: 0,
         [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
@@ -43,7 +55,7 @@ const Sidebar = () => {
         </Typography>
       </Toolbar>
       <List>
-        {navigation.map((item) => (
+        {filteredNavigation.map((item) => (
           <ListItem key={item.name} disablePadding>
             <ListItemButton
               component={NavLink}

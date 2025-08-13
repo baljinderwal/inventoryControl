@@ -13,7 +13,6 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { Visibility, VisibilityOff, LockOutlined } from '@mui/icons-material';
-import { motion } from 'framer-motion';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -50,7 +49,7 @@ const LoginPage = () => {
       setLoading(true);
       await login(email, password);
       navigate(from, { replace: true });
-    } catch (err) {
+    } catch {
       setError('Invalid credentials. Please try again.');
     } finally {
       setLoading(false);
@@ -75,14 +74,14 @@ const LoginPage = () => {
           p: 4,
         }}
       >
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
+        <div>
           <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 2 }}>
             MyBrand
           </Typography>
           <Typography variant="h6" sx={{ maxWidth: 400, textAlign: 'center' }}>
             Your productivity starts here — secure, fast, and beautifully simple.
           </Typography>
-        </motion.div>
+        </div>
       </Box>
 
       {/* Right Side: Login Form */}
@@ -97,11 +96,7 @@ const LoginPage = () => {
         }}
       >
         <Container component="main" maxWidth="xs">
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-          >
+          <div>
             <Paper
               elevation={6}
               sx={{
@@ -198,7 +193,7 @@ const LoginPage = () => {
                 </Typography>
               </Box>
             </Paper>
-          </motion.div>
+          </div>
         </Container>
       </Box>
     </Box>

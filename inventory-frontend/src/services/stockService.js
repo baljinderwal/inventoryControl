@@ -17,3 +17,10 @@ export const updateStockLevel = async (productId, newStockLevel) => {
   const response = await api.patch(`/products/${productId}`, { stock: newStockLevel });
   return response.data;
 };
+
+export const updateStock = async (productId, { quantityChange }) => {
+  const product = await api.get(`/products/${productId}`);
+  const currentStock = product.data.stock;
+  const newStock = currentStock + quantityChange;
+  return await updateStockLevel(productId, newStock);
+};

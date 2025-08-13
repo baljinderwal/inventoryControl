@@ -23,5 +23,6 @@
     { "id": 6, "productId": 6, "quantity": 30, "warehouse": "C" },
     { "id": 7, "productId": 7, "quantity": 40, "warehouse": "C" },
     { "id": 8, "productId": 8, "quantity": 90, "warehouse": "A" }
-  ]
+  ],
+  "purchaseOrders": []
 }

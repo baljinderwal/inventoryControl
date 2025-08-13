@@ -13,6 +13,7 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import WarehouseIcon from '@mui/icons-material/Warehouse';
 import BusinessIcon from '@mui/icons-material/Business';
 import SummarizeIcon from '@mui/icons-material/Summarize'; // Import new icon
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 
 const drawerWidth = 240;
 
@@ -21,6 +22,7 @@ const navigation = [
   { name: 'Products', href: '/products', icon: <InventoryIcon /> },
   { name: 'Stock', href: '/stock', icon: <WarehouseIcon /> },
   { name: 'Suppliers', href: '/suppliers', icon: <BusinessIcon /> },
+  { name: 'Purchase Orders', href: '/purchase-orders', icon: <ShoppingCartIcon /> },
   { name: 'Reports', href: '/reports', icon: <SummarizeIcon /> }, // Add new link
 ];
 

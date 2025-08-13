@@ -4,6 +4,7 @@ import Alert from '@mui/material/Alert';
 
 const NotificationContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useNotification = () => {
   return useContext(NotificationContext);
 };

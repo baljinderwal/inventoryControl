@@ -5,6 +5,11 @@ export const getSuppliers = async () => {
   return response.data;
 };
 
+export const getSupplier = async (id) => {
+  const response = await api.get(`/suppliers/${id}`);
+  return response.data;
+};
+
 export const addSupplier = async (supplier) => {
   const response = await api.post('/suppliers', supplier);
   return response.data;

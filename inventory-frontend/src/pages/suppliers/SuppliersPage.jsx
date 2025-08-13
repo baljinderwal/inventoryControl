@@ -13,9 +13,11 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
+import { Link } from 'react-router-dom';
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 const SuppliersPage = () => {
   const queryClient = useQueryClient();
@@ -78,6 +80,7 @@ const SuppliersPage = () => {
     email: s.email,
     actions: (
       <Box>
+        <IconButton component={Link} to={`/suppliers/${s.id}`}><VisibilityIcon /></IconButton>
         <IconButton onClick={() => handleEditClick(s)}><EditIcon /></IconButton>
         <IconButton onClick={() => handleDeleteClick(s)}><DeleteIcon /></IconButton>
       </Box>

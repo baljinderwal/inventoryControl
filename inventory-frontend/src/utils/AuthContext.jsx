@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = (email, password) => {
+  const login = () => {
     // In a real app, you'd have logic here to verify credentials and get a token
     const token = 'dummy-token';
     localStorage.setItem('token', token);
@@ -31,6 +31,7 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   return useContext(AuthContext);
 };

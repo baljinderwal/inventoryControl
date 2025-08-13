@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../utils/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -11,196 +11,379 @@ import {
   IconButton,
   InputAdornment,
   CircularProgress,
+  Divider,
 } from '@mui/material';
-import { Visibility, VisibilityOff, LockOutlined } from '@mui/icons-material';
-import { motion } from 'framer-motion';
+import {
+  Visibility,
+  VisibilityOff,
+  CheckCircleOutline,
+  ErrorOutline,
+  Google,
+  Lock,
+  VpnKey,
+} from '@mui/icons-material';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [form, setForm] = useState({
+    email: { value: '', valid: false, touched: false, error: '' },
+    password: { value: '', valid: false, touched: false, error: '' },
+  });
   const [showPassword, setShowPassword] = useState(false);
+  const [isCapsLockOn, setIsCapsLockOn] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [submitError, setSubmitError] = useState('');
+  const [animateShake, setAnimateShake] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
 
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/';
 
-  const validateForm = () => {
-    if (!email || !password) {
-      setError('Please fill in both fields.');
-      return false;
-    }
+  const validateEmail = (email) => {
+    if (!email) return "Email is required.";
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address.');
-      return false;
-    }
-    return true;
+    if (!emailRegex.test(email)) return "Please enter a valid email address.";
+    return "";
   };
+
+  const validatePassword = (password) => {
+    if (!password) return "Password is required.";
+    if (password.length < 8) return "Password must be at least 8 characters long.";
+    return "";
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    let error = '';
+    if (name === 'email') {
+      error = validateEmail(value);
+    } else if (name === 'password') {
+      error = validatePassword(value);
+    }
+    setForm((prev) => ({
+      ...prev,
+      [name]: { ...prev[name], value, error, valid: !error },
+    }));
+  };
+
+  const handleInputBlur = (e) => {
+    const { name } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: { ...prev[name], touched: true },
+    }));
+  };
+
+  const checkCapsLock = (e) => {
+    if (e.getModifierState) {
+      setIsCapsLockOn(e.getModifierState('CapsLock'));
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener('keydown', checkCapsLock);
+    window.addEventListener('keyup', checkCapsLock);
+    return () => {
+      window.removeEventListener('keydown', checkCapsLock);
+      window.removeEventListener('keyup', checkCapsLock);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setSubmitError('');
 
-    if (!validateForm()) return;
+    const emailError = validateEmail(form.email.value);
+    const passwordError = validatePassword(form.password.value);
+
+    setForm((prev) => ({
+      ...prev,
+      email: { ...prev.email, touched: true, error: emailError },
+      password: { ...prev.password, touched: true, error: passwordError },
+    }));
+
+    if (emailError || passwordError) {
+      setAnimateShake(c => c + 1);
+      return;
+    }
 
     try {
       setLoading(true);
-      await login(email, password);
+      await login(form.email.value, form.password.value);
       navigate(from, { replace: true });
     } catch (err) {
-      setError('Invalid credentials. Please try again.');
+      setSubmitError('Invalid credentials. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Left Side: Hero Image */}
-      <Box
-        sx={{
-          flex: 1,
-          backgroundImage:
-            'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(https://images.unsplash.com/photo-1507842217343-583bb7270b66)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          display: { xs: 'none', md: 'flex' },
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          color: 'white',
-          p: 4,
-        }}
-      >
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
-          <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 2 }}>
-            MyBrand
-          </Typography>
-          <Typography variant="h6" sx={{ maxWidth: 400, textAlign: 'center' }}>
-            Your productivity starts here — secure, fast, and beautifully simple.
-          </Typography>
-        </motion.div>
-      </Box>
+  const isFormValid = form.email.valid && form.password.valid;
 
-      {/* Right Side: Login Form */}
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        minHeight: '100vh',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
       <Box
         sx={{
-          flex: 1,
-          background: 'linear-gradient(to right, #667eea, #764ba2)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: 4,
+          position: 'absolute',
+          top: '-10%',
+          left: '-10%',
+          width: '300px',
+          height: '300px',
+          background: 'rgba(102, 126, 234, 0.1)',
+          borderRadius: '50%',
+          filter: 'blur(50px)',
         }}
-      >
-        <Container component="main" maxWidth="xs">
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: '-10%',
+          right: '-10%',
+          width: '400px',
+          height: '400px',
+          background: 'rgba(118, 75, 162, 0.1)',
+          borderRadius: '50%',
+          filter: 'blur(70px)',
+        }}
+      />
+      <Container component="main" maxWidth="xs" sx={{ zIndex: 1 }}>
+        <motion.div
+          initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          variants={{
+            shake: {
+              x: [0, -10, 10, -10, 10, 0],
+              transition: { duration: 0.5 }
+            }
+          }}
+          animate={animateShake ? "shake" : ""}
+        >
+          <Paper
+            elevation={8}
+            sx={{
+              p: { xs: 3, sm: 4 },
+              borderRadius: 4,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              backdropFilter: 'blur(10px)',
+              backgroundColor: 'rgba(255, 255, 255, 0.85)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+            }}
           >
-            <Paper
-              elevation={6}
-              sx={{
-                p: 4,
-                borderRadius: 3,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                backdropFilter: 'blur(10px)',
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              }}
+            <motion.div
+              whileHover={shouldReduceMotion ? {} : { scale: 1.1, rotate: -5 }}
+              transition={{ type: 'spring', stiffness: 300 }}
             >
-              <LockOutlined sx={{ fontSize: 40, color: '#667eea', mb: 1 }} />
-              <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>
-                Welcome Back
-              </Typography>
-              {error && (
-                <Typography color="error" variant="body2" sx={{ mb: 2 }}>
-                  {error}
-                </Typography>
+              <Lock
+                sx={{
+                  fontSize: 40,
+                  color: 'primary.main',
+                  mb: 2,
+                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                  color: 'white',
+                  borderRadius: '50%',
+                  p: 1,
+                }}
+              />
+            </motion.div>
+            <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
+              Welcome Back
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
+              Sign in to access your dashboard.
+            </Typography>
+
+            <AnimatePresence>
+              {submitError && (
+                <motion.div
+                  initial={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
+                  style={{ width: '100%', marginBottom: '16px' }}
+                >
+                  <Typography
+                    color="error"
+                    variant="body2"
+                    sx={{
+                      textAlign: 'center',
+                      background: 'rgba(211, 47, 47, 0.1)',
+                      p: 1,
+                      borderRadius: 1,
+                    }}
+                  >
+                    {submitError}
+                  </Typography>
+                </motion.div>
               )}
-              <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  autoFocus
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#667eea',
-                        boxShadow: '0 0 5px rgba(102,126,234,0.5)',
-                      },
-                    },
-                  }}
-                />
-                <TextField
-                  margin="normal"
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword((prev) => !prev)}
-                          edge="end"
-                          aria-label="toggle password visibility"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                  sx={{
-                    '& .MuiOutlinedInput-root': {
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#667eea',
-                        boxShadow: '0 0 5px rgba(102,126,234,0.5)',
-                      },
-                    },
-                  }}
-                />
+            </AnimatePresence>
+
+            <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+              <TextField
+                margin="normal"
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                autoFocus
+                value={form.email.value}
+                onChange={handleInputChange}
+                onBlur={handleInputBlur}
+                error={form.email.touched && !!form.email.error}
+                helperText={form.email.touched && form.email.error}
+                FormHelperTextProps={{ id: 'email-error-text' }}
+                InputProps={{
+                  'aria-describedby': 'email-error-text',
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <AnimatePresence>
+                        {form.email.touched && form.email.valid && (
+                          <motion.div initial={shouldReduceMotion ? {} : { scale: 0 }} animate={{ scale: 1 }} exit={shouldReduceMotion ? {} : { scale: 0 }}>
+                            <CheckCircleOutline color="success" />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <TextField
+                margin="normal"
+                fullWidth
+                name="password"
+                label="Password"
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                autoComplete="current-password"
+                value={form.password.value}
+                onChange={handleInputChange}
+                onBlur={handleInputBlur}
+                onKeyUp={checkCapsLock}
+                onKeyDown={checkCapsLock}
+                error={form.password.touched && !!form.password.error}
+                helperText={
+                  (form.password.touched && form.password.error) ||
+                  (isCapsLockOn ? 'Warning: Caps Lock is on' : '')
+                }
+                FormHelperTextProps={{ id: 'password-error-text' }}
+                InputProps={{
+                  'aria-describedby': 'password-error-text',
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        edge="end"
+                        aria-label="toggle password visibility"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 1 }}>
+                <Button size="small" sx={{ textTransform: 'none' }}>
+                  Forgot password?
+                </Button>
+              </Box>
+
+              <motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
                 <Button
                   type="submit"
                   fullWidth
                   variant="contained"
+                  size="large"
                   sx={{
-                    mt: 3,
+                    mt: 2,
                     mb: 2,
-                    background: 'linear-gradient(to right, #667eea, #764ba2)',
+                    py: 1.5,
+                    fontWeight: 'bold',
+                    background: 'linear-gradient(135deg, #667eea, #764ba2)',
                     '&:hover': {
-                      background: 'linear-gradient(to right, #5a67d8, #6b46c1)',
+                      background: 'linear-gradient(135deg, #5a67d8, #6b46c1)',
+                      boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
                     },
+                    '&:disabled': {
+                      background: '#e0e0e0'
+                    }
                   }}
-                  disabled={loading}
+                  disabled={loading || !isFormValid}
                 >
                   {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Sign In'}
                 </Button>
-                <Typography variant="body2" align="center" sx={{ mt: 2, color: 'text.secondary' }}>
-                  Forgot your password?
+              </motion.div>
+
+              <Divider sx={{ my: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  OR
                 </Typography>
-              </Box>
-            </Paper>
-          </motion.div>
-        </Container>
-      </Box>
+              </Divider>
+
+              <motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  startIcon={<Google />}
+                  sx={{
+                    mb: 1,
+                    textTransform: 'none',
+                    borderColor: '#ddd',
+                    color: 'text.primary',
+                    '&:hover': {
+                      borderColor: '#ccc',
+                      backgroundColor: '#f5f5f5'
+                    }
+                  }}
+                >
+                  Sign in with Google
+                </Button>
+              </motion.div>
+              <motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  startIcon={<VpnKey />}
+                  sx={{
+                    mb: 1,
+                    textTransform: 'none',
+                    borderColor: '#ddd',
+                    color: 'text.primary',
+                    '&:hover': {
+                      borderColor: '#ccc',
+                      backgroundColor: '#f5f5f5'
+                    }
+                  }}
+                >
+                  Sign in with a passkey
+                </Button>
+              </motion.div>
+
+              <Typography variant="body2" align="center" sx={{ mt: 3 }}>
+                Don't have an account?{' '}
+                <Button component="a" href="#" size="small" sx={{ textTransform: 'none' }}>
+                  Sign Up
+                </Button>
+              </Typography>
+            </Box>
+          </Paper>
+        </motion.div>
+      </Container>
     </Box>
   );
 };

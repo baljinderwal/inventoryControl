@@ -26,7 +26,7 @@ const navigation = [
   { name: 'Stock', href: '/stock', icon: <WarehouseIcon />, roles: ['Admin', 'Manager', 'Staff'] },
   { name: 'Suppliers', href: '/suppliers', icon: <BusinessIcon />, roles: ['Admin', 'Manager'] },
   { name: 'Orders', href: '/orders', icon: <ShoppingCartIcon />, roles: ['Admin', 'Manager', 'Staff'] },
-  { name: 'Reports', href: '/reports', icon: <SummarizeIcon />, roles: ['Admin', 'Manager'] },
+  { name: 'Reports', href: '/reports', icon: <SummarizeIcon />, roles: ['Admin', 'Manager'], end: true },
   { name: 'Profitability', href: '/reports/profitability', icon: <TrendingUpIcon />, roles: ['Admin', 'Manager'] },
   { name: 'Users', href: '/users', icon: <PeopleIcon />, roles: ['Admin'] },
 ];
@@ -62,6 +62,7 @@ const Sidebar = () => {
             <ListItemButton
               component={NavLink}
               to={item.href}
+              end={item.end}
               sx={{
                 '&.active': {
                   backgroundColor: 'rgba(0, 0, 0, 0.08)',

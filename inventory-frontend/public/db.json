@@ -1,13 +1,77 @@
 {
   "products": [
-    { "id": 1, "name": "Wireless Mouse", "sku": "WM-001", "category": "Electronics", "price": 25.99, "costPrice": 15.50, "stock": 150, "qrCode": "WM-001" },
-    { "id": 2, "name": "Mechanical Keyboard", "sku": "MK-001", "category": "Electronics", "price": 120.00, "costPrice": 80.00, "stock": 75, "qrCode": "MK-001" },
-    { "id": 3, "name": "USB-C Hub", "sku": "UCH-001", "category": "Accessories", "price": 45.50, "costPrice": 30.00, "stock": 120, "qrCode": "UCH-001" },
-    { "id": 4, "name": "14\" Laptop Sleeve", "sku": "LS-014", "category": "Accessories", "price": 18.99, "costPrice": 10.00, "stock": 200, "qrCode": "LS-014" },
-    { "id": 5, "name": "27\" 4K Monitor", "sku": "M-4K-027", "category": "Monitors", "price": 499.99, "costPrice": 350.00, "stock": 50, "qrCode": "M-4K-027" },
-    { "id": 6, "name": "Ergonomic Chair", "sku": "EC-001", "category": "Furniture", "price": 299.00, "costPrice": 200.00, "stock": 30, "qrCode": "EC-001" },
-    { "id": 7, "name": "Standing Desk", "sku": "SD-001", "category": "Furniture", "price": 350.00, "costPrice": 250.00, "stock": 40, "qrCode": "SD-001" },
-    { "id": 8, "name": "Webcam 1080p", "sku": "WC-1080", "category": "Electronics", "price": 65.00, "costPrice": 40.00, "stock": 90, "qrCode": "WC-1080" }
+    {
+      "id": 1,
+      "name": "Wireless Mouse",
+      "sku": "WM-001",
+      "category": "Electronics",
+      "price": 25.99,
+      "costPrice": 15.50,
+      "stock": 150
+    },
+    {
+      "id": 2,
+      "name": "Mechanical Keyboard",
+      "sku": "MK-001",
+      "category": "Electronics",
+      "price": 120.00,
+      "costPrice": 80.00,
+      "stock": 75
+    },
+    {
+      "id": 3,
+      "name": "USB-C Hub",
+      "sku": "UCH-001",
+      "category": "Accessories",
+      "price": 45.50,
+      "costPrice": 30.00,
+      "stock": 120
+    },
+    {
+      "id": 4,
+      "name": "14\" Laptop Sleeve",
+      "sku": "LS-014",
+      "category": "Accessories",
+      "price": 18.99,
+      "costPrice": 10.00,
+      "stock": 200
+    },
+    {
+      "id": 5,
+      "name": "27\" 4K Monitor",
+      "sku": "M-4K-027",
+      "category": "Monitors",
+      "price": 499.99,
+      "costPrice": 350.00,
+      "stock": 50
+    },
+    {
+      "id": 6,
+      "name": "Ergonomic Chair",
+      "sku": "EC-001",
+      "category": "Furniture",
+      "price": 299.00,
+      "costPrice": 200.00,
+      "stock": 30
+    },
+    {
+      "id": 7,
+      "name": "Standing Desk",
+      "sku": "SD-001",
+      "category": "Furniture",
+      "price": 350.00,
+      "costPrice": 250.00,
+      "stock": 40
+    },
+    {
+      "id": 8,
+      "name": "Webcam 1080p",
+      "sku": "WC-1080",
+      "category": "Electronics",
+      "price": 65.00,
+      "costPrice": 40.00,
+      "stock": 90
+    }
   ],
   "suppliers": [
     {

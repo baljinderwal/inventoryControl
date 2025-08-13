@@ -10,187 +10,100 @@
     { "id": 8, "name": "Webcam 1080p", "sku": "WC-1080", "category": "Electronics", "price": 65.00, "costPrice": 40.00, "stock": 90, "lowStockThreshold": 100, "createdAt": "2025-08-01T08:00:00Z" }
   ],
   "suppliers": [
-    {
-      "id": 1,
-      "name": "ElectroSupply",
-      "contact": "John Doe",
-      "email": "john.doe@electrosupply.com",
-      "products": [
-        1,
-        2,
-        8
-      ]
-    },
-    {
-      "id": 2,
-      "name": "OfficeWorks",
-      "contact": "Jane Smith",
-      "email": "jane.smith@officeworks.com",
-      "products": [
-        3,
-        4,
-        6,
-        7
-      ]
-    },
-    {
-      "id": 3,
-      "name": "MonitorCorp",
-      "contact": "Sam Wilson",
-      "email": "sam.wilson@monitorcorp.com",
-      "products": [
-        5
-      ]
-    }
+    { "id": 1, "name": "ElectroSupply", "contact": "John Doe", "email": "john.doe@electrosupply.com", "products": [ 1, 2, 8 ] },
+    { "id": 2, "name": "OfficeWorks", "contact": "Jane Smith", "email": "jane.smith@officeworks.com", "products": [ 3, 4, 6, 7 ] },
+    { "id": 3, "name": "MonitorCorp", "contact": "Sam Wilson", "email": "sam.wilson@monitorcorp.com", "products": [ 5 ] }
   ],
   "orders": [
-    {
-      "id": 1,
-      "supplier": {
-        "id": 1,
-        "name": "ElectroSupply"
-      },
-      "createdAt": "2025-08-01T10:15:00Z",
-      "status": "Completed",
-      "products": [
-        {
-          "productId": 1,
-          "quantity": 50
-        },
-        {
-          "productId": 8,
-          "quantity": 20
-        }
-      ],
-      "completedAt": "2025-08-03T14:30:00Z"
-    },
-    {
-      "id": 2,
-      "supplier": {
-        "id": 2,
-        "name": "OfficeWorks"
-      },
-      "createdAt": "2025-08-05T09:00:00Z",
-      "status": "Pending",
-      "products": [
-        {
-          "productId": 4,
-          "quantity": 100
-        },
-        {
-          "productId": 6,
-          "quantity": 5
-        }
-      ]
-    },
-    {
-      "id": 3,
-      "supplier": {
-        "id": 3,
-        "name": "MonitorCorp"
-      },
-      "createdAt": "2025-08-07T11:20:00Z",
-      "status": "Completed",
-      "products": [
-        {
-          "productId": 5,
-          "quantity": 10
-        }
-      ],
-      "completedAt": "2025-08-09T16:00:00Z"
-    },
-    {
-      "id": 4,
-      "supplier": {
-        "id": 2,
-        "name": "OfficeWorks"
-      },
-      "createdAt": "2025-08-10T13:45:00Z",
-      "status": "Pending",
-      "products": [
-        {
-          "productId": 3,
-          "quantity": 40
-        },
-        {
-          "productId": 7,
-          "quantity": 8
-        }
-      ]
-    },
-    {
-      "id": 5,
-      "supplier": {
-        "id": 1,
-        "name": "ElectroSupply"
-      },
-      "createdAt": "2025-08-12T08:30:00Z",
-      "status": "Pending",
-      "products": [
-        {
-          "productId": 2,
-          "quantity": 15
-        },
-        {
-          "productId": 8,
-          "quantity": 25
-        }
-      ]
-    }
+    { "id": 1, "supplier": { "id": 1, "name": "ElectroSupply" }, "createdAt": "2025-08-01T10:15:00Z", "status": "Completed", "products": [ { "productId": 1, "quantity": 50 }, { "productId": 8, "quantity": 20 } ], "completedAt": "2025-08-03T14:30:00Z" },
+    { "id": 2, "supplier": { "id": 2, "name": "OfficeWorks" }, "createdAt": "2025-08-05T09:00:00Z", "status": "Pending", "products": [ { "productId": 4, "quantity": 100 }, { "productId": 6, "quantity": 5 } ] },
+    { "id": 3, "supplier": { "id": 3, "name": "MonitorCorp" }, "createdAt": "2025-08-07T11:20:00Z", "status": "Completed", "products": [ { "productId": 5, "quantity": 10 } ], "completedAt": "2025-08-09T16:00:00Z" },
+    { "id": 4, "supplier": { "id": 2, "name": "OfficeWorks" }, "createdAt": "2025-08-10T13:45:00Z", "status": "Pending", "products": [ { "productId": 3, "quantity": 40 }, { "productId": 7, "quantity": 8 } ] },
+    { "id": 5, "supplier": { "id": 1, "name": "ElectroSupply" }, "createdAt": "2025-08-12T08:30:00Z", "status": "Pending", "products": [ { "productId": 2, "quantity": 15 }, { "productId": 8, "quantity": 25 } ] }
   ],
   "stock": [
-    {
-      "id": 1,
-      "productId": 1,
-      "quantity": 150,
-      "warehouse": "A"
-    },
-    {
-      "id": 2,
-      "productId": 2,
-      "quantity": 75,
-      "warehouse": "A"
-    },
-    {
-      "id": 3,
-      "productId": 3,
-      "quantity": 120,
-      "warehouse": "B"
-    },
-    {
-      "id": 4,
-      "productId": 4,
-      "quantity": 200,
-      "warehouse": "B"
-    },
-    {
-      "id": 5,
-      "productId": 5,
-      "quantity": 50,
-      "warehouse": "A"
-    },
-    {
-      "id": 6,
-      "productId": 6,
-      "quantity": 30,
-      "warehouse": "C"
-    },
-    {
-      "id": 7,
-      "productId": 7,
-      "quantity": 40,
-      "warehouse": "C"
-    },
-    {
-      "id": 8,
-      "productId": 8,
-      "quantity": 90,
-      "warehouse": "A"
-    }
+    { "id": 1, "productId": 1, "quantity": 150, "warehouse": "A" },
+    { "id": 2, "productId": 2, "quantity": 75, "warehouse": "A" },
+    { "id": 3, "productId": 3, "quantity": 120, "warehouse": "B" },
+    { "id": 4, "productId": 4, "quantity": 200, "warehouse": "B" },
+    { "id": 5, "productId": 5, "quantity": 50, "warehouse": "A" },
+    { "id": 6, "productId": 6, "quantity": 30, "warehouse": "C" },
+    { "id": 7, "productId": 7, "quantity": 40, "warehouse": "C" },
+    { "id": 8, "productId": 8, "quantity": 90, "warehouse": "A" }
   ],
   "users": [
     { "id": 1, "name": "Admin User", "email": "admin@example.com", "password": "password", "role": "Admin" },
     { "id": 2, "name": "Manager User", "email": "manager@example.com", "password": "password", "role": "Manager" },
     { "id": 3, "name": "Staff User", "email": "staff@example.com", "password": "password", "role": "Staff" }
+  ],
+  "sales": [
+    {
+      "id": 1,
+      "date": "2025-07-01T10:00:00Z",
+      "items": [
+        { "productId": 1, "productName": "Wireless Mouse", "quantity": 2, "price": 25.99, "total": 51.98 },
+        { "productId": 3, "productName": "USB-C Hub", "quantity": 1, "price": 45.50, "total": 45.50 }
+      ],
+      "totalRevenue": 97.48
+    },
+    {
+      "id": 2,
+      "date": "2025-07-03T14:30:00Z",
+      "items": [
+        { "productId": 2, "productName": "Mechanical Keyboard", "quantity": 1, "price": 120.00, "total": 120.00 }
+      ],
+      "totalRevenue": 120.00
+    },
+    {
+      "id": 3,
+      "date": "2025-07-05T11:20:00Z",
+      "items": [
+        { "productId": 4, "productName": "14\" Laptop Sleeve", "quantity": 5, "price": 18.99, "total": 94.95 },
+        { "productId": 8, "productName": "Webcam 1080p", "quantity": 3, "price": 65.00, "total": 195.00 }
+      ],
+      "totalRevenue": 289.95
+    },
+    {
+      "id": 4,
+      "date": "2025-06-10T13:45:00Z",
+      "items": [
+        { "productId": 5, "productName": "27\" 4K Monitor", "quantity": 2, "price": 499.99, "total": 999.98 }
+      ],
+      "totalRevenue": 999.98
+    },
+    {
+      "id": 5,
+      "date": "2025-06-12T08:30:00Z",
+      "items": [
+        { "productId": 6, "productName": "Ergonomic Chair", "quantity": 1, "price": 299.00, "total": 299.00 },
+        { "productId": 7, "productName": "Standing Desk", "quantity": 1, "price": 350.00, "total": 350.00 }
+      ],
+      "totalRevenue": 649.00
+    },
+    {
+      "id": 6,
+      "date": "2025-05-15T16:00:00Z",
+      "items": [
+        { "productId": 1, "productName": "Wireless Mouse", "quantity": 10, "price": 25.99, "total": 259.90 }
+      ],
+      "totalRevenue": 259.90
+    },
+    {
+        "id": 7,
+        "date": "2025-04-20T10:30:00Z",
+        "items": [
+          { "productId": 2, "productName": "Mechanical Keyboard", "quantity": 3, "price": 120.00, "total": 360.00 },
+          { "productId": 8, "productName": "Webcam 1080p", "quantity": 2, "price": 65.00, "total": 130.00 }
+        ],
+        "totalRevenue": 490.00
+    },
+    {
+        "id": 8,
+        "date": "2025-04-22T11:45:00Z",
+        "items": [
+            { "productId": 3, "productName": "USB-C Hub", "quantity": 4, "price": 45.50, "total": 182.00 }
+        ],
+        "totalRevenue": 182.00
+    }
   ]
 }

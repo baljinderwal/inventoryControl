@@ -84,7 +84,7 @@ const Sidebar = () => {
             <ListItemButton
               component={item.children ? 'div' : NavLink}
               to={item.href}
-              end={!item.children}
+              end={!item.children ? true : undefined}
               onClick={() => item.children && handleClick(item.name)}
               sx={{
                 '&.active': {

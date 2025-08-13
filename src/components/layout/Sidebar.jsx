@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -14,12 +14,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import PeopleIcon from '@mui/icons-material/People';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import BarChartIcon from '@mui/icons-material/BarChart';
 import { useAuth } from '../../utils/AuthContext';
-import Collapse from '@mui/material/Collapse';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import ExpandMore from '@mui/icons-material/ExpandMore';
 
 const drawerWidth = 240;
 
@@ -29,32 +24,12 @@ const navigation = [
   { name: 'Stock', href: '/stock', icon: <WarehouseIcon />, roles: ['Admin', 'Manager', 'Staff'] },
   { name: 'Suppliers', href: '/suppliers', icon: <BusinessIcon />, roles: ['Admin', 'Manager'] },
   { name: 'Orders', href: '/orders', icon: <ShoppingCartIcon />, roles: ['Admin', 'Manager', 'Staff'] },
-  {
-    name: 'Reports',
-    href: '/reports',
-    icon: <SummarizeIcon />,
-    roles: ['Admin', 'Manager'],
-    children: [
-      { name: 'Profitability', href: '/reports/profitability', icon: <TrendingUpIcon /> },
-      { name: 'Stock Value', href: '/reports/stock-value', icon: <InventoryIcon /> },
-      { name: 'Sales History', href: '/reports/sales-history', icon: <BarChartIcon /> },
-      { name: 'Inventory Aging', href: '/reports/inventory-aging', icon: <AssessmentIcon /> },
-      { name: 'Supplier Performance', href: '/reports/supplier-performance', icon: <PeopleIcon /> },
-    ],
-  },
+  { name: 'Reports', href: '/reports', icon: <SummarizeIcon />, roles: ['Admin', 'Manager'] },
   { name: 'Users', href: '/users', icon: <PeopleIcon />, roles: ['Admin'] },
 ];
 
 const Sidebar = () => {
   const { user } = useAuth();
-  const location = useLocation();
-  const [open, setOpen] = React.useState({
-    Reports: location.pathname.startsWith('/reports'),
-  });
-
-  const handleClick = (name) => {
-    setOpen(prevOpen => ({ ...prevOpen, [name]: !prevOpen[name] }));
-  };
 
   const filteredNavigation = navigation.filter(item => {
     if (!item.roles || !user) {
@@ -80,47 +55,20 @@ const Sidebar = () => {
       </Toolbar>
       <List component="nav">
         {filteredNavigation.map((item) => (
-          <React.Fragment key={item.name}>
-            <ListItemButton
-              component={NavLink}
-              to={item.href}
-              end={!item.children ? true : undefined}
-              onClick={item.children ? () => handleClick(item.name) : undefined}
-              sx={{
-                '&.active': {
-                  backgroundColor: 'action.selected',
-                  fontWeight: 'fontWeightBold',
-                },
-              }}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.name} />
-              {item.children ? (open[item.name] ? <ExpandLess /> : <ExpandMore />) : null}
-            </ListItemButton>
-            {item.children && (
-              <Collapse in={open[item.name]} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                  {item.children.map((child) => (
-                    <ListItemButton
-                      key={child.name}
-                      component={NavLink}
-                      to={child.href}
-                      sx={{
-                        pl: 4,
-                        '&.active': {
-                          backgroundColor: 'action.selected',
-                          fontWeight: 'fontWeightBold',
-                        },
-                      }}
-                    >
-                      <ListItemIcon>{child.icon}</ListItemIcon>
-                      <ListItemText primary={child.name} />
-                    </ListItemButton>
-                  ))}
-                </List>
-              </Collapse>
-            )}
-          </React.Fragment>
+          <ListItemButton
+            key={item.name}
+            component={NavLink}
+            to={item.href}
+            sx={{
+              '&.active': {
+                backgroundColor: 'action.selected',
+                fontWeight: 'fontWeightBold',
+              },
+            }}
+          >
+            <ListItemIcon>{item.icon}</ListItemIcon>
+            <ListItemText primary={item.name} />
+          </ListItemButton>
         ))}
       </List>
     </Drawer>

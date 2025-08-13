@@ -1,11 +1,11 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/auth/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import ProductsPage from './pages/products/ProductsPage';
 import StockPage from './pages/stock/StockPage';
 import SuppliersPage from './pages/suppliers/SuppliersPage';
-import ReportsPage from './pages/reports/ReportsPage';
+import ReportsLayout from './pages/reports/ReportsLayout';
 import ProfitabilityPage from './pages/reports/ProfitabilityPage';
 import SalesHistoryReport from './pages/reports/SalesHistoryReport';
 import InventoryAgingReport from './pages/reports/InventoryAgingReport';
@@ -29,12 +29,14 @@ function App() {
         </Route>
         <Route element={<PrivateRoute roles={['Admin', 'Manager']} />}>
           <Route path="/suppliers" element={<SuppliersPage />} />
-          <Route path="/reports" element={<ReportsPage />} />
-          <Route path="/reports/profitability" element={<ProfitabilityPage />} />
-          <Route path="/reports/sales-history" element={<SalesHistoryReport />} />
-          <Route path="/reports/inventory-aging" element={<InventoryAgingReport />} />
-          <Route path="/reports/supplier-performance" element={<SupplierPerformanceReport />} />
-          <Route path="/reports/stock-value" element={<StockValueReport />} />
+          <Route path="/reports" element={<ReportsLayout />}>
+            <Route index element={<Navigate to="profitability" replace />} />
+            <Route path="profitability" element={<ProfitabilityPage />} />
+            <Route path="sales-history" element={<SalesHistoryReport />} />
+            <Route path="inventory-aging" element={<InventoryAgingReport />} />
+            <Route path="supplier-performance" element={<SupplierPerformanceReport />} />
+            <Route path="stock-value" element={<StockValueReport />} />
+          </Route>
         </Route>
         <Route element={<PrivateRoute roles={['Admin']} />}>
           <Route path="/users" element={<UsersPage />} />

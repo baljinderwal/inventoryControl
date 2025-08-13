@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getSuppliers, deleteSupplier } from '../../services/supplierService';
 import { useNotification } from '../../utils/NotificationContext';
+import { Parser } from '@json2csv/plainjs';
 
 import MuiTable from '../../components/ui/Table';
 import AppDialog from '../../components/ui/AppDialog';
@@ -16,6 +17,8 @@ import Alert from '@mui/material/Alert';
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DownloadIcon from '@mui/icons-material/Download';
+import Stack from '@mui/material/Stack';
 
 const SuppliersPage = () => {
   const queryClient = useQueryClient();
@@ -70,6 +73,20 @@ const SuppliersPage = () => {
     setSupplierToEdit(null);
   }
 
+  const handleExport = () => {
+    if (!suppliers) return;
+    const fields = ['id', 'name', 'contact', 'email'];
+    const parser = new Parser({ fields });
+    const csv = parser.parse(suppliers);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', 'suppliers.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const tableHeaders = ['Name', 'Contact Person', 'Email', 'Actions'];
 
   const tableData = suppliers?.map(s => ({
@@ -96,7 +113,17 @@ const SuppliersPage = () => {
     <div>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4">Suppliers</Typography>
-        <Button variant="contained" onClick={handleAddClick}>Add Supplier</Button>
+        <Stack direction="row" spacing={2}>
+          <Button
+            variant="outlined"
+            startIcon={<DownloadIcon />}
+            onClick={handleExport}
+            disabled={!suppliers || suppliers.length === 0}
+          >
+            Export as CSV
+          </Button>
+          <Button variant="contained" onClick={handleAddClick}>Add Supplier</Button>
+        </Stack>
       </Box>
 
       <MuiTable headers={tableHeaders} data={tableData || []} />

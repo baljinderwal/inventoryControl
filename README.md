@@ -1,17 +1,28 @@
 # Inventory Management System Frontend
 
-This is a comprehensive, feature-rich frontend for an Inventory Management System, built with React. It provides a user-friendly interface for managing products, suppliers, stock, and orders. The application is designed to be a single-page application (SPA) and uses a mock backend for development and demonstration purposes.
+A modern, responsive web application for managing inventory, suppliers, orders, and more. Built with React, Vite, and Material-UI, this project provides a comprehensive solution for small to medium-sized businesses to track their assets and operations efficiently.
 
 ## ✨ Features
 
-*   **Dashboard**: A central hub displaying key statistics like total products, total suppliers, and inventory value. It also features a chart visualizing stock levels.
-*   **Product Management**: Full CRUD (Create, Read, Update, Delete) functionality for products. Users can add, edit, and delete products, as well as search for specific items.
-*   **Supplier Management**: Full CRUD functionality for suppliers.
-*   **Stock Management**: View current stock levels for all products, with visual indicators for low-stock items. Users can adjust stock quantities with "Stock In" and "Stock Out" actions.
-*   **Order Management**: View a list of all orders, with details about the supplier, creation date, and status.
-*   **Reporting**: Generate and view reports, starting with a Profitability Report that details the cost, price, and profit margin for each product.
-*   **User Authentication**: A mock login system to simulate user authentication and protect application routes.
-*   **Notifications**: A global notification system to provide feedback to the user on their actions (e.g., "Product added successfully").
+  **📊 Interactive Dashboard:** Get a quick overview of your inventory status with key metrics, charts, and low-stock alerts.
+*   **📦 Product Management:** Full CRUD (Create, Read, Update, Delete) functionality for your products.
+*   **🏢 Supplier Tracking:** Manage your suppliers and the products they provide.
+*   **🚚 Order Processing:** Keep track of purchase orders and their statuses.
+*   **📈 Stock Control:** View and manage your current stock levels.
+*   **📝 Advanced Reporting Suite:**
+    *   **Sales History:** Track sales trends over time.
+    *   **Inventory Aging:** Identify slow-moving and obsolete stock.
+    *   **Supplier Performance:** Evaluate supplier reliability and order history.
+    *   **Profitability Analysis:** Analyze revenue, costs, and profit margins.
+*   **📄 CSV Data Export:** Export data from main pages (Products, Orders, Suppliers) and all reports to CSV format for offline analysis.
+*   **👤 User Administration:** Manage users and their roles within the system.
+*   **🔐 Role-Based Access Control (RBAC):**
+    *   **Admin:** Full access to all features, including user management.
+    *   **Manager:** Access to all features except user management.
+    *   **Staff:** Access to core features like dashboard, products, stock, and orders.
+*   **🚀 Fast & Modern Tech:** Built with Vite for a lightning-fast development experience and React for a reactive UI.
+*   **💅 Sleek UI:** A beautiful and intuitive user interface built with Material-UI.
+
 
 ## 🚀 Technologies Used
 
@@ -97,45 +108,73 @@ The project follows a feature-based structure, which makes it scalable and easy 
 
 ## ⚙️ Getting Started
 
+
 ### Prerequisites
 
-*   [Node.js](https://nodejs.org/) (v14 or later)
-*   [npm](https://www.npmjs.com/) (v6 or later)
+Make sure you have the following installed on your machine:
 
-### Installation & Setup
+*   [Node.js](https://nodejs.org/en) (v18 or higher recommended)
+*   [npm](https://www.npmjs.com/) (usually comes with Node.js)
+
+### Installation
 
 1.  **Clone the repository:**
-    ```sh
-    git clone <repository-url>
-    ```
-2.  **Navigate to the project directory:**
-    ```sh
+    ```bash
+    git clone https://github.com/your-username/inventory-frontend.git
     cd inventory-frontend
     ```
-3.  **Install dependencies:**
-    ```sh
+
+2.  **Install dependencies:**
+    ```bash
     npm install
     ```
 
 ### Running the Application
 
-This project requires two processes to be running simultaneously: the frontend development server and the mock API server.
+This project requires two terminals to be running simultaneously: one for the mock backend API and one for the frontend development server.
 
 1.  **Start the mock API server:**
-    Open a terminal and run:
-    ```sh
+    In your first terminal, run the following command to start the `json-server`:
+    ```bash
     npm run server
     ```
-    This will start the `json-server` on `http://localhost:3001`.
+    This will start a mock API server on `http://localhost:3001`.
 
 2.  **Start the frontend development server:**
-    Open a second terminal and run:
-    ```sh
+    In your second terminal, run the following command:
+    ```bash
     npm run dev
     ```
-    This will start the Vite development server on `http://localhost:5173` (or another port if 5173 is in use).
+    This will start the Vite development server, and you can view the application by navigating to `http://localhost:5173` (or the URL provided in the terminal output).
+## 🧑‍💻 Usage
 
-Now, you can open your browser and navigate to `http://localhost:5173` to see the application in action.
+### Authentication
+
+The application features a login system with three predefined user roles. Use the following credentials to log in and explore the different access levels:
+
+*   **Admin:**
+    *   **Email:** `admin@example.com`
+    *   **Password:** `password`
+*   **Manager:**
+    *   **Email:** `manager@example.com`
+    *   **Password:** `password`
+*   **Staff:**
+    *   **Email:** `staff@example.com`
+    *   **Password:** `password`
+
+### Role-Based Access
+
+*   **Staff** can access:
+    *   `/` (Dashboard)
+    *   `/products`
+    *   `/stock`
+    *   `/orders`
+*   **Manager** can access everything a Staff member can, plus:
+    *   `/suppliers`
+    *   `/reports`
+    *   `/reports/profitability`
+*   **Admin** can access all pages, including:
+    *   `/users`
 
 ## 🤖 Mock API and Data Model
 

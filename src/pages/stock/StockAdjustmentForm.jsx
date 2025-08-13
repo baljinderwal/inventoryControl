@@ -1,38 +1,59 @@
 import React, { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { updateProduct } from '../../services/productService'; // Changed from stockService
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNotification } from '../../utils/NotificationContext';
+import { getLocations } from '../../services/locationsService';
+import { addInventoryBatch, updateInventoryBatch, deleteInventoryBatch } from '../../services/stockService';
+import {
+  Box,
+  Button,
+  TextField,
+  DialogActions,
+  Typography,
+  CircularProgress,
+  Collapse,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+  Select,
+  MenuItem,
+  InputLabel,
+} from '@mui/material';
 
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import DialogActions from '@mui/material/DialogActions';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
-import Collapse from '@mui/material/Collapse';
-import Radio from '@mui/material/Radio';
-import RadioGroup from '@mui/material/RadioGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormControl from '@mui/material/FormControl';
-import FormLabel from '@mui/material/FormLabel';
-
-const StockAdjustmentForm = ({ onClose, product }) => {
+const StockAdjustmentForm = ({ onClose, product, inventory, totalStock }) => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
 
-  const [adjustmentType, setAdjustmentType] = useState('in'); // 'in' or 'out'
+  const [adjustmentType, setAdjustmentType] = useState('in');
   const [quantity, setQuantity] = useState(1);
   const [batchNumber, setBatchNumber] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
+  const [locationId, setLocationId] = useState('');
 
-  // Calculate total stock from batches
-  const totalStock = product.batches.reduce((acc, batch) => acc + batch.quantity, 0);
+  const { data: locations = [], isLoading: isLoadingLocations } = useQuery({
+    queryKey: ['locations'],
+    queryFn: getLocations,
+  });
 
   const mutation = useMutation({
-    // Use the more generic updateProduct mutation
-    mutationFn: (updatedProduct) => updateProduct(product.id, updatedProduct),
+    mutationFn: async (vars) => {
+      if (vars.type === 'in') {
+        return addInventoryBatch(vars.payload);
+      } else {
+        // For 'out', we might need multiple updates.
+        // We'll loop and call the update/delete functions.
+        for (const op of vars.operations) {
+          if (op.type === 'update') {
+            await updateInventoryBatch(op.id, { quantity: op.newQuantity });
+          } else if (op.type === 'delete') {
+            await deleteInventoryBatch(op.id);
+          }
+        }
+      }
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['inventoryData'] });
       showNotification('Stock level updated successfully', 'success');
       onClose();
     },
@@ -43,74 +64,88 @@ const StockAdjustmentForm = ({ onClose, product }) => {
 
   const handleSubmit = () => {
     if (adjustmentType === 'in') {
-      if (!batchNumber || !expiryDate) {
-        showNotification('Batch Number and Expiry Date are required for Stock In.', 'error');
+      if (!batchNumber || !expiryDate || !locationId) {
+        showNotification('Location, Batch Number, and Expiry Date are required.', 'error');
         return;
       }
-      const newBatches = [...product.batches];
-      const existingBatchIndex = newBatches.findIndex(b => b.batchNumber === batchNumber);
-
-      if (existingBatchIndex > -1) {
-        // Update existing batch
-        newBatches[existingBatchIndex].quantity += quantity;
-      } else {
-        // Add new batch
-        newBatches.push({ batchNumber, quantity, expiryDate });
-      }
-
-      const updatedProduct = { ...product, batches: newBatches };
-      mutation.mutate(updatedProduct);
-
+      mutation.mutate({
+        type: 'in',
+        payload: {
+          productId: product.id,
+          locationId,
+          batchNumber,
+          quantity,
+          expiryDate,
+        },
+      });
     } else { // Stock Out
-      let remainingQty = quantity;
-      const newBatches = JSON.parse(JSON.stringify(product.batches)); // Deep copy
-
-      if (totalStock < remainingQty) {
-        showNotification('Not enough stock available.', 'error');
+      if (!locationId) {
+        showNotification('Location is required to remove stock.', 'error');
         return;
       }
 
-      // Simple FEFO: deduct from earliest expiring batches first
-      newBatches.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+      const batchesAtLocation = inventory
+        .filter(b => b.productId === product.id && b.locationId === locationId)
+        .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
 
-      for (const batch of newBatches) {
+      const stockAtLocation = batchesAtLocation.reduce((sum, b) => sum + b.quantity, 0);
+
+      if (stockAtLocation < quantity) {
+        showNotification('Not enough stock at the selected location.', 'error');
+        return;
+      }
+
+      let remainingQty = quantity;
+      const operations = [];
+
+      for (const batch of batchesAtLocation) {
         if (remainingQty <= 0) break;
         const deductQty = Math.min(remainingQty, batch.quantity);
-        batch.quantity -= deductQty;
+        const newQuantity = batch.quantity - deductQty;
+
+        if (newQuantity > 0) {
+          operations.push({ type: 'update', id: batch.id, newQuantity });
+        } else {
+          operations.push({ type: 'delete', id: batch.id });
+        }
         remainingQty -= deductQty;
       }
-
-      const updatedBatches = newBatches.filter(b => b.quantity > 0);
-      const updatedProduct = { ...product, batches: updatedBatches };
-      mutation.mutate(updatedProduct);
+      mutation.mutate({ type: 'out', operations });
     }
-  };
-
-  const handleAdjustmentTypeChange = (event) => {
-    setAdjustmentType(event.target.value);
   };
 
   return (
     <Box component="form" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-      <Typography gutterBottom>
-        Adjusting stock for: <strong>{product.name}</strong>
-      </Typography>
-      <Typography color="text.secondary" gutterBottom>
-        Current total stock: {totalStock}
-      </Typography>
+      <Typography gutterBottom>Adjusting stock for: <strong>{product.name}</strong></Typography>
+      <Typography color="text.secondary" gutterBottom>Current total stock: {totalStock}</Typography>
 
       <FormControl component="fieldset" margin="normal">
         <FormLabel component="legend">Adjustment Type</FormLabel>
-        <RadioGroup row name="adjustmentType" value={adjustmentType} onChange={handleAdjustmentTypeChange}>
+        <RadioGroup row value={adjustmentType} onChange={(e) => setAdjustmentType(e.target.value)}>
           <FormControlLabel value="in" control={<Radio />} label="Stock In" />
           <FormControlLabel value="out" control={<Radio />} label="Stock Out" />
         </RadioGroup>
       </FormControl>
 
+      <FormControl fullWidth margin="normal">
+        <InputLabel id="location-select-label">Location</InputLabel>
+        <Select
+          labelId="location-select-label"
+          value={locationId}
+          label="Location"
+          onChange={(e) => setLocationId(e.target.value)}
+          required
+        >
+          {isLoadingLocations ? (
+            <MenuItem disabled>Loading...</MenuItem>
+          ) : (
+            locations.map(loc => <MenuItem key={loc.id} value={loc.id}>{loc.name}</MenuItem>)
+          )}
+        </Select>
+      </FormControl>
+
       <TextField
-        autoFocus
         margin="dense"
-        id="quantity"
         label="Quantity"
         type="number"
         fullWidth
@@ -123,7 +158,6 @@ const StockAdjustmentForm = ({ onClose, product }) => {
       <Collapse in={adjustmentType === 'in'}>
         <TextField
           margin="dense"
-          id="batchNumber"
           label="Batch Number"
           type="text"
           fullWidth
@@ -133,7 +167,6 @@ const StockAdjustmentForm = ({ onClose, product }) => {
         />
         <TextField
           margin="dense"
-          id="expiryDate"
           label="Expiry Date"
           type="date"
           fullWidth

@@ -9,11 +9,14 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
+import SearchBar from '../ui/SearchBar'; // Reusing the existing SearchBar
+import { Box } from '@mui/material';
 
 const drawerWidth = 240;
 
 const Topbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const [lookupSku, setLookupSku] = useState('');
   const navigate = useNavigate();
   const { logout } = useAuth();
 
@@ -29,6 +32,14 @@ const Topbar = () => {
     logout();
     navigate('/login');
     handleClose();
+  };
+
+  const handleLookupSubmit = (e) => {
+    e.preventDefault();
+    if (lookupSku.trim()) {
+      navigate(`/products?sku=${lookupSku.trim()}`);
+      setLookupSku('');
+    }
   };
 
   return (
@@ -48,9 +59,42 @@ const Topbar = () => {
         >
           <MenuIcon />
         </IconButton>
-        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+        <Typography variant="h6" noWrap component="div">
           Inventory Control
         </Typography>
+
+        <Box sx={{ flexGrow: 1, ml: 3, display: 'flex', justifyContent: 'center' }}>
+          <Box component="form" onSubmit={handleLookupSubmit} sx={{ width: '100%', maxWidth: '400px' }}>
+            <SearchBar
+              value={lookupSku}
+              onChange={(e) => setLookupSku(e.target.value)}
+              placeholder="Scan or lookup by SKU..."
+              sx={{
+                color: 'inherit',
+                backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                },
+                borderRadius: 1,
+                width: '100%',
+                '& .MuiInputBase-input': {
+                  color: 'white',
+                  padding: '8px 12px',
+                },
+                '& .MuiInputBase-root': {
+                  color: 'white',
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: 'rgba(255, 255, 255, 0.5)',
+                },
+              }}
+            />
+          </Box>
+        </Box>
+
         <div>
           <IconButton
             size="large"

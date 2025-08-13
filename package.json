@@ -19,6 +19,7 @@
     "@tanstack/react-query": "^5.45.1",
     "axios": "^1.7.2",
     "framer-motion": "^11.0.14",
+    "jsbarcode": "^3.11.6",
     "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
     "react": "^19.1.1",

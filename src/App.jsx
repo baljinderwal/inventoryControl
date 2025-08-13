@@ -14,6 +14,7 @@ import StockValueReport from './pages/reports/StockValueReport';
 import ExpiryReportPage from './pages/reports/ExpiryReportPage';
 import PurchaseOrdersPage from './pages/orders/PurchaseOrdersPage';
 import UsersPage from './pages/users/UsersPage';
+import LocationsPage from './pages/locations/LocationsPage';
 import Layout from './components/layout/Layout';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -42,6 +43,7 @@ function App() {
         </Route>
         <Route element={<PrivateRoute roles={['Admin']} />}>
           <Route path="/users" element={<UsersPage />} />
+          <Route path="/locations" element={<LocationsPage />} />
         </Route>
       </Route>
     </Routes>

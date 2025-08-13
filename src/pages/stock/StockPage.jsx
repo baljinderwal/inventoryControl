@@ -1,53 +1,101 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getProducts } from '../../services/productService'; // Use productService
-
+import { getInventoryData } from '../../services/stockService';
 import AppDialog from '../../components/ui/AppDialog';
 import StockAdjustmentForm from './StockAdjustmentForm';
+import StockTransferForm from './StockTransferForm'; // Import the new form
 
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import CircularProgress from '@mui/material/CircularProgress';
-import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
-import Chip from '@mui/material/Chip';
-import Paper from '@mui/material/Paper';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import IconButton from '@mui/material/IconButton';
-import Collapse from '@mui/material/Collapse';
+import {
+  Box, Typography, CircularProgress, Alert, Button, Chip, Paper, Table,
+  TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton, Collapse
+} from '@mui/material';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
-const Row = ({ product, handleOpenModal }) => {
+const BatchTable = ({ batches }) => (
+  <Table size="small" aria-label="batches">
+    <TableHead>
+      <TableRow>
+        <TableCell>Batch Number</TableCell>
+        <TableCell>Expiry Date</TableCell>
+        <TableCell align="right">Quantity</TableCell>
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      {batches.map((batch) => (
+        <TableRow key={batch.id}>
+          <TableCell>{batch.batchNumber}</TableCell>
+          <TableCell>{new Date(batch.expiryDate).toLocaleDateString()}</TableCell>
+          <TableCell align="right">{batch.quantity}</TableCell>
+        </TableRow>
+      ))}
+    </TableBody>
+  </Table>
+);
+
+const LocationRow = ({ location, batches, onTransferClick }) => {
   const [open, setOpen] = useState(false);
-  const totalStock = product.batches.reduce((sum, batch) => sum + batch.quantity, 0);
+  const totalStockAtLocation = batches.reduce((sum, b) => sum + b.quantity, 0);
+
+  return (
+    <React.Fragment>
+      <TableRow>
+        <TableCell style={{ width: '50px' }}>
+          <IconButton size="small" onClick={() => setOpen(!open)}>
+            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
+          </IconButton>
+        </TableCell>
+        <TableCell>{location.name}</TableCell>
+        <TableCell align="right">{totalStockAtLocation}</TableCell>
+        <TableCell align="center" style={{ width: '120px' }}>
+          <Button size="small" variant="text" onClick={onTransferClick}>
+            Transfer
+          </Button>
+        </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell style={{ padding: 0 }} colSpan={4}>
+          <Collapse in={open} timeout="auto" unmountOnExit>
+            <Box sx={{ margin: 1, ml: 5 }}>
+              <Typography variant="h6" gutterBottom component="div">Batches at {location.name}</Typography>
+              <BatchTable batches={batches} />
+            </Box>
+          </Collapse>
+        </TableCell>
+      </TableRow>
+    </React.Fragment>
+  );
+};
+
+const ProductRow = ({ product, locations, inventory, handleOpenModal, handleOpenTransferModal }) => {
+  const [open, setOpen] = useState(false);
+
+  const { stockByLocation, totalStock } = useMemo(() => {
+    const productInventory = inventory.filter(item => item.productId === product.id);
+    const total = productInventory.reduce((sum, item) => sum + item.quantity, 0);
+    const byLocation = productInventory.reduce((acc, item) => {
+      acc[item.locationId] = [...(acc[item.locationId] || []), item];
+      return acc;
+    }, {});
+    return { stockByLocation: byLocation, totalStock: total };
+  }, [inventory, product.id]);
+
   const lowStock = totalStock < product.lowStockThreshold;
 
   return (
     <React.Fragment>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
         <TableCell>
-          <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
+          <IconButton size="small" onClick={() => setOpen(!open)} disabled={Object.keys(stockByLocation).length === 0}>
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell component="th" scope="row">{product.name}</TableCell>
+        <TableCell>{product.name}</TableCell>
         <TableCell>{product.sku}</TableCell>
         <TableCell align="right">{totalStock}</TableCell>
+        <TableCell><Chip label={lowStock ? 'Low Stock' : 'In Stock'} color={lowStock ? 'error' : 'success'} size="small" /></TableCell>
         <TableCell>
-          <Chip
-            label={lowStock ? 'Low Stock' : 'In Stock'}
-            color={lowStock ? 'error' : 'success'}
-            size="small"
-          />
-        </TableCell>
-        <TableCell>
-          <Button variant="outlined" size="small" onClick={() => handleOpenModal(product)}>
+          <Button variant="outlined" size="small" onClick={() => handleOpenModal(product, inventory, totalStock)}>
             Adjust Stock
           </Button>
         </TableCell>
@@ -56,31 +104,28 @@ const Row = ({ product, handleOpenModal }) => {
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
-              <Typography variant="h6" gutterBottom component="div">
-                Batches
-              </Typography>
-              <Table size="small" aria-label="batches">
+              <Typography variant="h6" gutterBottom component="div">Stock by Location</Typography>
+              <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Batch Number</TableCell>
-                    <TableCell>Expiry Date</TableCell>
-                    <TableCell align="right">Quantity</TableCell>
+                    <TableCell />
+                    <TableCell>Location</TableCell>
+                    <TableCell align="right">Sub-total</TableCell>
+                    <TableCell align="center">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {product.batches.length > 0 ? (
-                    product.batches.map((batch) => (
-                      <TableRow key={batch.batchNumber}>
-                        <TableCell component="th" scope="row">{batch.batchNumber}</TableCell>
-                        <TableCell>{new Date(batch.expiryDate).toLocaleDateString()}</TableCell>
-                        <TableCell align="right">{batch.quantity}</TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={3}>No batches for this product.</TableCell>
-                    </TableRow>
-                  )}
+                  {Object.entries(stockByLocation).map(([locationId, batches]) => {
+                    const location = locations.find(l => l.id === parseInt(locationId));
+                    return location ? (
+                      <LocationRow
+                        key={locationId}
+                        location={location}
+                        batches={batches}
+                        onTransferClick={() => handleOpenTransferModal(product, location, locations, inventory)}
+                      />
+                    ) : null;
+                  })}
                 </TableBody>
               </Table>
             </Box>
@@ -91,40 +136,40 @@ const Row = ({ product, handleOpenModal }) => {
   );
 };
 
-
 const StockPage = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [modalProps, setModalProps] = useState({});
 
-  const { data: products = [], isLoading, isError, error } = useQuery({
-    queryKey: ['products'],
-    queryFn: getProducts, // Use getProducts to get full product objects
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ['inventoryData'],
+    queryFn: getInventoryData,
   });
 
-  const handleOpenModal = (product) => {
-    setSelectedProduct(product);
-    setIsModalOpen(true);
+  const handleOpenAdjustModal = (product, inventory, totalStock) => {
+    setModalProps({ product, inventory, totalStock });
+    setIsAdjustModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setSelectedProduct(null);
-    setIsModalOpen(false);
+  const handleOpenTransferModal = (product, fromLocation, locations, inventory) => {
+    setModalProps({ product, fromLocation, locations, inventory });
+    setIsTransferModalOpen(true);
   };
 
-  if (isLoading) {
-    return <CircularProgress />;
-  }
+  const handleClose = () => {
+    setIsAdjustModalOpen(false);
+    setIsTransferModalOpen(false);
+    setModalProps({});
+  };
 
-  if (isError) {
-    return <Alert severity="error">Error fetching stock levels: {error.message}</Alert>;
-  }
+  if (isLoading) return <CircularProgress />;
+  if (isError) return <Alert severity="error">Error fetching stock data: {error.message}</Alert>;
+
+  const { products = [], locations = [], inventoryBatches = [] } = data || {};
 
   return (
     <div>
-      <Typography variant="h4" gutterBottom>
-        Stock Management
-      </Typography>
-
+      <Typography variant="h4" gutterBottom>Stock Management</Typography>
       <TableContainer component={Paper}>
         <Table aria-label="collapsible table">
           <TableHead>
@@ -139,19 +184,28 @@ const StockPage = () => {
           </TableHead>
           <TableBody>
             {products.map((product) => (
-              <Row key={product.id} product={product} handleOpenModal={handleOpenModal} />
+              <ProductRow
+                key={product.id}
+                product={product}
+                locations={locations}
+                inventory={inventoryBatches}
+                handleOpenModal={handleOpenAdjustModal}
+                handleOpenTransferModal={handleOpenTransferModal}
+              />
             ))}
           </TableBody>
         </Table>
       </TableContainer>
 
-      {selectedProduct && (
-        <AppDialog
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          title={`Adjust Stock for ${selectedProduct.name}`}
-        >
-          <StockAdjustmentForm onClose={handleCloseModal} product={selectedProduct} />
+      {isAdjustModalOpen && (
+        <AppDialog isOpen={isAdjustModalOpen} onClose={handleClose} title={`Adjust Stock for ${modalProps.product?.name}`}>
+          <StockAdjustmentForm onClose={handleClose} {...modalProps} />
+        </AppDialog>
+      )}
+
+      {isTransferModalOpen && (
+        <AppDialog isOpen={isTransferModalOpen} onClose={handleClose} title={`Transfer Stock for ${modalProps.product?.name}`}>
+          <StockTransferForm onClose={handleClose} {...modalProps} />
         </AppDialog>
       )}
     </div>

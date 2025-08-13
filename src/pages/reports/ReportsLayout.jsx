@@ -12,6 +12,7 @@ const reportTabs = [
   { label: 'Inventory Aging', value: '/reports/inventory-aging' },
   { label: 'Supplier Performance', value: '/reports/supplier-performance' },
   { label: 'Stock Value', value: '/reports/stock-value' },
+  { label: 'Inventory Expiry', value: '/reports/inventory-expiry' },
 ];
 
 const ReportsLayout = () => {

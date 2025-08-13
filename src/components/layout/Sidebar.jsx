@@ -82,10 +82,10 @@ const Sidebar = () => {
         {filteredNavigation.map((item) => (
           <React.Fragment key={item.name}>
             <ListItemButton
-              component={item.children ? 'div' : NavLink}
+              component={NavLink}
               to={item.href}
               end={!item.children ? true : undefined}
-              onClick={() => item.children && handleClick(item.name)}
+              onClick={item.children ? () => handleClick(item.name) : undefined}
               sx={{
                 '&.active': {
                   backgroundColor: 'action.selected',

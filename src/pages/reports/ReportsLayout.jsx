@@ -5,6 +5,7 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Typography from '@mui/material/Typography';
 import Paper from '@mui/material/Paper';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const reportTabs = [
   { label: 'Profitability', value: '/reports/profitability' },
@@ -16,6 +17,17 @@ const reportTabs = [
 
 const ReportsLayout = () => {
   const location = useLocation();
+
+  // While the index route redirects, the path is temporarily '/reports'.
+  // This causes a MUI warning because '/reports' is not a valid tab value.
+  // We can render a loader for this brief moment to prevent the warning.
+  if (location.pathname === '/reports') {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Paper sx={{ p: 3 }}>

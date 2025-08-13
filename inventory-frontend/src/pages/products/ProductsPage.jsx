@@ -94,7 +94,7 @@ const ProductsPage = () => {
     setProductToEdit(null);
   }
 
-  const tableHeaders = ['Name', 'SKU', 'Category', 'Price', 'Stock', 'Actions'];
+  const tableHeaders = ['Name', 'SKU', 'Category', 'Price', 'Stock', 'QR Code', 'Actions'];
 
   const tableData = filteredProducts.map(p => ({
     name: p.name,
@@ -102,6 +102,7 @@ const ProductsPage = () => {
     category: p.category,
     price: `$${p.price.toFixed(2)}`,
     stock: p.stock,
+    qrCode: p.qrCode,
     actions: (
       <Box>
         <IconButton onClick={() => handleEditClick(p)}><EditIcon /></IconButton>

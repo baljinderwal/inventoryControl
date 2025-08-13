@@ -1,25 +1,20 @@
-# Inventory Management System
+# Inventory Management System Frontend
 
 A modern, responsive web application for managing inventory, suppliers, orders, and more. Built with React, Vite, and Material-UI, this project provides a comprehensive solution for small to medium-sized businesses to track their assets and operations efficiently.
 
-## ✨ Key Features
+## ✨ Features
 
-*   **📊 Interactive Dashboard:** Get a quick overview of your inventory status with key metrics, charts, and low-stock alerts.
+  **📊 Interactive Dashboard:** Get a quick overview of your inventory status with key metrics, charts, and low-stock alerts.
 *   **📦 Product Management:** Full CRUD (Create, Read, Update, Delete) functionality for your products.
 *   **🏢 Supplier Tracking:** Manage your suppliers and the products they provide.
-*   **🚚 Purchase Order Management:**
-    *   Create, manage, and track purchase orders (POs) sent to suppliers.
-    *   **Smart Suggestions:** Get recommendations for products to reorder based on low-stock alerts.
-    *   **Automated Stock Reconciliation:** Automatically update product stock levels when a PO is marked as "Received".
+*   **🚚 Order Processing:** Keep track of purchase orders and their statuses.
 *   **📈 Stock Control:** View and manage your current stock levels.
 *   **📝 Advanced Reporting Suite:**
     *   **Sales History:** Track sales trends over time.
     *   **Inventory Aging:** Identify slow-moving and obsolete stock.
     *   **Supplier Performance:** Evaluate supplier reliability and order history.
     *   **Profitability Analysis:** Analyze revenue, costs, and profit margins.
-*   **📄 Data Export:**
-    *   **PDF Generation:** Generate a professional PDF for any purchase order to send to suppliers.
-    *   **CSV Export:** Export data from main pages and all reports to CSV format for offline analysis.
+*   **📄 CSV Data Export:** Export data from main pages (Products, Orders, Suppliers) and all reports to CSV format for offline analysis.
 *   **👤 User Administration:** Manage users and their roles within the system.
 *   **🔐 Role-Based Access Control (RBAC):**
     *   **Admin:** Full access to all features, including user management.
@@ -28,23 +23,91 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
 *   **🚀 Fast & Modern Tech:** Built with Vite for a lightning-fast development experience and React for a reactive UI.
 *   **💅 Sleek UI:** A beautiful and intuitive user interface built with Material-UI.
 
-## 🛠️ Tech Stack & Libraries
 
-*   **Frontend:**
-    *   [React](https://react.dev/)
-    *   [Vite](https://vitejs.dev/)
-    *   [React Router](https://reactrouter.com/) for routing
-    *   [Material-UI](https://mui.com/) for UI components
-    *   [Recharts](https://recharts.org/) for charts
-*   **Data Fetching & State Management:**
-    *   [React Query](https://tanstack.com/query/latest) for server state management and caching
-    *   [Axios](https://axios-http.com/) for making HTTP requests
-*   **Mock Backend:**
-    *   [JSON Server](https://github.com/typicode/json-server) for a quick and easy mock REST API.
+## 🚀 Technologies Used
 
-## 🚀 Getting Started
+*   **React**: The core JavaScript library for building the user interface.
+*   **Vite**: A next-generation frontend tooling system for fast development and builds.
+*   **Material-UI (MUI)**: A comprehensive suite of UI tools to implement Google's Material Design.
+*   **TanStack Query (React Query)**: A powerful library for data fetching, caching, synchronization, and server state management.
+*   **React Router**: For declarative routing and navigation within the application.
+*   **axios**: A promise-based HTTP client for making requests to the mock API.
+*   **Recharts**: A composable charting library built on React components.
+*   **JSON Server**: To create a fake REST API for prototyping and development.
 
-Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+## 📦 Project Structure
+
+The project follows a feature-based structure, which makes it scalable and easy to maintain.
+
+```
+/
+├── public/
+├── src/
+│   ├── assets/
+│   ├── components/
+│   │   ├── layout/
+│   │   ├── ui/
+│   │   └── PrivateRoute.jsx
+│   ├── pages/
+│   │   ├── auth/
+│   │   ├── dashboard/
+│   │   ├── orders/
+│   │   ├── products/
+│   │   ├── reports/
+│   │   ├── stock/
+│   │   ├── suppliers/
+│   │   └── users/
+│   ├── services/
+│   ├── utils/
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── index.css
+├── .eslintrc.js
+├── .gitignore
+├── db.json
+├── index.html
+├── package.json
+└── vite.config.js
+```
+
+### File-by-File Breakdown (`src` directory)
+
+*   **`main.jsx`**: The application's entry point. It renders the `App` component and wraps it with necessary context providers (`BrowserRouter`, `QueryClientProvider`, `AuthProvider`, `NotificationProvider`).
+*   **`App.jsx`**: The root component that defines the application's routing structure using `react-router-dom`. It sets up the main layout and distinguishes between public (`/login`) and private routes.
+*   **`index.css` / `App.css`**: Global stylesheets for the application.
+
+*   **`components/`**: Contains reusable components used across multiple pages.
+    *   **`layout/`**: Components that define the overall structure of the application.
+        *   `Layout.jsx`: The main layout for protected pages, including the `Topbar` and `Sidebar`.
+        *   `Sidebar.jsx`: The navigation sidebar with links to all the main pages.
+        *   `Topbar.jsx`: The header bar of the application.
+    *   **`ui/`**: Generic, reusable UI components.
+        *   `AppDialog.jsx`: A customizable modal dialog.
+        *   `Button.jsx`: A styled button component.
+        *   `ConfirmationDialog.jsx`: A specific dialog for "Are you sure?" prompts.
+        *   `SearchBar.jsx`: A search input field.
+        *   `StatsCard.jsx`: A card for displaying key metrics on the dashboard.
+        *   `Table.jsx`: A reusable table component.
+    *   `PrivateRoute.jsx`: A component that protects routes from unauthenticated access. It redirects to the login page if the user is not logged in.
+
+*   **`pages/`**: Each subdirectory represents a major feature or page of the application.
+    *   **`auth/LoginPage.jsx`**: The login page component.
+    *   **`dashboard/DashboardPage.jsx`**: The main dashboard page, displaying stats and charts.
+    *   **`orders/OrdersPage.jsx`**: Lists all orders.
+    *   **`products/ProductsPage.jsx`**: The main page for product management, including the product table and controls for adding, editing, and deleting products.
+    *   **`products/AddEditProductForm.jsx`**: The form used for adding and editing products.
+    *   ... (and so on for `suppliers`, `stock`, `reports`, and `users`).
+
+*   **`services/`**: Handles all API communication.
+    *   `api.js`: Creates a central `axios` instance with the base URL for the mock API.
+    *   `productService.js`, `supplierService.js`, etc.: These files contain functions for specific API calls (e.g., `getProducts`, `addProduct`), separating API logic from UI components.
+
+*   **`utils/`**: Contains shared utilities and React contexts.
+    *   `AuthContext.jsx`: Manages user authentication state (`isAuthenticated`, `login`, `logout`).
+    *   `NotificationContext.jsx`: Provides a global system for showing snackbar notifications.
+
+## ⚙️ Getting Started
+
 
 ### Prerequisites
 
@@ -83,7 +146,6 @@ This project requires two terminals to be running simultaneously: one for the mo
     npm run dev
     ```
     This will start the Vite development server, and you can view the application by navigating to `http://localhost:5173` (or the URL provided in the terminal output).
-
 ## 🧑‍💻 Usage
 
 ### Authentication
@@ -106,7 +168,7 @@ The application features a login system with three predefined user roles. Use th
     *   `/` (Dashboard)
     *   `/products`
     *   `/stock`
-    *   `/purchase-orders`
+    *   `/orders`
 *   **Manager** can access everything a Staff member can, plus:
     *   `/suppliers`
     *   `/reports`
@@ -114,32 +176,23 @@ The application features a login system with three predefined user roles. Use th
 *   **Admin** can access all pages, including:
     *   `/users`
 
-## 📂 Project Structure
+## 🤖 Mock API and Data Model
 
-Here is a high-level overview of the project's directory structure:
+The application uses `json-server` to simulate a backend API. The data is stored in `db.json`.
 
-```
-/
-├── public/              # Static assets
-├── src/
-│   ├── assets/          # Images, icons, etc.
-│   ├── components/      # Reusable React components
-│   │   ├── layout/      # Main layout components (Sidebar, Topbar)
-│   │   └── ui/          # Generic UI elements (Button, Table, etc.)
-│   ├── pages/           # Top-level page components for each route
-│   ├── services/        # API call definitions (e.g., poService.js)
-│   └── utils/           # Utility functions and React contexts (e.g., generatePOPDF.js)
-├── .eslintrc.cjs        # ESLint configuration
-├── package.json         # Project dependencies and scripts
-└── vite.config.js       # Vite configuration
-```
+*   **`db.json`**: This file acts as a simple database. It contains several top-level keys (`products`, `suppliers`, `orders`, `stock`, `users`), each being an array of objects.
+    *   **`products`**: `{id, name, sku, category, price, costPrice, stock, lowStockThreshold}`
+    *   **`suppliers`**: `{id, name, contact, email, products: [productId, ... ]}`
+    *   **`orders`**: `{id, supplier: {id, name}, createdAt, status, products: [{productId, quantity}], completedAt?}`
+    *   **`stock`**: `{id, productId, quantity, warehouse}`
+    *   **`users`**: `{id, name, email, password, role}`
 
-## 🤝 Contributing
+`json-server` automatically creates RESTful endpoints for each of these keys. For example, a `GET` request to `http://localhost:3001/products` will return all products.
 
-Contributions are welcome! Please feel free to open an issue or submit a pull request.
+## 📜 Available Scripts
 
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
+*   **`npm run dev`**: Starts the Vite development server with Hot Module Replacement (HMR).
+*   **`npm run build`**: Compiles the application for production into the `dist` directory.
+*   **`npm run lint`**: Lints the codebase using ESLint to check for errors and style issues.
+*   **`npm run preview`**: Serves the production build from the `dist` directory for previewing.
+*   **`npm run server`**: Starts the `json-server` to provide the mock API.

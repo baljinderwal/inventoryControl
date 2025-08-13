@@ -9,6 +9,7 @@ import AppDialog from '../../components/ui/AppDialog';
 import ConfirmationDialog from '../../components/ui/ConfirmationDialog';
 import AddEditProductForm from './AddEditProductForm';
 import QrCodeScanner from '../../components/ui/QrCodeScanner';
+import QrCodeDisplay from '../../components/ui/QrCodeDisplay';
 
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
@@ -19,6 +20,7 @@ import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 const ProductsPage = () => {
   const queryClient = useQueryClient();
@@ -30,6 +32,7 @@ const ProductsPage = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [qrCodeToDisplay, setQrCodeToDisplay] = useState(null);
 
   const { data: products = [], isLoading, isError, error } = useQuery({
     queryKey: ['products'],
@@ -105,6 +108,7 @@ const ProductsPage = () => {
     qrCode: p.qrCode,
     actions: (
       <Box>
+        <IconButton onClick={() => setQrCodeToDisplay(p.qrCode)}><VisibilityIcon /></IconButton>
         <IconButton onClick={() => handleEditClick(p)}><EditIcon /></IconButton>
         <IconButton onClick={() => handleDeleteClick(p)}><DeleteIcon /></IconButton>
       </Box>
@@ -166,6 +170,14 @@ const ProductsPage = () => {
         title="Delete Product"
         message={`Are you sure you want to delete ${productToDelete?.name}?`}
       />
+
+      <AppDialog
+        isOpen={Boolean(qrCodeToDisplay)}
+        onClose={() => setQrCodeToDisplay(null)}
+        title="Product QR Code"
+      >
+        <QrCodeDisplay value={qrCodeToDisplay} />
+      </AppDialog>
     </div>
   );
 };

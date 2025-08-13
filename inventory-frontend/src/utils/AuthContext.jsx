@@ -15,10 +15,14 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.get('http://localhost:3001/users', {
-        params: { email, password },
-      });
+      // const response = await axios.get('http://localhost:3001/users', {
+      //   params: { email, password },
+      // });
 
+      const response = { data: [{ "id": 1, "name": "Admin User", "email": "admin@example.com", "password": "password", "role": "Admin" }] };
+
+      // Simulating a successful login response
+      // In a real application, you would replace the above line with the actual API call
       if (response.data.length > 0) {
         const loggedInUser = response.data[0];
         localStorage.setItem('user', JSON.stringify(loggedInUser));

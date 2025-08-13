@@ -1,8 +1,14 @@
 import api from './api';
 
 export const getUsers = async () => {
-  const response = await api.get('/users');
-  return response.data;
+  // const response = await api.get('/users');
+  // return response.data;
+
+  // For the sake of this example, we will fetch users role from a public db.json file
+  // This is useful for testing without a backend server
+  const response = await fetch('/db.json');
+  const data = await response.json();
+  return data.users || [];
 };
 
 export const addUser = async (user) => {

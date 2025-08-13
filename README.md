@@ -7,14 +7,19 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
 *   **📊 Interactive Dashboard:** Get a quick overview of your inventory status with key metrics, charts, and low-stock alerts.
 *   **📦 Product Management:** Full CRUD (Create, Read, Update, Delete) functionality for your products.
 *   **🏢 Supplier Tracking:** Manage your suppliers and the products they provide.
-*   **🚚 Order Processing:** Keep track of purchase orders and their statuses.
+*   **🚚 Purchase Order Management:**
+    *   Create, manage, and track purchase orders (POs) sent to suppliers.
+    *   **Smart Suggestions:** Get recommendations for products to reorder based on low-stock alerts.
+    *   **Automated Stock Reconciliation:** Automatically update product stock levels when a PO is marked as "Received".
 *   **📈 Stock Control:** View and manage your current stock levels.
 *   **📝 Advanced Reporting Suite:**
     *   **Sales History:** Track sales trends over time.
     *   **Inventory Aging:** Identify slow-moving and obsolete stock.
     *   **Supplier Performance:** Evaluate supplier reliability and order history.
     *   **Profitability Analysis:** Analyze revenue, costs, and profit margins.
-*   **📄 CSV Data Export:** Export data from main pages (Products, Orders, Suppliers) and all reports to CSV format for offline analysis.
+*   **📄 Data Export:**
+    *   **PDF Generation:** Generate a professional PDF for any purchase order to send to suppliers.
+    *   **CSV Export:** Export data from main pages and all reports to CSV format for offline analysis.
 *   **👤 User Administration:** Manage users and their roles within the system.
 *   **🔐 Role-Based Access Control (RBAC):**
     *   **Admin:** Full access to all features, including user management.
@@ -101,7 +106,7 @@ The application features a login system with three predefined user roles. Use th
     *   `/` (Dashboard)
     *   `/products`
     *   `/stock`
-    *   `/orders`
+    *   `/purchase-orders`
 *   **Manager** can access everything a Staff member can, plus:
     *   `/suppliers`
     *   `/reports`
@@ -122,8 +127,8 @@ Here is a high-level overview of the project's directory structure:
 │   │   ├── layout/      # Main layout components (Sidebar, Topbar)
 │   │   └── ui/          # Generic UI elements (Button, Table, etc.)
 │   ├── pages/           # Top-level page components for each route
-│   ├── services/        # API call definitions (e.g., productService.js)
-│   └── utils/           # Utility functions and React contexts
+│   ├── services/        # API call definitions (e.g., poService.js)
+│   └── utils/           # Utility functions and React contexts (e.g., generatePOPDF.js)
 ├── .eslintrc.cjs        # ESLint configuration
 ├── package.json         # Project dependencies and scripts
 └── vite.config.js       # Vite configuration

@@ -27,6 +27,7 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
     *   **Staff:** Access to core features like dashboard, products, stock, and orders.
 *   **🚀 Fast & Modern Tech:** Built with Vite for a lightning-fast development experience and React for a reactive UI.
 *   **💅 Sleek UI:** A beautiful and intuitive user interface built with Material-UI.
+*   **🎨 Dark Mode:** Toggle between light and dark themes for comfortable viewing in any lighting condition.
 
 ## 🛠️ Tech Stack & Libraries
 

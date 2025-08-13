@@ -11,7 +11,7 @@ import SalesHistoryReport from './pages/reports/SalesHistoryReport';
 import InventoryAgingReport from './pages/reports/InventoryAgingReport';
 import SupplierPerformanceReport from './pages/reports/SupplierPerformanceReport';
 import StockValueReport from './pages/reports/StockValueReport';
-import OrdersPage from './pages/orders/OrdersPage';
+import PurchaseOrdersPage from './pages/orders/PurchaseOrdersPage';
 import UsersPage from './pages/users/UsersPage';
 import Layout from './components/layout/Layout';
 import PrivateRoute from './components/PrivateRoute';
@@ -25,7 +25,7 @@ function App() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/stock" element={<StockPage />} />
-          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />
         </Route>
         <Route element={<PrivateRoute roles={['Admin', 'Manager']} />}>
           <Route path="/suppliers" element={<SuppliersPage />} />

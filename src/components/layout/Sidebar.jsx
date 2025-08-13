@@ -23,7 +23,7 @@ const navigation = [
   { name: 'Products', href: '/products', icon: <InventoryIcon />, roles: ['Admin', 'Manager', 'Staff'] },
   { name: 'Stock', href: '/stock', icon: <WarehouseIcon />, roles: ['Admin', 'Manager', 'Staff'] },
   { name: 'Suppliers', href: '/suppliers', icon: <BusinessIcon />, roles: ['Admin', 'Manager'] },
-  { name: 'Orders', href: '/orders', icon: <ShoppingCartIcon />, roles: ['Admin', 'Manager', 'Staff'] },
+  { name: 'Purchase Orders', href: '/purchase-orders', icon: <ShoppingCartIcon />, roles: ['Admin', 'Manager', 'Staff'] },
   { name: 'Reports', href: '/reports', icon: <SummarizeIcon />, roles: ['Admin', 'Manager'] },
   { name: 'Users', href: '/users', icon: <PeopleIcon />, roles: ['Admin'] },
 ];

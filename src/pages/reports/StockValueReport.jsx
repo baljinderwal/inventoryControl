@@ -11,7 +11,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DownloadIcon from '@mui/icons-material/Download';
 
-const ReportsPage = () => {
+const StockValueReport = () => {
   const { data: products = [], isLoading, isError, error } = useQuery({
     queryKey: ['products'],
     queryFn: getProducts,
@@ -83,4 +83,4 @@ const ReportsPage = () => {
   );
 };
 
-export default ReportsPage;
+export default StockValueReport;

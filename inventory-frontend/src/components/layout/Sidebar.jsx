@@ -15,6 +15,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import PeopleIcon from '@mui/icons-material/People';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { useAuth } from '../../utils/AuthContext';
 
 const drawerWidth = 240;
@@ -26,6 +27,7 @@ const navigation = [
   { name: 'Suppliers', href: '/suppliers', icon: <BusinessIcon />, roles: ['Admin', 'Manager'] },
   { name: 'Orders', href: '/orders', icon: <ShoppingCartIcon />, roles: ['Admin', 'Manager', 'Staff'] },
   { name: 'Reports', href: '/reports', icon: <SummarizeIcon />, roles: ['Admin', 'Manager'] },
+  { name: 'Profitability', href: '/reports/profitability', icon: <TrendingUpIcon />, roles: ['Admin', 'Manager'] },
   { name: 'Users', href: '/users', icon: <PeopleIcon />, roles: ['Admin'] },
 ];
 

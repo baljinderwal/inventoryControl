@@ -6,6 +6,7 @@ import ProductsPage from './pages/products/ProductsPage';
 import StockPage from './pages/stock/StockPage';
 import SuppliersPage from './pages/suppliers/SuppliersPage';
 import ReportsPage from './pages/reports/ReportsPage';
+import ProfitabilityPage from './pages/reports/ProfitabilityPage';
 import OrdersPage from './pages/orders/OrdersPage';
 import UsersPage from './pages/users/UsersPage';
 import Layout from './components/layout/Layout';
@@ -25,6 +26,7 @@ function App() {
         <Route element={<PrivateRoute roles={['Admin', 'Manager']} />}>
           <Route path="/suppliers" element={<SuppliersPage />} />
           <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/reports/profitability" element={<ProfitabilityPage />} />
         </Route>
         <Route element={<PrivateRoute roles={['Admin']} />}>
           <Route path="/users" element={<UsersPage />} />

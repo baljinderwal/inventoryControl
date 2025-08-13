@@ -14,7 +14,18 @@
     { "id": 2, "name": "OfficeWorks", "contact": "Jane Smith", "email": "jane.smith@officeworks.com", "products": [3, 4, 6, 7] },
     { "id": 3, "name": "MonitorCorp", "contact": "Sam Wilson", "email": "sam.wilson@monitorcorp.com", "products": [5] }
   ],
-  "orders": [],
+  "orders": [
+    { "id": 1, "productId": 1, "quantity": 5, "orderDate": "2024-07-01T10:00:00Z" },
+    { "id": 2, "productId": 2, "quantity": 2, "orderDate": "2024-07-01T11:30:00Z" },
+    { "id": 3, "productId": 5, "quantity": 1, "orderDate": "2024-07-02T14:00:00Z" },
+    { "id": 4, "productId": 1, "quantity": 3, "orderDate": "2024-07-03T09:00:00Z" },
+    { "id": 5, "productId": 8, "quantity": 10, "orderDate": "2024-07-04T16:45:00Z" },
+    { "id": 6, "productId": 4, "quantity": 15, "orderDate": "2024-06-15T08:20:00Z" },
+    { "id": 7, "productId": 6, "quantity": 2, "orderDate": "2024-06-20T13:00:00Z" },
+    { "id": 8, "productId": 7, "quantity": 1, "orderDate": "2024-05-10T18:00:00Z" },
+    { "id": 9, "productId": 3, "quantity": 8, "orderDate": "2024-05-25T12:10:00Z" },
+    { "id": 10, "productId": 2, "quantity": 3, "orderDate": "2024-07-05T10:30:00Z" }
+  ],
   "stock": [
     { "id": 1, "productId": 1, "quantity": 150, "warehouse": "A" },
     { "id": 2, "productId": 2, "quantity": 75, "warehouse": "A" },

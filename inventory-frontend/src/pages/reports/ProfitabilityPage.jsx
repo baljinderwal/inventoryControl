@@ -31,35 +31,42 @@ const ProfitabilityPage = () => {
     const end = new Date(endDate);
     end.setHours(23,59,59,999);
 
-    const filteredOrders = orders.filter(order => {
-      const orderDate = new Date(order.orderDate);
-      return orderDate >= start && orderDate <= end;
-    });
-
     const productMetrics = {};
 
-    filteredOrders.forEach(order => {
-      const product = productsMap.get(order.productId);
-      if (!product) return;
-
-      const revenue = product.price * order.quantity;
-      const cogs = product.costPrice * order.quantity;
-      const grossProfit = revenue - cogs;
-
-      if (!productMetrics[product.id]) {
-        productMetrics[product.id] = {
-          ...product,
-          totalRevenue: 0,
-          totalCogs: 0,
-          totalGrossProfit: 0,
-          totalQuantitySold: 0,
-        };
+    orders.forEach(order => {
+      // Only include completed orders in the calculation
+      if (order.status !== 'Completed') {
+        return;
       }
 
-      productMetrics[product.id].totalRevenue += revenue;
-      productMetrics[product.id].totalCogs += cogs;
-      productMetrics[product.id].totalGrossProfit += grossProfit;
-      productMetrics[product.id].totalQuantitySold += order.quantity;
+      const completedDate = new Date(order.completedAt);
+      if (completedDate < start || completedDate > end) {
+        return;
+      }
+
+      order.products.forEach(item => {
+        const product = productsMap.get(item.productId);
+        if (!product) return;
+
+        const revenue = product.price * item.quantity;
+        const cogs = product.costPrice * item.quantity;
+        const grossProfit = revenue - cogs;
+
+        if (!productMetrics[product.id]) {
+          productMetrics[product.id] = {
+            ...product,
+            totalRevenue: 0,
+            totalCogs: 0,
+            totalGrossProfit: 0,
+            totalQuantitySold: 0,
+          };
+        }
+
+        productMetrics[product.id].totalRevenue += revenue;
+        productMetrics[product.id].totalCogs += cogs;
+        productMetrics[product.id].totalGrossProfit += grossProfit;
+        productMetrics[product.id].totalQuantitySold += item.quantity;
+      });
     });
 
     const reportData = Object.values(productMetrics).map(p => ({
@@ -178,23 +185,18 @@ const ProfitabilityPage = () => {
             <Grid item xs={12} md={4}>
               <Paper sx={{ p: 2, height: 400 }}>
                 <Typography variant="h6">Profit by Category</Typography>
-                <ResponsiveContainer>
-                  <PieChart>
+                <ResponsiveContainer width="100%" height={400}>
+                  <PieChart width={400} height={400}>
                     <Pie
                       data={profitabilityData.profitByCategory}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={120}
-                      fill="#8884d8"
                       dataKey="value"
                       nameKey="name"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {profitabilityData.profitByCategory.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={120}
+                      fill="#8884d8"
+                      label
+                    />
                     <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
                     <Legend />
                   </PieChart>

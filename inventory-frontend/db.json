@@ -10,31 +10,183 @@
     { "id": 8, "name": "Webcam 1080p", "sku": "WC-1080", "category": "Electronics", "price": 65.00, "costPrice": 40.00, "stock": 90, "lowStockThreshold": 100 }
   ],
   "suppliers": [
-    { "id": 1, "name": "ElectroSupply", "contact": "John Doe", "email": "john.doe@electrosupply.com", "products": [1, 2, 8] },
-    { "id": 2, "name": "OfficeWorks", "contact": "Jane Smith", "email": "jane.smith@officeworks.com", "products": [3, 4, 6, 7] },
-    { "id": 3, "name": "MonitorCorp", "contact": "Sam Wilson", "email": "sam.wilson@monitorcorp.com", "products": [5] }
+    {
+      "id": 1,
+      "name": "ElectroSupply",
+      "contact": "John Doe",
+      "email": "john.doe@electrosupply.com",
+      "products": [
+        1,
+        2,
+        8
+      ]
+    },
+    {
+      "id": 2,
+      "name": "OfficeWorks",
+      "contact": "Jane Smith",
+      "email": "jane.smith@officeworks.com",
+      "products": [
+        3,
+        4,
+        6,
+        7
+      ]
+    },
+    {
+      "id": 3,
+      "name": "MonitorCorp",
+      "contact": "Sam Wilson",
+      "email": "sam.wilson@monitorcorp.com",
+      "products": [
+        5
+      ]
+    }
   ],
   "orders": [
-    { "id": 1, "productId": 1, "quantity": 5, "orderDate": "2024-07-01T10:00:00Z" },
-    { "id": 2, "productId": 2, "quantity": 2, "orderDate": "2024-07-01T11:30:00Z" },
-    { "id": 3, "productId": 5, "quantity": 1, "orderDate": "2024-07-02T14:00:00Z" },
-    { "id": 4, "productId": 1, "quantity": 3, "orderDate": "2024-07-03T09:00:00Z" },
-    { "id": 5, "productId": 8, "quantity": 10, "orderDate": "2024-07-04T16:45:00Z" },
-    { "id": 6, "productId": 4, "quantity": 15, "orderDate": "2024-06-15T08:20:00Z" },
-    { "id": 7, "productId": 6, "quantity": 2, "orderDate": "2024-06-20T13:00:00Z" },
-    { "id": 8, "productId": 7, "quantity": 1, "orderDate": "2024-05-10T18:00:00Z" },
-    { "id": 9, "productId": 3, "quantity": 8, "orderDate": "2024-05-25T12:10:00Z" },
-    { "id": 10, "productId": 2, "quantity": 3, "orderDate": "2024-07-05T10:30:00Z" }
+    {
+      "id": 1,
+      "supplier": {
+        "id": 1,
+        "name": "ElectroSupply"
+      },
+      "createdAt": "2025-08-01T10:15:00Z",
+      "status": "Completed",
+      "products": [
+        {
+          "productId": 1,
+          "quantity": 50
+        },
+        {
+          "productId": 8,
+          "quantity": 20
+        }
+      ],
+      "completedAt": "2025-08-03T14:30:00Z"
+    },
+    {
+      "id": 2,
+      "supplier": {
+        "id": 2,
+        "name": "OfficeWorks"
+      },
+      "createdAt": "2025-08-05T09:00:00Z",
+      "status": "Pending",
+      "products": [
+        {
+          "productId": 4,
+          "quantity": 100
+        },
+        {
+          "productId": 6,
+          "quantity": 5
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "supplier": {
+        "id": 3,
+        "name": "MonitorCorp"
+      },
+      "createdAt": "2025-08-07T11:20:00Z",
+      "status": "Completed",
+      "products": [
+        {
+          "productId": 5,
+          "quantity": 10
+        }
+      ],
+      "completedAt": "2025-08-09T16:00:00Z"
+    },
+    {
+      "id": 4,
+      "supplier": {
+        "id": 2,
+        "name": "OfficeWorks"
+      },
+      "createdAt": "2025-08-10T13:45:00Z",
+      "status": "Pending",
+      "products": [
+        {
+          "productId": 3,
+          "quantity": 40
+        },
+        {
+          "productId": 7,
+          "quantity": 8
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "supplier": {
+        "id": 1,
+        "name": "ElectroSupply"
+      },
+      "createdAt": "2025-08-12T08:30:00Z",
+      "status": "Pending",
+      "products": [
+        {
+          "productId": 2,
+          "quantity": 15
+        },
+        {
+          "productId": 8,
+          "quantity": 25
+        }
+      ]
+    }
   ],
   "stock": [
-    { "id": 1, "productId": 1, "quantity": 150, "warehouse": "A" },
-    { "id": 2,.jsx
-    { "id": 3, "productId": 3, "quantity": 120, "warehouse": "B" },
-    { "id": 4, "productId": 4, "quantity": 200, "warehouse": "B" },
-    { "id": 5, "productId": 5, "quantity": 50, "warehouse": "A" },
-    { "id": 6, "productId": 6, "quantity": 30, "warehouse": "C" },
-    { "id": 7, "productId": 7, "quantity": 40, "warehouse": "C" },
-    { "id": 8, "productId": 8, "quantity": 90, "warehouse": "A" }
+    {
+      "id": 1,
+      "productId": 1,
+      "quantity": 150,
+      "warehouse": "A"
+    },
+    {
+      "id": 2,
+      "productId": 2,
+      "quantity": 75,
+      "warehouse": "A"
+    },
+    {
+      "id": 3,
+      "productId": 3,
+      "quantity": 120,
+      "warehouse": "B"
+    },
+    {
+      "id": 4,
+      "productId": 4,
+      "quantity": 200,
+      "warehouse": "B"
+    },
+    {
+      "id": 5,
+      "productId": 5,
+      "quantity": 50,
+      "warehouse": "A"
+    },
+    {
+      "id": 6,
+      "productId": 6,
+      "quantity": 30,
+      "warehouse": "C"
+    },
+    {
+      "id": 7,
+      "productId": 7,
+      "quantity": 40,
+      "warehouse": "C"
+    },
+    {
+      "id": 8,
+      "productId": 8,
+      "quantity": 90,
+      "warehouse": "A"
+    }
   ],
   "users": [
     { "id": 1, "name": "Admin User", "email": "admin@example.com", "password": "password", "role": "Admin" },

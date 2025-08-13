@@ -8,6 +8,8 @@ import SearchBar from '../../components/ui/SearchBar';
 import AppDialog from '../../components/ui/AppDialog';
 import ConfirmationDialog from '../../components/ui/ConfirmationDialog';
 import AddEditProductForm from './AddEditProductForm';
+import QrCodeScanner from '../../components/ui/QrCodeScanner';
+import QrCodeDisplay from '../../components/ui/QrCodeDisplay';
 
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
@@ -17,6 +19,8 @@ import Alert from '@mui/material/Alert';
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 
 const ProductsPage = () => {
   const queryClient = useQueryClient();
@@ -27,6 +31,8 @@ const ProductsPage = () => {
   const [productToEdit, setProductToEdit] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [qrCodeToDisplay, setQrCodeToDisplay] = useState(null);
 
   const { data: products = [], isLoading, isError, error } = useQuery({
     queryKey: ['products'],
@@ -48,9 +54,20 @@ const ProductsPage = () => {
     if (!Array.isArray(products)) return [];
     return products.filter((product) =>
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchQuery.toLowerCase())
+      product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (product.qrCode && product.qrCode.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [products, searchQuery]);
+
+  const handleScanSuccess = (decodedText, decodedResult) => {
+    setSearchQuery(decodedText);
+    setIsScannerOpen(false);
+    showNotification(`Scanned QR Code: ${decodedText}`, 'success');
+  };
+
+  const handleScanFailure = (error) => {
+    // console.error(`QR Code scan error = ${error}`);
+  };
 
   const handleAddClick = () => {
     setProductToEdit(null);
@@ -80,7 +97,7 @@ const ProductsPage = () => {
     setProductToEdit(null);
   }
 
-  const tableHeaders = ['Name', 'SKU', 'Category', 'Price', 'Stock', 'Actions'];
+  const tableHeaders = ['Name', 'SKU', 'Category', 'Price', 'Stock', 'QR Code', 'Actions'];
 
   const tableData = filteredProducts.map(p => ({
     name: p.name,
@@ -88,8 +105,10 @@ const ProductsPage = () => {
     category: p.category,
     price: `$${p.price.toFixed(2)}`,
     stock: p.stock,
+    qrCode: p.qrCode,
     actions: (
       <Box>
+        <IconButton onClick={() => setQrCodeToDisplay(p.qrCode)}><VisibilityIcon /></IconButton>
         <IconButton onClick={() => handleEditClick(p)}><EditIcon /></IconButton>
         <IconButton onClick={() => handleDeleteClick(p)}><DeleteIcon /></IconButton>
       </Box>
@@ -108,7 +127,14 @@ const ProductsPage = () => {
     <div>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4">Products</Typography>
-        <Button variant="contained" onClick={handleAddClick}>Add Product</Button>
+        <Box>
+          <Button variant="contained" onClick={() => setIsScannerOpen(true)} startIcon={<QrCodeScannerIcon />}>
+            Scan Product
+          </Button>
+          <Button variant="contained" onClick={handleAddClick} sx={{ ml: 2 }}>
+            Add Product
+          </Button>
+        </Box>
       </Box>
 
       <Box sx={{ mb: 2 }}>
@@ -125,6 +151,18 @@ const ProductsPage = () => {
         <AddEditProductForm onClose={handleCloseForm} product={productToEdit} />
       </AppDialog>
 
+      <AppDialog
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        title="Scan QR Code"
+      >
+        <QrCodeScanner
+          onScanSuccess={handleScanSuccess}
+          onScanFailure={handleScanFailure}
+          onClose={() => setIsScannerOpen(false)}
+        />
+      </AppDialog>
+
       <ConfirmationDialog
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
@@ -132,6 +170,14 @@ const ProductsPage = () => {
         title="Delete Product"
         message={`Are you sure you want to delete ${productToDelete?.name}?`}
       />
+
+      <AppDialog
+        isOpen={Boolean(qrCodeToDisplay)}
+        onClose={() => setQrCodeToDisplay(null)}
+        title="Product QR Code"
+      >
+        <QrCodeDisplay value={qrCodeToDisplay} />
+      </AppDialog>
     </div>
   );
 };

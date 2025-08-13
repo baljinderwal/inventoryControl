@@ -19,6 +19,7 @@ const AddEditProductForm = ({ onClose, product }) => {
     price: '',
     costPrice: '',
     stock: '',
+    qrCode: '',
   });
 
   const isEditMode = Boolean(product);
@@ -32,6 +33,7 @@ const AddEditProductForm = ({ onClose, product }) => {
         price: product.price || '',
         costPrice: product.costPrice || '',
         stock: product.stock || '',
+        qrCode: product.qrCode || '',
       });
     }
   }, [product]);
@@ -66,6 +68,11 @@ const AddEditProductForm = ({ onClose, product }) => {
     mutation.mutate(submissionData);
   };
 
+  const handleGenerateQrCode = () => {
+    const newQrCode = `prod-${Date.now().toString(36)}`;
+    setFormData(prev => ({ ...prev, qrCode: newQrCode }));
+  };
+
   return (
     <Box component="form" onSubmit={handleSubmit}>
       <TextField margin="dense" id="name" name="name" label="Product Name" type="text" fullWidth variant="standard" value={formData.name} onChange={handleChange} required />
@@ -74,6 +81,12 @@ const AddEditProductForm = ({ onClose, product }) => {
       <TextField margin="dense" id="price" name="price" label="Price" type="number" fullWidth variant="standard" value={formData.price} onChange={handleChange} required />
       <TextField margin="dense" id="costPrice" name="costPrice" label="Cost Price" type="number" fullWidth variant="standard" value={formData.costPrice} onChange={handleChange} required />
       <TextField margin="dense" id="stock" name="stock" label="Stock" type="number" fullWidth variant="standard" value={formData.stock} onChange={handleChange} required />
+      <Box sx={{ display: 'flex', alignItems: 'flex-end', gap: 2 }}>
+        <TextField margin="dense" id="qrCode" name="qrCode" label="QR Code" type="text" fullWidth variant="standard" value={formData.qrCode} onChange={handleChange} />
+        <Button onClick={handleGenerateQrCode} variant="outlined" size="small">
+          Generate
+        </Button>
+      </Box>
 
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>

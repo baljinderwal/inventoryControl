@@ -4,7 +4,10 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
 
 ## ✨ Features
 
-  **📊 Interactive Dashboard:** Get a quick overview of your inventory status with key metrics, charts, and low-stock alerts.
+  **📊 Interactive Dashboard:** Get a quick overview of your business performance with key metrics and charts.
+    *   **Sales & Revenue Analytics:** View total sales and revenue at a glance.
+    *   **Sales Trends:** A dynamic line chart visualizes sales revenue over time.
+    *   **Low Stock Alerts:** Immediately see which products are running low on stock.
 *   **📦 Product Management:** Full CRUD (Create, Read, Update, Delete) functionality for your products.
 *   **🏢 Supplier Tracking:** Manage your suppliers and the products they provide.
 *   **🚚 Order Processing:** Keep track of purchase orders and their statuses.
@@ -186,6 +189,7 @@ The application uses `json-server` to simulate a backend API. The data is stored
     *   **`orders`**: `{id, supplier: {id, name}, createdAt, status, products: [{productId, quantity}], completedAt?}`
     *   **`stock`**: `{id, productId, quantity, warehouse}`
     *   **`users`**: `{id, name, email, password, role}`
+    *   **`sales`**: `{id, date, items: [{productId, productName, quantity, price, total}], totalRevenue}`
 
 `json-server` automatically creates RESTful endpoints for each of these keys. For example, a `GET` request to `http://localhost:3001/products` will return all products.
 

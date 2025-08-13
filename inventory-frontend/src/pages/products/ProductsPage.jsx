@@ -8,6 +8,7 @@ import SearchBar from '../../components/ui/SearchBar';
 import AppDialog from '../../components/ui/AppDialog';
 import ConfirmationDialog from '../../components/ui/ConfirmationDialog';
 import AddEditProductForm from './AddEditProductForm';
+import QrCodeScanner from '../../components/ui/QrCodeScanner';
 
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
@@ -17,6 +18,7 @@ import Alert from '@mui/material/Alert';
 import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 
 const ProductsPage = () => {
   const queryClient = useQueryClient();
@@ -27,6 +29,7 @@ const ProductsPage = () => {
   const [productToEdit, setProductToEdit] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
 
   const { data: products = [], isLoading, isError, error } = useQuery({
     queryKey: ['products'],
@@ -48,9 +51,20 @@ const ProductsPage = () => {
     if (!Array.isArray(products)) return [];
     return products.filter((product) =>
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchQuery.toLowerCase())
+      product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (product.qrCode && product.qrCode.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [products, searchQuery]);
+
+  const handleScanSuccess = (decodedText, decodedResult) => {
+    setSearchQuery(decodedText);
+    setIsScannerOpen(false);
+    showNotification(`Scanned QR Code: ${decodedText}`, 'success');
+  };
+
+  const handleScanFailure = (error) => {
+    // console.error(`QR Code scan error = ${error}`);
+  };
 
   const handleAddClick = () => {
     setProductToEdit(null);
@@ -108,7 +122,14 @@ const ProductsPage = () => {
     <div>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4">Products</Typography>
-        <Button variant="contained" onClick={handleAddClick}>Add Product</Button>
+        <Box>
+          <Button variant="contained" onClick={() => setIsScannerOpen(true)} startIcon={<QrCodeScannerIcon />}>
+            Scan Product
+          </Button>
+          <Button variant="contained" onClick={handleAddClick} sx={{ ml: 2 }}>
+            Add Product
+          </Button>
+        </Box>
       </Box>
 
       <Box sx={{ mb: 2 }}>
@@ -123,6 +144,18 @@ const ProductsPage = () => {
         title={productToEdit ? 'Edit Product' : 'Add New Product'}
       >
         <AddEditProductForm onClose={handleCloseForm} product={productToEdit} />
+      </AppDialog>
+
+      <AppDialog
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        title="Scan QR Code"
+      >
+        <QrCodeScanner
+          onScanSuccess={handleScanSuccess}
+          onScanFailure={handleScanFailure}
+          onClose={() => setIsScannerOpen(false)}
+        />
       </AppDialog>
 
       <ConfirmationDialog

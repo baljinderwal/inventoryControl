@@ -19,6 +19,7 @@ const AddEditProductForm = ({ onClose, product }) => {
     price: '',
     costPrice: '',
     stock: '',
+    qrCode: '',
   });
 
   const isEditMode = Boolean(product);
@@ -32,6 +33,7 @@ const AddEditProductForm = ({ onClose, product }) => {
         price: product.price || '',
         costPrice: product.costPrice || '',
         stock: product.stock || '',
+        qrCode: product.qrCode || '',
       });
     }
   }, [product]);
@@ -74,6 +76,7 @@ const AddEditProductForm = ({ onClose, product }) => {
       <TextField margin="dense" id="price" name="price" label="Price" type="number" fullWidth variant="standard" value={formData.price} onChange={handleChange} required />
       <TextField margin="dense" id="costPrice" name="costPrice" label="Cost Price" type="number" fullWidth variant="standard" value={formData.costPrice} onChange={handleChange} required />
       <TextField margin="dense" id="stock" name="stock" label="Stock" type="number" fullWidth variant="standard" value={formData.stock} onChange={handleChange} required />
+      <TextField margin="dense" id="qrCode" name="qrCode" label="QR Code" type="text" fullWidth variant="standard" value={formData.qrCode} onChange={handleChange} />
 
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>

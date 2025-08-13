@@ -1,20 +1,31 @@
 {
   "products": [
-    { "id": 1, "name": "Wireless Mouse", "sku": "WM-001", "category": "Electronics", "price": 25.99, "costPrice": 15.50, "stock": 150, "qrCode": "WM-001" },
-    { "id": 2, "name": "Mechanical Keyboard", "sku": "MK-001", "category": "Electronics", "price": 120.00, "costPrice": 80.00, "stock": 75, "qrCode": "MK-001" },
-    { "id": 3, "name": "USB-C Hub", "sku": "UCH-001", "category": "Accessories", "price": 45.50, "costPrice": 30.00, "stock": 120, "qrCode": "UCH-001" },
-    { "id": 4, "name": "14\" Laptop Sleeve", "sku": "LS-014", "category": "Accessories", "price": 18.99, "costPrice": 10.00, "stock": 200, "qrCode": "LS-014" },
-    { "id": 5, "name": "27\" 4K Monitor", "sku": "M-4K-027", "category": "Monitors", "price": 499.99, "costPrice": 350.00, "stock": 50, "qrCode": "M-4K-027" },
-    { "id": 6, "name": "Ergonomic Chair", "sku": "EC-001", "category": "Furniture", "price": 299.00, "costPrice": 200.00, "stock": 30, "qrCode": "EC-001" },
-    { "id": 7, "name": "Standing Desk", "sku": "SD-001", "category": "Furniture", "price": 350.00, "costPrice": 250.00, "stock": 40, "qrCode": "SD-001" },
-    { "id": 8, "name": "Webcam 1080p", "sku": "WC-1080", "category": "Electronics", "price": 65.00, "costPrice": 40.00, "stock": 90, "qrCode": "WC-1080" }
+    { "id": 1, "name": "Wireless Mouse", "sku": "WM-001", "category": "Electronics", "price": 25.99, "costPrice": 15.50, "stock": 150 },
+    { "id": 2, "name": "Mechanical Keyboard", "sku": "MK-001", "category": "Electronics", "price": 120.00, "costPrice": 80.00, "stock": 75 },
+    { "id": 3, "name": "USB-C Hub", "sku": "UCH-001", "category": "Accessories", "price": 45.50, "costPrice": 30.00, "stock": 120 },
+    { "id": 4, "name": "14\" Laptop Sleeve", "sku": "LS-014", "category": "Accessories", "price": 18.99, "costPrice": 10.00, "stock": 200 },
+    { "id": 5, "name": "27\" 4K Monitor", "sku": "M-4K-027", "category": "Monitors", "price": 499.99, "costPrice": 350.00, "stock": 50 },
+    { "id": 6, "name": "Ergonomic Chair", "sku": "EC-001", "category": "Furniture", "price": 299.00, "costPrice": 200.00, "stock": 30 },
+    { "id": 7, "name": "Standing Desk", "sku": "SD-001", "category": "Furniture", "price": 350.00, "costPrice": 250.00, "stock": 40 },
+    { "id": 8, "name": "Webcam 1080p", "sku": "WC-1080", "category": "Electronics", "price": 65.00, "costPrice": 40.00, "stock": 90 }
   ],
   "suppliers": [
     { "id": 1, "name": "ElectroSupply", "contact": "John Doe", "email": "john.doe@electrosupply.com", "products": [1, 2, 8] },
     { "id": 2, "name": "OfficeWorks", "contact": "Jane Smith", "email": "jane.smith@officeworks.com", "products": [3, 4, 6, 7] },
     { "id": 3, "name": "MonitorCorp", "contact": "Sam Wilson", "email": "sam.wilson@monitorcorp.com", "products": [5] }
   ],
-  "orders": [],
+  "orders": [
+    { "id": 1, "productId": 1, "quantity": 5, "orderDate": "2024-07-01T10:00:00Z" },
+    { "id": 2, "productId": 2, "quantity": 2, "orderDate": "2024-07-01T11:30:00Z" },
+    { "id": 3, "productId": 5, "quantity": 1, "orderDate": "2024-07-02T14:00:00Z" },
+    { "id": 4, "productId": 1, "quantity": 3, "orderDate": "2024-07-03T09:00:00Z" },
+    { "id": 5, "productId": 8, "quantity": 10, "orderDate": "2024-07-04T16:45:00Z" },
+    { "id": 6, "productId": 4, "quantity": 15, "orderDate": "2024-06-15T08:20:00Z" },
+    { "id": 7, "productId": 6, "quantity": 2, "orderDate": "2024-06-20T13:00:00Z" },
+    { "id": 8, "productId": 7, "quantity": 1, "orderDate": "2024-05-10T18:00:00Z" },
+    { "id": 9, "productId": 3, "quantity": 8, "orderDate": "2024-05-25T12:10:00Z" },
+    { "id": 10, "productId": 2, "quantity": 3, "orderDate": "2024-07-05T10:30:00Z" }
+  ],
   "stock": [
     { "id": 1, "productId": 1, "quantity": 150, "warehouse": "A" },
     { "id": 2, "productId": 2, "quantity": 75, "warehouse": "A" },

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getSuppliers, deleteSupplier } from '../../services/supplierService';
+import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
 import { Parser } from '@json2csv/plainjs';
 
@@ -23,6 +23,7 @@ import Stack from '@mui/material/Stack';
 const SuppliersPage = () => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
+  const { mode, services } = useApi();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [supplierToEdit, setSupplierToEdit] = useState(null);
@@ -30,12 +31,12 @@ const SuppliersPage = () => {
   const [supplierToDelete, setSupplierToDelete] = useState(null);
 
   const { data: suppliers = [], isLoading, isError, error } = useQuery({
-    queryKey: ['suppliers'],
-    queryFn: getSuppliers,
+    queryKey: ['suppliers', mode],
+    queryFn: services.suppliers.getSuppliers,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: deleteSupplier,
+    mutationFn: services.suppliers.deleteSupplier,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       showNotification('Supplier deleted successfully', 'success');
@@ -101,13 +102,8 @@ const SuppliersPage = () => {
     )
   }));
 
-  if (isLoading) {
-    return <CircularProgress />;
-  }
-
-  if (isError) {
-    return <Alert severity="error">Error fetching suppliers: {error.message}</Alert>;
-  }
+  if (isLoading) return <CircularProgress />;
+  if (isError) return <Alert severity="error">Error fetching suppliers: {error.message}</Alert>;
 
   return (
     <div>

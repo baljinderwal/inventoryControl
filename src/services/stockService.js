@@ -1,47 +1,96 @@
-// import api from './api';
+import api from './api';
 
-/**
- * Fetches both products and their detailed stock information from the static db.json,
- * then merges them.
- * This provides a comprehensive view of each product's stock, including total quantity
- * and batch details.
- */
-export const getStockLevels = async () => {
-  // const [productsResponse, stockResponse] = await Promise.all([
-  //   api.get('/products'),
-  //   api.get('/stock')
-  // ]);
-  // const products = productsResponse.data;
-  // const stockData = stockResponse.data;
+const local = {
+  getStockLevels: async () => {
+    console.log('Fetching stock levels from local db.json');
+    const response = await fetch('/db.json');
+    const data = await response.json();
+    const products = data.products || [];
+    const stockData = data.stock || [];
 
-  const response = await fetch('/db.json');
-  const data = await response.json();
-  const products = data.products || [];
-  const stockData = data.stock || [];
+    const stockMap = new Map(stockData.map(item => [item.productId, item]));
 
-
-  // Create a map of productId to stock info for efficient lookup
-  const stockMap = new Map(stockData.map(item => [item.productId, item]));
-
-  // Merge the product data with its corresponding stock information
-  return products.map(product => {
-    const stockInfo = stockMap.get(product.id);
-    const totalStock = stockInfo ? stockInfo.quantity : 0;
-    const batches = stockInfo ? stockInfo.batches : [];
-
-    return {
-      ...product,
-      stock: totalStock, // Denormalized total stock for display
-      batches,         // Detailed batch information
-      stockId: stockInfo ? stockInfo.id : null,
-    };
-  });
+    return products.map(product => {
+      const stockInfo = stockMap.get(product.id);
+      return {
+        ...product,
+        stock: stockInfo ? stockInfo.quantity : 0,
+        batches: stockInfo ? stockInfo.batches : [],
+        stockId: stockInfo ? stockInfo.id : null,
+      };
+    });
+  },
+  adjustStockLevel: async (adjustmentData) => {
+    console.warn('Read-only mode: adjustStockLevel disabled.', adjustmentData);
+    return Promise.resolve();
+  },
 };
 
-/**
- * Adjusts the stock level for a product. This is a read-only operation.
- */
-export const adjustStockLevel = async (adjustmentData) => {
-  console.log('Read-only mode: adjustStockLevel disabled.', adjustmentData);
-  return Promise.resolve();
+const remote = {
+  getStockLevels: async () => {
+    console.log('Fetching stock levels from API');
+    const [productsResponse, stockResponse] = await Promise.all([
+      api.get('/products'),
+      api.get('/stock')
+    ]);
+    const products = productsResponse.data;
+    const stockData = stockResponse.data;
+
+    const stockMap = new Map(stockData.map(item => [item.productId, item]));
+
+    return products.map(product => {
+      const stockInfo = stockMap.get(product.id);
+      return {
+        ...product,
+        stock: stockInfo ? stockInfo.quantity : 0,
+        batches: stockInfo ? stockInfo.batches : [],
+        stockId: stockInfo ? stockInfo.id : null,
+      };
+    });
+  },
+  adjustStockLevel: async ({ productId, quantity, batchNumber, expiryDate }) => {
+    console.log('Adjusting stock level via API', { productId, quantity });
+    const stockRes = await api.get(`/stock?productId=${productId}`);
+    let stockEntry = stockRes.data[0];
+
+    if (!stockEntry) {
+      if (quantity > 0) {
+        const newStockEntry = {
+          productId,
+          quantity,
+          warehouse: 'A',
+          batches: [{ batchNumber, expiryDate, quantity }]
+        };
+        return await api.post('/stock', newStockEntry);
+      } else {
+        throw new Error("Cannot deduct stock from a product that has no stock entry.");
+      }
+    }
+
+    if (quantity > 0) {
+      if (!batchNumber || !expiryDate) throw new Error("Batch number and expiry date are required for stock additions.");
+      const existingBatchIndex = stockEntry.batches.findIndex(b => b.batchNumber === batchNumber);
+      if (existingBatchIndex > -1) {
+        stockEntry.batches[existingBatchIndex].quantity += quantity;
+      } else {
+        stockEntry.batches.push({ batchNumber, expiryDate, quantity });
+      }
+    } else {
+      let quantityToDeduct = Math.abs(quantity);
+      stockEntry.batches.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+      for (const batch of stockEntry.batches) {
+        if (quantityToDeduct === 0) break;
+        const deduction = Math.min(quantityToDeduct, batch.quantity);
+        batch.quantity -= deduction;
+        quantityToDeduct -= deduction;
+      }
+      if (quantityToDeduct > 0) throw new Error("Not enough stock to fulfill the request.");
+      stockEntry.batches = stockEntry.batches.filter(b => b.quantity > 0);
+    }
+
+    stockEntry.quantity = stockEntry.batches.reduce((sum, b) => sum + b.quantity, 0);
+    return await api.put(`/stock/${stockEntry.id}`, stockEntry);
+  },
 };
+
+export const stockService = { local, api: remote };

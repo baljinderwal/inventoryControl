@@ -9,6 +9,8 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
+import ApiModeToggle from '../ui/ApiModeToggle';
+import Box from '@mui/material/Box';
 
 const drawerWidth = 240;
 
@@ -51,7 +53,8 @@ const Topbar = () => {
         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
           Inventory Control
         </Typography>
-        <div>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <ApiModeToggle />
           <IconButton
             size="large"
             aria-label="account of current user"

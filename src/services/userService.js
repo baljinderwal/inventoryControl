@@ -1,27 +1,42 @@
 import api from './api';
 
-export const getUsers = async () => {
-  // const response = await api.get('/users');
-  // return response.data;
-
-  // For the sake of this example, we will fetch users role from a public db.json file
-  // This is useful for testing without a backend server
-  const response = await fetch('/db.json');
-  const data = await response.json();
-  return data.users || [];
+const local = {
+  getUsers: async () => {
+    const response = await fetch('/db.json');
+    const data = await response.json();
+    return data.users || [];
+  },
+  addUser: async (user) => {
+    console.warn('Read-only mode: addUser disabled.', user);
+    return Promise.resolve(user);
+  },
+  updateUser: async (id, user) => {
+    console.warn('Read-only mode: updateUser disabled.', id, user);
+    return Promise.resolve(user);
+  },
+  deleteUser: async (id) => {
+    console.warn('Read-only mode: deleteUser disabled.', id);
+    return Promise.resolve();
+  },
 };
 
-export const addUser = async (user) => {
-  const response = await api.post('/users', user);
-  return response.data;
+const remote = {
+  getUsers: async () => {
+    const response = await api.get('/users');
+    return response.data;
+  },
+  addUser: async (user) => {
+    const response = await api.post('/users', user);
+    return response.data;
+  },
+  updateUser: async (id, user) => {
+    const response = await api.patch(`/users/${id}`, user);
+    return response.data;
+  },
+  deleteUser: async (id) => {
+    const response = await api.delete(`/users/${id}`);
+    return response.data;
+  },
 };
 
-export const updateUser = async (id, user) => {
-  const response = await api.patch(`/users/${id}`, user);
-  return response.data;
-};
-
-export const deleteUser = async (id) => {
-  const response = await api.delete(`/users/${id}`);
-  return response.data;
-};
+export const userService = { local, api: remote };

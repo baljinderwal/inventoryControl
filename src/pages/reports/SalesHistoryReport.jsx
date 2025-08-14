@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getSalesHistory } from '../../services/reportService';
+import { useApi } from '../../utils/ApiModeContext';
 import { Parser } from '@json2csv/plainjs';
 
 import Paper from '@mui/material/Paper';
@@ -25,10 +25,11 @@ import {
 const SalesHistoryReport = () => {
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const { mode, services } = useApi();
 
   const { data: salesHistory, isLoading, isError, error } = useQuery({
-    queryKey: ['salesHistory'],
-    queryFn: getSalesHistory,
+    queryKey: ['salesHistory', mode],
+    queryFn: services.reports.getSalesHistory,
   });
 
   const monthlySales = useMemo(() => {
@@ -47,18 +48,13 @@ const SalesHistoryReport = () => {
         month,
         totalSales: salesByMonth[month],
       }))
-      .reverse(); // To show most recent months first
+      .reverse();
   }, [salesHistory]);
 
   const handleExport = () => {
     if (!salesHistory) return;
     const fields = ['orderId', 'completedAt', 'productName', 'quantity', 'price', 'totalSale'];
-    const opts = {
-      fields,
-      formatters: {
-        completedAt: (value) => value.toISOString(),
-      },
-    };
+    const opts = { fields, formatters: { completedAt: (value) => value.toISOString() } };
     const parser = new Parser(opts);
     const csv = parser.parse(salesHistory);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -70,10 +66,7 @@ const SalesHistoryReport = () => {
     document.body.removeChild(link);
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
+  const handleChangePage = (event, newPage) => setPage(newPage);
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
@@ -111,9 +104,7 @@ const SalesHistoryReport = () => {
       </Grid>
       <Grid item xs={12}>
         <Paper sx={{ p: 2 }}>
-          <Typography variant="h5" gutterBottom>
-            Detailed Sales History
-          </Typography>
+          <Typography variant="h5" gutterBottom>Detailed Sales History</Typography>
           <TableContainer>
             <Table>
               <TableHead>

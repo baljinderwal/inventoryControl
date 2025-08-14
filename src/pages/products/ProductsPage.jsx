@@ -1,11 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  deleteProduct
-} from '../../services/productService';
-import {
-  getStockLevels
-} from '../../services/stockService';
+import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
 import { Parser } from '@json2csv/plainjs';
 
@@ -29,6 +24,7 @@ import Stack from '@mui/material/Stack';
 const ProductsPage = () => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
+  const { mode, services } = useApi();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -37,14 +33,15 @@ const ProductsPage = () => {
   const [productToDelete, setProductToDelete] = useState(null);
 
   const { data: products = [], isLoading, isError, error } = useQuery({
-    queryKey: ['stock'], // Use the same key as StockPage to leverage caching
-    queryFn: getStockLevels,
+    queryKey: ['stock', mode], // Refetch when mode changes
+    queryFn: services.stock.getStockLevels,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: deleteProduct,
+    mutationFn: services.products.deleteProduct,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['stock'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] }); // Just in case
       showNotification('Product deleted successfully', 'success');
     },
     onError: (err) => {

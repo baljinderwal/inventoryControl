@@ -1,40 +1,79 @@
-// import api from './api';
+import api from './api';
 
-export const getProducts = async () => {
-  // const response = await api.get('/products');
-  // return response.data;
-
-  // For the sake of this example, we will fetch products from a public db.json file
-  // This is useful for testing without a backend server
-  const response = await fetch('/db.json');
-  const data = await response.json();
-  return data.products || [];
+const local = {
+  getProducts: async () => {
+    console.log('Fetching products from local db.json');
+    const response = await fetch('/db.json');
+    const data = await response.json();
+    return data.products || [];
+  },
+  getProduct: async (id) => {
+    console.log(`Fetching product ${id} from local db.json`);
+    const response = await fetch('/db.json');
+    const data = await response.json();
+    const products = data.products || [];
+    return products.find(p => p.id === id);
+  },
+  addProduct: async (productData) => {
+    console.warn('Read-only mode: addProduct disabled.', productData);
+    return Promise.resolve(productData);
+  },
+  updateProduct: async (id, product) => {
+    console.warn('Read-only mode: updateProduct disabled.', id, product);
+    return Promise.resolve(product);
+  },
+  deleteProduct: async (id) => {
+    console.warn('Read-only mode: deleteProduct disabled.', id);
+    return Promise.resolve();
+  },
 };
 
-export const getProduct = async (id) => {
-  // const response = await api.get(`/products/${id}`);
-  // return response.data;
+const remote = {
+  getProducts: async () => {
+    console.log('Fetching products from API');
+    const response = await api.get('/products');
+    return response.data;
+  },
+  getProduct: async (id) => {
+    console.log(`Fetching product ${id} from API`);
+    const response = await api.get(`/products/${id}`);
+    return response.data;
+  },
+  addProduct: async (productData) => {
+    console.log('Adding product via API', productData);
+    // Separate product details from stock details
+    const { stock, batchNumber, expiryDate, ...productDetails } = productData;
 
-  const response = await fetch('/db.json');
-  const data = await response.json();
-  const products = data.products || [];
-  return products.find(p => p.id === id);
+    // 1. Create the product
+    const productResponse = await api.post('/products', productDetails);
+    const newProduct = productResponse.data;
+
+    // 2. If initial stock is provided, create the stock entry
+    if (stock > 0 && expiryDate) { // Ensure expiry date is present
+      const newStockEntry = {
+        productId: newProduct.id,
+        quantity: stock,
+        warehouse: 'A', // Default warehouse
+        batches: [{
+          batchNumber: batchNumber || `B${newProduct.id}-INIT`,
+          expiryDate: expiryDate,
+          quantity: stock
+        }]
+      };
+      await api.post('/stock', newStockEntry);
+    }
+    return newProduct;
+  },
+  updateProduct: async (id, product) => {
+    console.log(`Updating product ${id} via API`, product);
+    const response = await api.patch(`/products/${id}`, product);
+    return response.data;
+  },
+  deleteProduct: async (id) => {
+    console.log(`Deleting product ${id} via API`);
+    const response = await api.delete(`/products/${id}`);
+    return response.data;
+  },
 };
 
-export const addProduct = async (productData) => {
-  // This is a read-only operation.
-  console.log('Read-only mode: addProduct disabled.', productData);
-  return Promise.resolve(productData);
-};
-
-export const updateProduct = async (id, product) => {
-  // This is a read-only operation.
-  console.log('Read-only mode: updateProduct disabled.', id, product);
-  return Promise.resolve(product);
-};
-
-export const deleteProduct = async (id) => {
-  // This is a read-only operation.
-  console.log('Read-only mode: deleteProduct disabled.', id);
-  return Promise.resolve();
-};
+export const productService = { local, api: remote };

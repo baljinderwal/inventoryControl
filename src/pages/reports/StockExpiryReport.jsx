@@ -15,7 +15,7 @@ const StockExpiryReport = () => {
 
   const reportData = stockLevels
     .flatMap(product =>
-      product.batches.map(batch => ({
+      (product.batches || []).map(batch => ({
         ...batch,
         productName: product.name,
         productSku: product.sku,

@@ -187,22 +187,19 @@ const LoginPage = () => {
               border: '1px solid rgba(255, 255, 255, 0.2)',
             }}
           >
-            <motion.div
-              whileHover={shouldReduceMotion ? {} : { scale: 1.1, rotate: -5 }}
-              transition={{ type: 'spring', stiffness: 300 }}
+            <Typography
+              component="h1"
+              variant="h4"
+              sx={{
+                fontWeight: 'bold',
+                mb: 2,
+                letterSpacing: '0.1rem',
+                color: '#434343', // Fallback color
+              }}
             >
-              <Lock
-                sx={{
-                  fontSize: 40,
-                  mb: 2,
-                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                  color: 'white',
-                  borderRadius: '50%',
-                  p: 1,
-                }}
-              />
-            </motion.div>
-            <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
+              MyBrand
+            </Typography>
+            <Typography component="h2" variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
               Welcome Back
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>

@@ -6,14 +6,23 @@ import api from './api';
  * and batch details.
  */
 export const getStockLevels = async () => {
-  // Fetch both products and stock data in parallel
-  const [productsResponse, stockResponse] = await Promise.all([
-    api.get('/products'),
-    api.get('/stock')
-  ]);
+  // In a real application, you might have a dedicated endpoint for this report.
+  // For this example, we fetch both products and stocks and combine them on the client-side.
 
-  const products = productsResponse.data;
-  const stockData = stockResponse.data;
+  // Fetch both products and stock data in parallel
+  // const [productsResponse, stockResponse] = await Promise.all([
+  //   api.get('/products'),
+  //   api.get('/stock')
+  // ]);
+  // return { products: productsResponse.data, orders: ordersResponse.data };
+
+  // For the sake of this example, we will fetch the whole db.json file
+  // and extract the products and orders from it.
+  const response = await fetch('/db.json');
+  const data = await response.json();
+
+  const products = data.products || [];
+  const stockData = data.stock || [];
 
   // Create a map of productId to stock info for efficient lookup
   const stockMap = new Map(stockData.map(item => [item.productId, item]));

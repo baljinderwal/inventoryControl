@@ -15,6 +15,11 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
     *   View and manage your current stock levels.
     *   Track products by batch number and expiry date.
     *   Deduct stock using FEFO (First-Expiring, First-Out) logic.
+*   **🌐 Multi-Location Inventory Management:**
+    *   **Manage Locations:** Admins and Managers can add, edit, and delete inventory locations via the "Locations" settings page.
+    *   **Location-Specific Stock:** View stock levels for each product broken down by location on the Stock page.
+    *   **Stock Transfers:** Easily transfer stock between locations using a dedicated transfer form on the Stock page.
+    *   **Filtered Reports:** Reports like Inventory Aging and Stock Value can be filtered by location to provide more granular insights.
 *   **📝 Advanced Reporting Suite:**
     *   **Stock by Expiry Date:** A new report to identify items nearing their expiry date.
     *   **Sales History:** Track sales trends over time.
@@ -24,8 +29,8 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
 *   **📄 CSV Data Export:** Export data from main pages (Products, Orders, Suppliers) and all reports to CSV format for offline analysis.
 *   **👤 User Administration:** Manage users and their roles within the system.
 *   **🔐 Role-Based Access Control (RBAC):**
-    *   **Admin:** Full access to all features, including user management.
-    *   **Manager:** Access to all features except user management.
+    *   **Admin:** Full access to all features, including user management and location settings.
+    *   **Manager:** Access to all features except user management, including location settings.
     *   **Staff:** Access to core features like dashboard, products, stock, and orders.
 *   **🚀 Fast & Modern Tech:** Built with Vite for a lightning-fast development experience and React for a reactive UI.
 *   **💅 Sleek UI:** A beautiful and intuitive user interface built with Material-UI.
@@ -67,6 +72,7 @@ The project follows a feature-based structure, which makes it scalable and easy 
 │   │   ├── orders/
 │   │   ├── products/
 │   │   ├── reports/
+│   │   ├── settings/
 │   │   ├── stock/
 │   │   ├── suppliers/
 │   │   └── users/
@@ -186,8 +192,10 @@ The application features a login system with three predefined user roles. Use th
     *   `/suppliers`
     *   `/reports`
     *   `/reports/profitability`
+    *   `/settings/locations`
 *   **Admin** can access all pages, including:
     *   `/users`
+    *   `/settings/locations`
 
 ## 🤖 Mock API and Data Model
 
@@ -197,7 +205,8 @@ The application uses `json-server` to simulate a backend API. The data is stored
     *   **`products`**: `{id, name, sku, category, price, costPrice, lowStockThreshold}`
     *   **`suppliers`**: `{id, name, contact, email, products: [productId, ... ]}`
     *   **`orders`**: `{id, supplier: {id, name}, createdAt, status, products: [{productId, quantity}], completedAt?}`
-    *   **`stock`**: `{id, productId, quantity, warehouse, batches: [{batchNumber, expiryDate, quantity}]}`
+    *   **`stock`**: `{id, productId, quantity, locationId, batches: [{batchNumber, expiryDate, quantity}]}`
+    *   **`locations`**: `{id, name, address}`
     *   **`users`**: `{id, name, email, password, role}`
     *   **`sales`**: `{id, date, items: [{productId, productName, quantity, price, total}], totalRevenue}`
 

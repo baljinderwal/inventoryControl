@@ -11,6 +11,7 @@ import SalesHistoryReport from './pages/reports/SalesHistoryReport';
 import InventoryAgingReport from './pages/reports/InventoryAgingReport';
 import SupplierPerformanceReport from './pages/reports/SupplierPerformanceReport';
 import StockValueReport from './pages/reports/StockValueReport';
+import StockExpiryReport from './pages/reports/StockExpiryReport';
 import PurchaseOrdersPage from './pages/orders/PurchaseOrdersPage';
 import UsersPage from './pages/users/UsersPage';
 import Layout from './components/layout/Layout';
@@ -36,6 +37,7 @@ function App() {
             <Route path="inventory-aging" element={<InventoryAgingReport />} />
             <Route path="supplier-performance" element={<SupplierPerformanceReport />} />
             <Route path="stock-value" element={<StockValueReport />} />
+            <Route path="stock-expiry" element={<StockExpiryReport />} />
           </Route>
         </Route>
         <Route element={<PrivateRoute roles={['Admin']} />}>

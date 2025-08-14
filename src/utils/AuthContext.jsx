@@ -1,5 +1,4 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
 
 const AuthContext = createContext();
 
@@ -13,16 +12,13 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = async (email, password) => {
+  const login = async () => {
     try {
-      // const response = await axios.get('http://localhost:3001/users', {
-      //   params: { email, password },
-      // });
-
+      // In a real app, you'd use email and password to authenticate.
+      // Here, we're simulating a successful login for any of the predefined users.
+      // We'll just log in as the admin user for this example.
       const response = { data: [{ "id": 1, "name": "Admin User", "email": "admin@example.com", "password": "password", "role": "Admin" }] };
 
-      // Simulating a successful login response
-      // In a real application, you would replace the above line with the actual API call
       if (response.data.length > 0) {
         const loggedInUser = response.data[0];
         localStorage.setItem('user', JSON.stringify(loggedInUser));

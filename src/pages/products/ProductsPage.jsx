@@ -1,6 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getProducts, deleteProduct } from '../../services/productService';
+import {
+  deleteProduct
+} from '../../services/productService';
+import {
+  getStockLevels
+} from '../../services/stockService';
 import { useNotification } from '../../utils/NotificationContext';
 import { Parser } from '@json2csv/plainjs';
 
@@ -32,8 +37,8 @@ const ProductsPage = () => {
   const [productToDelete, setProductToDelete] = useState(null);
 
   const { data: products = [], isLoading, isError, error } = useQuery({
-    queryKey: ['products'],
-    queryFn: getProducts,
+    queryKey: ['stock'], // Use the same key as StockPage to leverage caching
+    queryFn: getStockLevels,
   });
 
   const deleteMutation = useMutation({

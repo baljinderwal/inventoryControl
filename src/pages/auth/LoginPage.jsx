@@ -20,7 +20,7 @@ import {
   Google,
   VpnKey,
 } from '@mui/icons-material';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, useReducedMotion } from 'framer-motion';
 
 const LoginPage = () => {
   const [form, setForm] = useState({
@@ -112,7 +112,7 @@ const LoginPage = () => {
       setLoading(true);
       await login(form.email.value, form.password.value);
       navigate(from, { replace: true });
-    } catch (err) {
+    } catch {
       setSubmitError('Invalid credentials. Please try again.');
     } finally {
       setLoading(false);

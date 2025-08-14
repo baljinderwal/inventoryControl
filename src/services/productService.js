@@ -16,9 +16,30 @@ export const getProduct = async (id) => {
   return response.data;
 };
 
-export const addProduct = async (product) => {
-  const response = await api.post('/products', product);
-  return response.data;
+export const addProduct = async (productData) => {
+  // Separate product details from stock details
+  const { stock, batchNumber, expiryDate, ...productDetails } = productData;
+
+  // 1. Create the product
+  const productResponse = await api.post('/products', productDetails);
+  const newProduct = productResponse.data;
+
+  // 2. If initial stock is provided, create the stock entry
+  if (stock > 0) {
+    const newStockEntry = {
+      productId: newProduct.id,
+      quantity: stock,
+      warehouse: 'A', // Default warehouse
+      batches: [{
+        batchNumber: batchNumber || `B${newProduct.id}-INIT`, // Default batch number
+        expiryDate: expiryDate,
+        quantity: stock
+      }]
+    };
+    await api.post('/stock', newStockEntry);
+  }
+
+  return newProduct;
 };
 
 export const updateProduct = async (id, product) => {

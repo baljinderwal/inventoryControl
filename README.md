@@ -20,6 +20,11 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
     *   **Location-Specific Stock:** View stock levels for each product broken down by location on the Stock page.
     *   **Stock Transfers:** Easily transfer stock between locations using a dedicated transfer form on the Stock page.
     *   **Filtered Reports:** Reports like Inventory Aging and Stock Value can be filtered by location to provide more granular insights.
+*   **⚡ Barcode Scanning for Efficiency:**
+    *   **Accelerated Workflows:** Use a device's camera to scan product barcodes, significantly speeding up data entry.
+    *   **Add to POs:** Quickly add items to a Purchase Order by scanning their barcodes.
+    *   **Adjust Stock:** Streamline stock adjustments by scanning a product to bring up its adjustment form instantly.
+    *   **Product Management:** Add and edit barcodes directly on the product management page.
 *   **📝 Advanced Reporting Suite:**
     *   **Stock by Expiry Date:** A new report to identify items nearing their expiry date.
     *   **Sales History:** Track sales trends over time.
@@ -51,6 +56,7 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
 *   **React Router**: For declarative routing and navigation within the application.
 *   **axios**: A promise-based HTTP client for making requests to the mock API.
 *   **Recharts**: A composable charting library built on React components.
+*   **`react-zxing`**: A React hook for barcode scanning using the ZXing library.
 *   **JSON Server**: To create a fake REST API for prototyping and development.
 
 ## 📦 Project Structure
@@ -202,7 +208,7 @@ The application features a login system with three predefined user roles. Use th
 The application uses `json-server` to simulate a backend API. The data is stored in `db.json`.
 
 *   **`db.json`**: This file acts as a simple database. It contains several top-level keys (`products`, `suppliers`, `orders`, `stock`, `users`), each being an array of objects.
-    *   **`products`**: `{id, name, sku, category, price, costPrice, lowStockThreshold}`
+    *   **`products`**: `{id, name, sku, barcode, category, price, costPrice, lowStockThreshold}`
     *   **`suppliers`**: `{id, name, contact, email, products: [productId, ... ]}`
     *   **`orders`**: `{id, supplier: {id, name}, createdAt, status, products: [{productId, quantity}], completedAt?}`
     *   **`stock`**: `{id, productId, quantity, locationId, batches: [{batchNumber, expiryDate, quantity}]}`

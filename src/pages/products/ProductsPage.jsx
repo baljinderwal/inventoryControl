@@ -53,13 +53,14 @@ const ProductsPage = () => {
     if (!Array.isArray(products)) return [];
     return products.filter((product) =>
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchQuery.toLowerCase())
+      product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (product.barcode && product.barcode.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [products, searchQuery]);
 
   const handleExport = () => {
     if (!filteredProducts) return;
-    const fields = ['id', 'name', 'sku', 'category', 'price', 'costPrice', 'stock', 'lowStockThreshold', 'createdAt'];
+    const fields = ['id', 'name', 'sku', 'barcode', 'category', 'price', 'costPrice', 'stock', 'lowStockThreshold', 'createdAt'];
     const parser = new Parser({ fields });
     const csv = parser.parse(filteredProducts);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -99,11 +100,12 @@ const ProductsPage = () => {
     setProductToEdit(null);
   }
 
-  const tableHeaders = ['Name', 'SKU', 'Category', 'Price', 'Stock', 'Actions'];
+  const tableHeaders = ['Name', 'SKU', 'Barcode', 'Category', 'Price', 'Stock', 'Actions'];
 
   const tableData = filteredProducts.map(p => ({
     name: p.name,
     sku: p.sku,
+    barcode: p.barcode,
     category: p.category,
     price: `$${p.price.toFixed(2)}`,
     stock: p.stock,

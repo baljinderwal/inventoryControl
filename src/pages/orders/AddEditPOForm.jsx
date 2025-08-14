@@ -19,8 +19,14 @@ import {
   ListItemText,
   Divider,
   Badge,
+  Paper,
 } from '@mui/material';
-import { Add, Delete, Lightbulb } from '@mui/icons-material';
+import { Add, Delete, Lightbulb, QrCodeScanner } from '@mui/icons-material';
+import BarcodeScanner from '../../components/ui/BarcodeScanner';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+
 
 const AddEditPOForm = ({ open, onClose, po }) => {
   const isEditMode = Boolean(po);
@@ -31,6 +37,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   const [supplierId, setSupplierId] = useState('');
   const [productsList, setProductsList] = useState([{ productId: '', quantity: 1 }]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
 
   useEffect(() => {
     if (open) { // Reset state when dialog opens
@@ -97,6 +104,17 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   const handleRemoveProduct = (index) => {
     if (productsList.length > 1) {
       setProductsList(productsList.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleScan = (scannedBarcode) => {
+    setIsScannerOpen(false);
+    const product = products?.find(p => p.barcode === scannedBarcode);
+    if (product) {
+      handleAddFromSuggestion(product);
+      showNotification(`Scanned and added: ${product.name}`, 'success');
+    } else {
+      showNotification(`Product with barcode ${scannedBarcode} not found.`, 'error');
     }
   };
 
@@ -177,6 +195,16 @@ const AddEditPOForm = ({ open, onClose, po }) => {
           </Box>
         ))}
         <Button startIcon={<Add />} onClick={handleAddProduct}>Add Product</Button>
+        <Button startIcon={<QrCodeScanner />} onClick={() => setIsScannerOpen(true)} sx={{ ml: 1 }}>
+            Scan Product
+        </Button>
+
+        <Dialog open={isScannerOpen} onClose={() => setIsScannerOpen(false)}>
+            <DialogTitle>Scan Barcode</DialogTitle>
+            <DialogContent>
+            {isScannerOpen && <BarcodeScanner onScan={handleScan} />}
+            </DialogContent>
+        </Dialog>
 
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
           <Button onClick={onClose} color="inherit">Cancel</Button>

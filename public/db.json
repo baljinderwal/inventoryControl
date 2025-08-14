@@ -35,5 +35,13 @@
     { "id": 1, "name": "Admin User", "email": "admin@example.com", "password": "password", "role": "Admin" },
     { "id": 2, "name": "Manager User", "email": "manager@example.com", "password": "password", "role": "Manager" },
     { "id": 3, "name": "Staff User", "email": "staff@example.com", "password": "password", "role": "Staff" }
+  ],
+  "locations": [
+    { "id": 1, "name": "Main Warehouse", "address": "123 Industrial Park, Cityville" },
+    { "id": 2, "name": "Downtown Store", "address": "456 Main St, Cityville" },
+    { "id": 3, "name": "Eastside Depot", "address": "789 Commercial Ave, Eastville" }
+  ],
+  "sales": [
+    { "id": 1, "date": "2025-08-13T14:30:00Z", "items": [{ "productId": 1, "productName": "Wireless Mouse", "quantity": 2, "price": 25.99, "total": 51.98 }], "totalRevenue": 51.98 }
   ]
 }

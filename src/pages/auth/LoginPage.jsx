@@ -112,7 +112,7 @@ const LoginPage = () => {
       setLoading(true);
       await login(form.email.value, form.password.value);
       navigate(from, { replace: true });
-    } catch (err) {
+    } catch {
       setSubmitError('Invalid credentials. Please try again.');
     } finally {
       setLoading(false);

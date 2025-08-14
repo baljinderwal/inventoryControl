@@ -11,8 +11,12 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
 *   **📦 Product Management:** Full CRUD (Create, Read, Update, Delete) functionality for your products.
 *   **🏢 Supplier Tracking:** Manage your suppliers and the products they provide.
 *   **🚚 Order Processing:** Keep track of purchase orders and their statuses.
-*   **📈 Stock Control:** View and manage your current stock levels.
+*   **📈 Stock Control with Batch and Expiry Tracking:**
+    *   View and manage your current stock levels.
+    *   Track products by batch number and expiry date.
+    *   Deduct stock using FEFO (First-Expiring, First-Out) logic.
 *   **📝 Advanced Reporting Suite:**
+    *   **Stock by Expiry Date:** A new report to identify items nearing their expiry date.
     *   **Sales History:** Track sales trends over time.
     *   **Inventory Aging:** Identify slow-moving and obsolete stock.
     *   **Supplier Performance:** Evaluate supplier reliability and order history.
@@ -190,10 +194,10 @@ The application features a login system with three predefined user roles. Use th
 The application uses `json-server` to simulate a backend API. The data is stored in `db.json`.
 
 *   **`db.json`**: This file acts as a simple database. It contains several top-level keys (`products`, `suppliers`, `orders`, `stock`, `users`), each being an array of objects.
-    *   **`products`**: `{id, name, sku, category, price, costPrice, stock, lowStockThreshold}`
+    *   **`products`**: `{id, name, sku, category, price, costPrice, lowStockThreshold}`
     *   **`suppliers`**: `{id, name, contact, email, products: [productId, ... ]}`
     *   **`orders`**: `{id, supplier: {id, name}, createdAt, status, products: [{productId, quantity}], completedAt?}`
-    *   **`stock`**: `{id, productId, quantity, warehouse}`
+    *   **`stock`**: `{id, productId, quantity, warehouse, batches: [{batchNumber, expiryDate, quantity}]}`
     *   **`users`**: `{id, name, email, password, role}`
     *   **`sales`**: `{id, date, items: [{productId, productName, quantity, price, total}], totalRevenue}`
 

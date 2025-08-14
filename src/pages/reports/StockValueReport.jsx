@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getProducts } from '../../services/productService';
+import { useApi } from '../../utils/ApiModeContext';
 import { Parser } from '@json2csv/plainjs';
 
 import Paper from '@mui/material/Paper';
@@ -12,9 +12,10 @@ import Alert from '@mui/material/Alert';
 import DownloadIcon from '@mui/icons-material/Download';
 
 const StockValueReport = () => {
+  const { mode, services } = useApi();
   const { data: products = [], isLoading, isError, error } = useQuery({
-    queryKey: ['products'],
-    queryFn: getProducts,
+    queryKey: ['stock', mode],
+    queryFn: services.stock.getStockLevels,
   });
 
   const stockValueReport = useMemo(() => {
@@ -35,7 +36,6 @@ const StockValueReport = () => {
     const json2csvParser = new Parser({ fields });
     const csv = json2csvParser.parse(stockValueReport.reportData);
 
-    // Create a blob and trigger download
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
@@ -78,7 +78,6 @@ const StockValueReport = () => {
       <Typography color="text.secondary">
         This report calculates the total value of all inventory based on the cost price of each product.
       </Typography>
-      {/* A table could be added here to show the detailed report */}
     </Paper>
   );
 };

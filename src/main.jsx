@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import { AuthProvider } from './utils/AuthContext';
 import { NotificationProvider } from './utils/NotificationContext';
+import { ApiModeProvider } from './utils/ApiModeContext';
 import './index.css';
 
 // Create a client
@@ -35,7 +36,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <CssBaseline />
           <BrowserRouter>
             <AuthProvider>
-              <App />
+              <ApiModeProvider>
+                <App />
+              </ApiModeProvider>
             </AuthProvider>
           </BrowserRouter>
         </NotificationProvider>

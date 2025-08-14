@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getProducts } from '../../services/productService';
+import { useApi } from '../../utils/ApiModeContext';
 
 import StatsCard from '../../components/ui/StatsCard';
 import Grid from '@mui/material/Grid';
@@ -26,9 +26,12 @@ const chartData = [
 ];
 
 const DashboardPage = () => {
+  const { mode, services } = useApi();
+
+  // Fetch stock levels which include product data
   const { data: products, isLoading, error } = useQuery({
-    queryKey: ['products'],
-    queryFn: getProducts,
+    queryKey: ['stock', mode],
+    queryFn: services.stock.getStockLevels,
   });
 
   const lowStockProducts = products?.filter(p => p.stock <= p.lowStockThreshold) || [];

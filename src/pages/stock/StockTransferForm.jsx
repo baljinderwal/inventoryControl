@@ -119,7 +119,7 @@ const StockTransferForm = ({ product, onClose }) => {
         fullWidth
         variant="standard"
         value={quantity}
-.jsx        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10)))}
+        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10)))}
         InputProps={{ inputProps: { min: 1 } }}
       />
 

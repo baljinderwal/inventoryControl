@@ -95,6 +95,7 @@ The project follows a feature-based structure, which makes it scalable and easy 
         *   `Sidebar.jsx`: The navigation sidebar with links to all the main pages.
         *   `Topbar.jsx`: The header bar of the application.
     *   **`ui/`**: Generic, reusable UI components.
+        *   `ApiModeToggle.jsx`: A UI switch component placed in the top bar that allows the user to toggle the application's data fetching mode between `local` (static file) and `api` (live server).
         *   `AppDialog.jsx`: A customizable modal dialog.
         *   `Button.jsx`: A styled button component.
         *   `ConfirmationDialog.jsx`: A specific dialog for "Are you sure?" prompts.
@@ -104,18 +105,17 @@ The project follows a feature-based structure, which makes it scalable and easy 
     *   `PrivateRoute.jsx`: A component that protects routes from unauthenticated access. It redirects to the login page if the user is not logged in.
 
 *   **`pages/`**: Each subdirectory represents a major feature or page of the application.
-    *   **`auth/LoginPage.jsx`**: A modern, feature-rich login page component. It includes local form state management, inline validation, microinteractions, accessibility features, and support for progressive authentication methods.
+    *   **`auth/LoginPage.jsx`**: A modern, feature-rich login page component.
     *   **`dashboard/DashboardPage.jsx`**: The main dashboard page, displaying stats and charts.
-    *   **`orders/OrdersPage.jsx`**: Lists all orders.
-    *   **`products/ProductsPage.jsx`**: The main page for product management, including the product table and controls for adding, editing, and deleting products.
-    *   **`products/AddEditProductForm.jsx`**: The form used for adding and editing products.
-    *   ... (and so on for `suppliers`, `stock`, `reports`, and `users`).
+    *   ... (and so on for `suppliers`, `stock`, `products`, and `users`).
+    *   **`reports/StockExpiryReport.jsx`**: A new report page that lists all inventory batches, sorted by the nearest expiry date. This is critical for managing perishable goods.
 
-*   **`services/`**: Handles all API communication.
+*   **`services/`**: Handles all API communication. Each service file is structured to export two objects: `local` and `api`. This allows the application to dynamically switch between fetching from a static JSON file (for read-only local mode) and a live API server.
     *   `api.js`: Creates a central `axios` instance with the base URL for the mock API.
-    *   `productService.js`, `supplierService.js`, etc.: These files contain functions for specific API calls (e.g., `getProducts`, `addProduct`), separating API logic from UI components.
+    *   `productService.js`, `stockService.js`, etc.: These files contain the logic for both local and remote data operations for each feature.
 
 *   **`utils/`**: Contains shared utilities and React contexts.
+    *   `ApiModeContext.jsx`: A powerful development tool that manages the application's data fetching mode. It provides the rest of the application with the correct set of service functions (`local` or `api`) based on the user's selection from the `ApiModeToggle` component. It also persists the user's choice in `localStorage`.
     *   `AuthContext.jsx`: Manages user authentication state (`isAuthenticated`, `login`, `logout`).
     *   `NotificationContext.jsx`: Provides a global system for showing snackbar notifications.
 

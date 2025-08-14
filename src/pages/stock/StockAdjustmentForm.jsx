@@ -10,15 +10,15 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 
-const StockAdjustmentForm = ({ onClose, product }) => {
+const StockAdjustmentForm = ({ onClose, stock }) => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
   const [quantity, setQuantity] = useState(1);
 
   const mutation = useMutation({
-    mutationFn: (newStock) => updateStockLevel(product.id, newStock),
+    mutationFn: (newStock) => updateStockLevel(stock.id, newStock),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] }); // Invalidate products to refetch stock levels
+      queryClient.invalidateQueries({ queryKey: ['stockLevels'] });
       showNotification('Stock level updated successfully', 'success');
       onClose();
     },
@@ -28,7 +28,7 @@ const StockAdjustmentForm = ({ onClose, product }) => {
   });
 
   const handleAdjustStock = (adjustment) => {
-    const newStock = product.stock + adjustment;
+    const newStock = stock.quantity + adjustment;
     if (newStock < 0) {
       showNotification('Stock level cannot be negative', 'error');
       return;
@@ -39,10 +39,10 @@ const StockAdjustmentForm = ({ onClose, product }) => {
   return (
     <Box>
       <Typography gutterBottom>
-        Adjusting stock for: <strong>{product.name}</strong>
+        Adjusting stock for: <strong>{stock.product.name}</strong> at <strong>{stock.location.name}</strong>
       </Typography>
       <Typography color="text.secondary" gutterBottom>
-        Current stock: {product.stock}
+        Current stock: {stock.quantity}
       </Typography>
       <TextField
         autoFocus

@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { getProducts } from '../../services/productService';
+import { getStockLevels } from '../../services/stockService';
+import { getLocations } from '../../services/locationService';
 import { Parser } from '@json2csv/plainjs';
 
 import Paper from '@mui/material/Paper';
@@ -10,48 +11,68 @@ import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import DownloadIcon from '@mui/icons-material/Download';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 
 const StockValueReport = () => {
-  const { data: products = [], isLoading, isError, error } = useQuery({
-    queryKey: ['products'],
-    queryFn: getProducts,
+  const [selectedLocation, setSelectedLocation] = useState(null);
+
+  const { data: stockLevels = [], isLoading: isLoadingStock, isError: isErrorStock, error: errorStock } = useQuery({
+    queryKey: ['stockLevels'],
+    queryFn: getStockLevels,
+  });
+
+  const { data: locations = [], isLoading: isLoadingLocations, isError: isErrorLocations, error: errorLocations } = useQuery({
+    queryKey: ['locations'],
+    queryFn: getLocations,
   });
 
   const stockValueReport = useMemo(() => {
-    if (!Array.isArray(products)) return { totalValue: 0, reportData: [] };
+    if (!Array.isArray(stockLevels)) return { totalValue: 0, reportData: [] };
 
-    const reportData = products.map(p => ({
-      ...p,
-      inventoryValue: p.stock * p.costPrice,
+    const filteredStock = selectedLocation
+      ? stockLevels.filter(s => s.locationId === selectedLocation.id)
+      : stockLevels;
+
+    const reportData = filteredStock.map(s => ({
+      productName: s.product.name,
+      productSku: s.product.sku,
+      locationName: s.location.name,
+      quantity: s.quantity,
+      costPrice: s.product.costPrice,
+      inventoryValue: s.quantity * s.product.costPrice,
     }));
 
-    const totalValue = reportData.reduce((sum, p) => sum + p.inventoryValue, 0);
+    const totalValue = reportData.reduce((sum, s) => sum + s.inventoryValue, 0);
 
     return { totalValue, reportData };
-  }, [products]);
+  }, [stockLevels, selectedLocation]);
 
   const handleExport = () => {
-    const fields = ['id', 'name', 'sku', 'category', 'price', 'costPrice', 'stock', 'inventoryValue'];
+    const fields = ['productName', 'productSku', 'locationName', 'quantity', 'costPrice', 'inventoryValue'];
     const json2csvParser = new Parser({ fields });
     const csv = json2csvParser.parse(stockValueReport.reportData);
 
-    // Create a blob and trigger download
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', 'stock_value_report.csv');
+    link.setAttribute('download', `stock_value_report_${selectedLocation ? selectedLocation.name : 'all'}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
+
+  const isLoading = isLoadingStock || isLoadingLocations;
+  const isError = isErrorStock || isErrorLocations;
+  const error = errorStock || errorLocations;
 
   if (isLoading) {
     return <CircularProgress />;
   }
 
   if (isError) {
-    return <Alert severity="error">Error fetching product data: {error.message}</Alert>;
+    return <Alert severity="error">Error fetching data: {error.message}</Alert>;
   }
 
   return (
@@ -64,21 +85,31 @@ const StockValueReport = () => {
           variant="contained"
           startIcon={<DownloadIcon />}
           onClick={handleExport}
-          disabled={!products || products.length === 0}
+          disabled={stockValueReport.reportData.length === 0}
         >
           Export as CSV
         </Button>
       </Box>
+
+      <Autocomplete
+        options={locations}
+        getOptionLabel={(option) => option.name}
+        onChange={(event, newValue) => {
+          setSelectedLocation(newValue);
+        }}
+        renderInput={(params) => <TextField {...params} label="Filter by Location" />}
+        sx={{ mb: 2, maxWidth: 300 }}
+      />
+
       <Typography variant="h5" component="p">
-        Total Inventory Value:
+        Total Inventory Value ({selectedLocation ? selectedLocation.name : 'All Locations'}):
         <Typography variant="h5" component="span" color="primary" sx={{ ml: 1, fontWeight: 'bold' }}>
           ${stockValueReport.totalValue.toFixed(2)}
         </Typography>
       </Typography>
       <Typography color="text.secondary">
-        This report calculates the total value of all inventory based on the cost price of each product.
+        This report calculates the total value of inventory based on the cost price of each product.
       </Typography>
-      {/* A table could be added here to show the detailed report */}
     </Paper>
   );
 };

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getInventoryAging } from '../../services/reportService';
+import { getLocations } from '../../services/locationService';
 import { Parser } from '@json2csv/plainjs';
 
 import Paper from '@mui/material/Paper';
@@ -10,6 +11,8 @@ import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import DownloadIcon from '@mui/icons-material/Download';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 import {
   Table,
   TableBody,
@@ -27,16 +30,27 @@ const getAgingColor = (days) => {
 };
 
 const InventoryAgingReport = () => {
-  const { data: agingReport, isLoading, isError, error } = useQuery({
-    queryKey: ['inventoryAging'],
-    queryFn: getInventoryAging,
+  const [selectedLocation, setSelectedLocation] = useState(null);
+
+  const { data: locations = [], isLoading: isLoadingLocations } = useQuery({
+    queryKey: ['locations'],
+    queryFn: getLocations,
+  });
+
+  const { data: agingReport = [], isLoading: isLoadingAging, isError, error } = useQuery({
+    queryKey: ['inventoryAging', selectedLocation],
+    queryFn: () => getInventoryAging(selectedLocation?.id),
   });
 
   const handleExport = () => {
     if (!agingReport) return;
-    const fields = ['id', 'name', 'sku', 'category', 'stock', 'ageInDays'];
+    const fields = ['name', 'sku', 'quantity', 'ageInDays', 'locationName'];
+    const dataToExport = agingReport.map(item => ({
+      ...item,
+      locationName: locations.find(l => l.id === item.locationId)?.name || 'N/A'
+    }));
     const parser = new Parser({ fields });
-    const csv = parser.parse(agingReport);
+    const csv = parser.parse(dataToExport);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -45,6 +59,8 @@ const InventoryAgingReport = () => {
     link.click();
     document.body.removeChild(link);
   };
+
+  const isLoading = isLoadingLocations || isLoadingAging;
 
   if (isLoading) return <CircularProgress />;
   if (isError) return <Alert severity="error">Error fetching inventory aging data: {error.message}</Alert>;
@@ -64,6 +80,17 @@ const InventoryAgingReport = () => {
           Export as CSV
         </Button>
       </Box>
+
+      <Autocomplete
+        options={locations}
+        getOptionLabel={(option) => option.name}
+        onChange={(event, newValue) => {
+          setSelectedLocation(newValue);
+        }}
+        renderInput={(params) => <TextField {...params} label="Filter by Location" />}
+        sx={{ mb: 2, maxWidth: 300 }}
+      />
+
       <Typography color="text.secondary" sx={{ mb: 2 }}>
         This report shows the age of your current inventory. Products are sorted with the oldest items first.
       </Typography>
@@ -73,17 +100,19 @@ const InventoryAgingReport = () => {
             <TableRow>
               <TableCell>Product Name</TableCell>
               <TableCell>SKU</TableCell>
+              <TableCell>Location</TableCell>
               <TableCell align="right">Current Stock</TableCell>
               <TableCell align="right">Age (Days)</TableCell>
               <TableCell align="center">Status</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {agingReport && agingReport.map((product) => (
-              <TableRow key={product.id}>
+            {agingReport.map((product) => (
+              <TableRow key={product.stockId}>
                 <TableCell>{product.name}</TableCell>
                 <TableCell>{product.sku}</TableCell>
-                <TableCell align="right">{product.stock}</TableCell>
+                <TableCell>{locations.find(l => l.id === product.locationId)?.name}</TableCell>
+                <TableCell align="right">{product.quantity}</TableCell>
                 <TableCell align="right">{product.ageInDays}</TableCell>
                 <TableCell align="center">
                   <Chip

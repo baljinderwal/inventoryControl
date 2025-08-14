@@ -1,5 +1,4 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
 
 const AuthContext = createContext();
 
@@ -13,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = async (email, password) => {
+  const login = async () => {
     try {
       // const response = await axios.get('http://localhost:3001/users', {
       //   params: { email, password },

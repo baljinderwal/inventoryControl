@@ -13,6 +13,8 @@ import SupplierPerformanceReport from './pages/reports/SupplierPerformanceReport
 import StockValueReport from './pages/reports/StockValueReport';
 import PurchaseOrdersPage from './pages/orders/PurchaseOrdersPage';
 import UsersPage from './pages/users/UsersPage';
+import LocationsPage from './pages/settings/LocationsPage';
+import StockTransferPage from './pages/stock/StockTransferPage';
 import Layout from './components/layout/Layout';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -37,9 +39,11 @@ function App() {
             <Route path="supplier-performance" element={<SupplierPerformanceReport />} />
             <Route path="stock-value" element={<StockValueReport />} />
           </Route>
+          <Route path="/stock/transfer" element={<StockTransferPage />} />
         </Route>
         <Route element={<PrivateRoute roles={['Admin']} />}>
           <Route path="/users" element={<UsersPage />} />
+          <Route path="/settings/locations" element={<LocationsPage />} />
         </Route>
       </Route>
     </Routes>

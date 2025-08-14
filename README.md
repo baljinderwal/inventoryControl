@@ -11,8 +11,15 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
 *   **📦 Product Management:** Full CRUD (Create, Read, Update, Delete) functionality for your products.
 *   **🏢 Supplier Tracking:** Manage your suppliers and the products they provide.
 *   **🚚 Order Processing:** Keep track of purchase orders and their statuses.
-*   **📈 Stock Control:** View and manage your current stock levels.
+*   **📈 Stock Control:** A completely redesigned stock management page.
+    *   View stock levels grouped by product.
+    *   Expand each product to see a detailed breakdown of stock quantities across different locations.
+    *   Adjust stock levels for a specific product at a specific location.
+*   **🏢 Multi-Location Inventory Management:**
+    *   **Location CRUD:** Add, edit, and delete inventory locations/warehouses through a new settings page.
+    *   **Stock Transfers:** A dedicated page to transfer stock from one location to another, with validation to prevent transferring more stock than is available.
 *   **📝 Advanced Reporting Suite:**
+    *   **Location-Based Filtering:** The "Stock Value" and "Inventory Aging" reports can now be filtered by location.
     *   **Sales History:** Track sales trends over time.
     *   **Inventory Aging:** Identify slow-moving and obsolete stock.
     *   **Supplier Performance:** Evaluate supplier reliability and order history.
@@ -189,11 +196,12 @@ The application features a login system with three predefined user roles. Use th
 
 The application uses `json-server` to simulate a backend API. The data is stored in `db.json`.
 
-*   **`db.json`**: This file acts as a simple database. It contains several top-level keys (`products`, `suppliers`, `orders`, `stock`, `users`), each being an array of objects.
-    *   **`products`**: `{id, name, sku, category, price, costPrice, stock, lowStockThreshold}`
+*   **`db.json`**: This file acts as a simple database. It contains several top-level keys (`products`, `suppliers`, `orders`, `stock`, `users`, `locations`, `sales`), each being an array of objects.
+    *   **`products`**: `{id, name, sku, category, price, costPrice, lowStockThreshold, createdAt}`
     *   **`suppliers`**: `{id, name, contact, email, products: [productId, ... ]}`
     *   **`orders`**: `{id, supplier: {id, name}, createdAt, status, products: [{productId, quantity}], completedAt?}`
-    *   **`stock`**: `{id, productId, quantity, warehouse}`
+    *   **`stock`**: `{id, productId, quantity, locationId}`
+    *   **`locations`**: `{id, name, address}`
     *   **`users`**: `{id, name, email, password, role}`
     *   **`sales`**: `{id, date, items: [{productId, productName, quantity, price, total}], totalRevenue}`
 

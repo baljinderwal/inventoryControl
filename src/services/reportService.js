@@ -49,23 +49,30 @@ export const getSalesHistory = async () => {
   return salesHistory;
 };
 
-export const getInventoryAging = async () => {
-  const response = await fetch('/db.json');
-  const data = await response.json();
-  const { products = [] } = data;
+export const getInventoryAging = async (locationId = null) => {
+  // To get product info, we need to fetch stock with product expanded
+  const url = locationId
+    ? `/stock?_expand=product&locationId=${locationId}`
+    : '/stock?_expand=product';
 
-  if (!products.length) {
+  const response = await fetch(url);
+  const stockLevels = await response.json();
+
+  if (!stockLevels.length) {
     return [];
   }
 
   const today = new Date();
-  const agingReport = products
-    .filter(p => p.stock > 0 && p.createdAt)
-    .map(product => {
-      const createdAt = new Date(product.createdAt);
+  const agingReport = stockLevels
+    .filter(s => s.quantity > 0 && s.product.createdAt)
+    .map(stock => {
+      const createdAt = new Date(stock.product.createdAt);
       const ageInDays = Math.floor((today - createdAt) / (1000 * 60 * 60 * 24));
       return {
-        ...product,
+        ...stock.product, // return product info
+        stockId: stock.id,
+        quantity: stock.quantity, // with the current quantity
+        locationId: stock.locationId,
         ageInDays,
       };
     })

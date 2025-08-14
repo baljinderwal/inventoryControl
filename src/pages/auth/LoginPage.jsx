@@ -20,6 +20,7 @@ import {
   Google,
   VpnKey,
 } from '@mui/icons-material';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
 const LoginPage = () => {
@@ -110,9 +111,9 @@ const LoginPage = () => {
 
     try {
       setLoading(true);
-      await login(form.email.value, form.password.value);
+      await login();
       navigate(from, { replace: true });
-    } catch (err) {
+    } catch {
       setSubmitError('Invalid credentials. Please try again.');
     } finally {
       setLoading(false);

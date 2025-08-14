@@ -14,6 +14,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import PeopleIcon from '@mui/icons-material/People';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { useAuth } from '../../utils/AuthContext';
 
 const drawerWidth = 240;
@@ -26,6 +27,7 @@ const navigation = [
   { name: 'Purchase Orders', href: '/purchase-orders', icon: <ShoppingCartIcon />, roles: ['Admin', 'Manager', 'Staff'] },
   { name: 'Reports', href: '/reports', icon: <SummarizeIcon />, roles: ['Admin', 'Manager'] },
   { name: 'Users', href: '/users', icon: <PeopleIcon />, roles: ['Admin'] },
+  { name: 'Locations', href: '/settings/locations', icon: <SettingsIcon />, roles: ['Admin'] },
 ];
 
 const Sidebar = () => {

@@ -20,7 +20,7 @@ import {
   Google,
   VpnKey,
 } from '@mui/icons-material';
-import { AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
 const LoginPage = () => {
   const [form, setForm] = useState({

@@ -1,22 +1,37 @@
 import api from './api';
 
 const local = {
-  getStockLevels: async () => {
+  getStockLevels: async ({ locationId } = {}) => {
     console.log('Fetching stock levels from local db.json');
     const response = await fetch('/db.json');
     const data = await response.json();
     const products = data.products || [];
-    const stockData = data.stock || [];
+    let stockData = data.stock || [];
+    if (locationId) {
+      stockData = stockData.filter(s => s.locationId === locationId);
+    }
+    const locations = data.locations || [];
 
-    const stockMap = new Map(stockData.map(item => [item.productId, item]));
+    const locationMap = new Map(locations.map(loc => [loc.id, loc]));
+    const stockMap = new Map();
+
+    for (const item of stockData) {
+      if (!stockMap.has(item.productId)) {
+        stockMap.set(item.productId, []);
+      }
+      stockMap.get(item.productId).push({
+        ...item,
+        locationName: locationMap.get(item.locationId)?.name || 'Unknown Location',
+      });
+    }
 
     return products.map(product => {
-      const stockInfo = stockMap.get(product.id);
+      const stockEntries = stockMap.get(product.id) || [];
+      const totalStock = stockEntries.reduce((sum, s) => sum + s.quantity, 0);
       return {
         ...product,
-        stock: stockInfo ? stockInfo.quantity : 0,
-        batches: stockInfo ? stockInfo.batches : [],
-        stockId: stockInfo ? stockInfo.id : null,
+        stock: totalStock,
+        stockByLocation: stockEntries,
       };
     });
   },
@@ -24,33 +39,53 @@ const local = {
     console.warn('Read-only mode: adjustStockLevel disabled.', adjustmentData);
     return Promise.resolve();
   },
+  transferStock: async (transferData) => {
+    console.warn('Read-only mode: transferStock disabled.', transferData);
+    return Promise.resolve();
+  }
 };
 
 const remote = {
-  getStockLevels: async () => {
+  getStockLevels: async ({ locationId } = {}) => {
     console.log('Fetching stock levels from API');
-    const [productsResponse, stockResponse] = await Promise.all([
+    const stockUrl = locationId ? `/stock?locationId=${locationId}` : '/stock';
+    const [productsResponse, stockResponse, locationsResponse] = await Promise.all([
       api.get('/products'),
-      api.get('/stock')
+      api.get(stockUrl),
+      api.get('/locations'),
     ]);
     const products = productsResponse.data;
     const stockData = stockResponse.data;
+    const locations = locationsResponse.data;
 
-    const stockMap = new Map(stockData.map(item => [item.productId, item]));
+    const locationMap = new Map(locations.map(loc => [loc.id, loc]));
+    const stockMap = new Map();
+
+    for (const item of stockData) {
+      if (!stockMap.has(item.productId)) {
+        stockMap.set(item.productId, []);
+      }
+      stockMap.get(item.productId).push({
+        ...item,
+        locationName: locationMap.get(item.locationId)?.name || 'Unknown Location',
+      });
+    }
 
     return products.map(product => {
-      const stockInfo = stockMap.get(product.id);
+      const stockEntries = stockMap.get(product.id) || [];
+      const totalStock = stockEntries.reduce((sum, s) => sum + s.quantity, 0);
       return {
         ...product,
-        stock: stockInfo ? stockInfo.quantity : 0,
-        batches: stockInfo ? stockInfo.batches : [],
-        stockId: stockInfo ? stockInfo.id : null,
+        stock: totalStock,
+        stockByLocation: stockEntries,
       };
     });
   },
-  adjustStockLevel: async ({ productId, quantity, batchNumber, expiryDate }) => {
-    console.log('Adjusting stock level via API', { productId, quantity });
-    const stockRes = await api.get(`/stock?productId=${productId}`);
+  adjustStockLevel: async ({ productId, quantity, batchNumber, expiryDate, locationId }) => {
+    console.log('Adjusting stock level via API', { productId, quantity, locationId });
+    if (!locationId) throw new Error("Location ID is required for stock adjustments.");
+
+    const stockRes = await api.get(`/stock?productId=${productId}&locationId=${locationId}`);
     let stockEntry = stockRes.data[0];
 
     if (!stockEntry) {
@@ -58,12 +93,12 @@ const remote = {
         const newStockEntry = {
           productId,
           quantity,
-          warehouse: 'A',
+          locationId,
           batches: [{ batchNumber, expiryDate, quantity }]
         };
         return await api.post('/stock', newStockEntry);
       } else {
-        throw new Error("Cannot deduct stock from a product that has no stock entry.");
+        throw new Error("Cannot deduct stock from a product that has no stock entry at this location.");
       }
     }
 
@@ -84,12 +119,82 @@ const remote = {
         batch.quantity -= deduction;
         quantityToDeduct -= deduction;
       }
-      if (quantityToDeduct > 0) throw new Error("Not enough stock to fulfill the request.");
+      if (quantityToDeduct > 0) throw new Error("Not enough stock to fulfill the request at this location.");
       stockEntry.batches = stockEntry.batches.filter(b => b.quantity > 0);
     }
 
     stockEntry.quantity = stockEntry.batches.reduce((sum, b) => sum + b.quantity, 0);
     return await api.put(`/stock/${stockEntry.id}`, stockEntry);
+  },
+
+  transferStock: async ({ productId, fromLocationId, toLocationId, quantity }) => {
+    console.log('Transferring stock via API', { productId, fromLocationId, toLocationId, quantity });
+    if (fromLocationId === toLocationId) throw new Error("Source and destination locations cannot be the same.");
+
+    // 1. Get stock from the source location
+    const fromStockRes = await api.get(`/stock?productId=${productId}&locationId=${fromLocationId}`);
+    const fromStock = fromStockRes.data[0];
+
+    if (!fromStock || fromStock.quantity < quantity) {
+      throw new Error("Not enough stock at the source location.");
+    }
+
+    // 2. Determine which batches to transfer (FEFO)
+    let quantityToTransfer = quantity;
+    const batchesToTransfer = [];
+    fromStock.batches.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+
+    for (const batch of fromStock.batches) {
+      if (quantityToTransfer === 0) break;
+      const amountFromBatch = Math.min(quantityToTransfer, batch.quantity);
+
+      batchesToTransfer.push({ ...batch, quantity: amountFromBatch });
+      batch.quantity -= amountFromBatch;
+      quantityToTransfer -= amountFromBatch;
+    }
+
+    fromStock.batches = fromStock.batches.filter(b => b.quantity > 0);
+    fromStock.quantity = fromStock.batches.reduce((sum, b) => sum + b.quantity, 0);
+
+    // 3. Get or create stock at the destination location
+    const toStockRes = await api.get(`/stock?productId=${productId}&locationId=${toLocationId}`);
+    let toStock = toStockRes.data[0];
+
+    if (!toStock) {
+      toStock = {
+        productId,
+        locationId: toLocationId,
+        quantity: 0,
+        batches: []
+      };
+    }
+
+    // 4. Add transferred batches to the destination
+    for (const transferredBatch of batchesToTransfer) {
+      const existingBatch = toStock.batches.find(b => b.batchNumber === transferredBatch.batchNumber);
+      if (existingBatch) {
+        existingBatch.quantity += transferredBatch.quantity;
+      } else {
+        toStock.batches.push(transferredBatch);
+      }
+    }
+    toStock.quantity = toStock.batches.reduce((sum, b) => sum + b.quantity, 0);
+
+    // 5. Atomically update both locations
+    // In a real API, this would be a single transaction. Here we simulate it.
+    if (toStock.id) { // It existed before
+      await Promise.all([
+        api.put(`/stock/${fromStock.id}`, fromStock),
+        api.put(`/stock/${toStock.id}`, toStock)
+      ]);
+    } else { // It's a new stock entry
+      await Promise.all([
+        api.put(`/stock/${fromStock.id}`, fromStock),
+        api.post('/stock', toStock)
+      ]);
+    }
+
+    return { fromStock, toStock };
   },
 };
 

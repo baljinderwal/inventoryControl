@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import StockAdjustmentForm from './StockAdjustmentForm';
+import StockTransferForm from './StockTransferForm';
 import AppDialog from '../../components/ui/AppDialog';
 import MuiTable from '../../components/ui/Table';
 
@@ -21,7 +22,8 @@ import Typography from '@mui/material/Typography';
 
 const StockPage = () => {
   const [isAdjustmentModalOpen, setIsAdjustmentModalOpen] = useState(false);
-  const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const { mode, services } = useApi();
 
@@ -40,14 +42,24 @@ const StockPage = () => {
     setIsAdjustmentModalOpen(false);
   };
 
-  const handleOpenBatchModal = (product) => {
+  const handleOpenDetailsModal = (product) => {
     setSelectedProduct(product);
-    setIsBatchModalOpen(true);
+    setIsDetailsModalOpen(true);
   };
 
-  const handleCloseBatchModal = () => {
+  const handleCloseDetailsModal = () => {
     setSelectedProduct(null);
-    setIsBatchModalOpen(false);
+    setIsDetailsModalOpen(false);
+  };
+
+  const handleOpenTransferModal = (product) => {
+    setSelectedProduct(product);
+    setIsTransferModalOpen(true);
+  };
+
+  const handleCloseTransferModal = () => {
+    setSelectedProduct(null);
+    setIsTransferModalOpen(false);
   };
 
   const tableHeaders = ['Name', 'SKU', 'Total Stock', 'Status', 'Actions'];
@@ -68,13 +80,16 @@ const StockPage = () => {
         <Button variant="outlined" size="small" onClick={() => handleOpenAdjustmentModal(p)}>
           Adjust Stock
         </Button>
+        <Button variant="outlined" size="small" onClick={() => handleOpenTransferModal(p)}>
+          Transfer Stock
+        </Button>
         <Button
           variant="text"
           size="small"
-          onClick={() => handleOpenBatchModal(p)}
-          disabled={!p.batches || p.batches.length === 0}
+          onClick={() => handleOpenDetailsModal(p)}
+          disabled={!p.stockByLocation || p.stockByLocation.length === 0}
         >
-          View Batches
+          View Details
         </Button>
       </Stack>
     )
@@ -102,27 +117,42 @@ const StockPage = () => {
 
       {selectedProduct && (
         <AppDialog
-          isOpen={isBatchModalOpen}
-          onClose={handleCloseBatchModal}
-          title={`Batches for ${selectedProduct.name}`}
+          isOpen={isTransferModalOpen}
+          onClose={handleCloseTransferModal}
+          title={`Transfer Stock for ${selectedProduct.name}`}
+        >
+          <StockTransferForm onClose={handleCloseTransferModal} product={selectedProduct} />
+        </AppDialog>
+      )}
+
+      {selectedProduct && (
+        <AppDialog
+          isOpen={isDetailsModalOpen}
+          onClose={handleCloseDetailsModal}
+          title={`Stock Details for ${selectedProduct.name}`}
+          maxWidth="md"
         >
           <DialogContent>
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>Batch Number</TableCell>
+                  <TableCell>Location</TableCell>
                   <TableCell>Quantity</TableCell>
+                  <TableCell>Batch Number</TableCell>
                   <TableCell>Expiry Date</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {selectedProduct.batches?.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate)).map((batch) => (
-                  <TableRow key={batch.batchNumber}>
-                    <TableCell>{batch.batchNumber}</TableCell>
-                    <TableCell>{batch.quantity}</TableCell>
-                    <TableCell>{new Date(batch.expiryDate).toLocaleDateString()}</TableCell>
-                  </TableRow>
-                ))}
+                {selectedProduct.stockByLocation?.flatMap(stockEntry =>
+                  stockEntry.batches.map(batch => (
+                    <TableRow key={`${stockEntry.locationId}-${batch.batchNumber}`}>
+                      <TableCell>{stockEntry.locationName}</TableCell>
+                      <TableCell>{batch.quantity}</TableCell>
+                      <TableCell>{batch.batchNumber}</TableCell>
+                      <TableCell>{new Date(batch.expiryDate).toLocaleDateString()}</TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </DialogContent>

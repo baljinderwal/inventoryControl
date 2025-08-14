@@ -23,10 +23,13 @@ const local = {
       return { ...item, completedAt: new Date(o.completedAt), productName: p?.name, price: p?.price, totalSale: p ? item.quantity * p.price : 0 };
     })).sort((a, b) => b.completedAt - a.completedAt);
   },
-  getInventoryAging: async () => {
+  getInventoryAging: async ({ locationId } = {}) => {
     const data = await getLocalData();
     const products = data.products || [];
-    const stock = data.stock || [];
+    let stock = data.stock || [];
+    if (locationId) {
+      stock = stock.filter(s => s.locationId === locationId);
+    }
     if (!products.length) return [];
     const stockMap = new Map(stock.map(s => [s.productId, s.quantity]));
     const today = new Date();
@@ -62,8 +65,9 @@ const remote = {
       return { ...item, completedAt: new Date(o.completedAt), productName: p?.name, price: p?.price, totalSale: p ? item.quantity * p.price : 0 };
     })).sort((a, b) => b.completedAt - a.completedAt);
   },
-  getInventoryAging: async () => {
-    const [pRes, sRes] = await Promise.all([api.get('/products'), api.get('/stock')]);
+  getInventoryAging: async ({ locationId } = {}) => {
+    const stockUrl = locationId ? `/stock?locationId=${locationId}` : '/stock';
+    const [pRes, sRes] = await Promise.all([api.get('/products'), api.get(stockUrl)]);
     const products = pRes.data, stock = sRes.data;
     if (!products.length) return [];
     const stockMap = new Map(stock.map(s => [s.productId, s.quantity]));

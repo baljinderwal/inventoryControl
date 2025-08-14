@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
+import { locationService } from '../../services/locationService';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -20,12 +21,19 @@ const StockAdjustmentForm = ({
 }) => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
-  const { services } = useApi();
+  const { mode, services } = useApi();
+  const a_services = { ...services, locations: locationService[mode] };
 
+  const [locationId, setLocationId] = useState('');
   const [adjustmentType, setAdjustmentType] = useState('in'); // 'in' or 'out'
   const [quantity, setQuantity] = useState(1);
   const [batchNumber, setBatchNumber] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
+
+  const { data: locations = [], isLoading: isLoadingLocations } = useQuery({
+    queryKey: ['locations', mode],
+    queryFn: () => a_services.locations.getLocations(),
+  });
 
   const mutation = useMutation({
     mutationFn: services.stock.adjustStockLevel,
@@ -40,6 +48,10 @@ const StockAdjustmentForm = ({
   });
 
   const handleSubmit = () => {
+    if (!locationId) {
+      showNotification('Please select a location.', 'error');
+      return;
+    }
     const adjQuantity = adjustmentType === 'in' ? quantity : -quantity;
     if (adjustmentType === 'in' && (!batchNumber || !expiryDate)) {
       showNotification('Batch number and expiry date are required for Stock In.', 'error');
@@ -50,6 +62,7 @@ const StockAdjustmentForm = ({
       quantity: adjQuantity,
       batchNumber: adjustmentType === 'in' ? batchNumber : undefined,
       expiryDate: adjustmentType === 'in' ? expiryDate : undefined,
+      locationId: locationId,
     });
   };
 
@@ -59,8 +72,26 @@ const StockAdjustmentForm = ({
         Adjusting stock for: <strong>{product.name}</strong>
       </Typography>
       <Typography color="text.secondary" gutterBottom>
-        Current stock: {product.stock}
+        Current total stock: {product.stock}
       </Typography>
+
+      <FormControl fullWidth margin="dense" variant="standard">
+        <InputLabel id="location-select-label">Location</InputLabel>
+        <Select
+          labelId="location-select-label"
+          id="locationId"
+          value={locationId}
+          onChange={(e) => setLocationId(e.target.value)}
+          label="Location"
+          disabled={isLoadingLocations}
+        >
+          {locations.map((location) => (
+            <MenuItem key={location.id} value={location.id}>
+              {location.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
 
       <FormControl fullWidth margin="dense" variant="standard">
         <InputLabel id="adjustment-type-label">Adjustment Type</InputLabel>

@@ -42,18 +42,18 @@ const remote = {
   addProduct: async (productData) => {
     console.log('Adding product via API', productData);
     // Separate product details from stock details
-    const { stock, batchNumber, expiryDate, ...productDetails } = productData;
+    const { stock, batchNumber, expiryDate, locationId, ...productDetails } = productData;
 
     // 1. Create the product
     const productResponse = await api.post('/products', productDetails);
     const newProduct = productResponse.data;
 
     // 2. If initial stock is provided, create the stock entry
-    if (stock > 0 && expiryDate) { // Ensure expiry date is present
+    if (stock > 0 && expiryDate && locationId) { // Ensure all stock details are present
       const newStockEntry = {
         productId: newProduct.id,
         quantity: stock,
-        warehouse: 'A', // Default warehouse
+        locationId: locationId,
         batches: [{
           batchNumber: batchNumber || `B${newProduct.id}-INIT`,
           expiryDate: expiryDate,

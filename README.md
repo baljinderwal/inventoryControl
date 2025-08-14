@@ -25,6 +25,12 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
     *   **Staff:** Access to core features like dashboard, products, stock, and orders.
 *   **🚀 Fast & Modern Tech:** Built with Vite for a lightning-fast development experience and React for a reactive UI.
 *   **💅 Sleek UI:** A beautiful and intuitive user interface built with Material-UI.
+*   **🔐 World-Class Login Experience:** A modern, beautiful, and highly functional login page designed for a seamless and secure user experience. It features:
+    *   A focused, single-column layout with a vibrant, colorful background.
+    *   Real-time inline validation with clear, instructive error messages.
+    *   Helpful microinteractions like success checkmarks in fields and a "shake" animation for submission errors.
+    *   Enhanced accessibility, including support for reduced motion preferences and Caps Lock detection.
+    *   Progressive authentication options with UI for "Sign in with Google" and "Sign in with a passkey".
 
 
 ## 🚀 Technologies Used
@@ -94,7 +100,7 @@ The project follows a feature-based structure, which makes it scalable and easy 
     *   `PrivateRoute.jsx`: A component that protects routes from unauthenticated access. It redirects to the login page if the user is not logged in.
 
 *   **`pages/`**: Each subdirectory represents a major feature or page of the application.
-    *   **`auth/LoginPage.jsx`**: The login page component.
+    *   **`auth/LoginPage.jsx`**: A modern, feature-rich login page component. It includes local form state management, inline validation, microinteractions, accessibility features, and support for progressive authentication methods.
     *   **`dashboard/DashboardPage.jsx`**: The main dashboard page, displaying stats and charts.
     *   **`orders/OrdersPage.jsx`**: Lists all orders.
     *   **`products/ProductsPage.jsx`**: The main page for product management, including the product table and controls for adding, editing, and deleting products.

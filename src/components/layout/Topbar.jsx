@@ -82,7 +82,7 @@ const Topbar = () => {
           >
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
           </Menu>
-        </div>
+        </Box>
       </Toolbar>
     </AppBar>
   );

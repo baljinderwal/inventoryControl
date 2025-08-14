@@ -1,20 +1,33 @@
-import api from './api';
+// import api from './api';
 
 export const getProfitabilityReportData = async () => {
-  const [productsResponse, ordersResponse] = await Promise.all([
-    api.get('/products'),
-    api.get('/orders?status=Completed') // Fetch only completed orders for profitability
-  ]);
-  return { products: productsResponse.data, orders: ordersResponse.data };
+  // const [productsResponse, ordersResponse] = await Promise.all([
+  //   api.get('/products'),
+  //   api.get('/orders?status=Completed')
+  // ]);
+  // const products = productsResponse.data;
+  // const orders = ordersResponse.data;
+
+  const response = await fetch('/db.json');
+  const data = await response.json();
+  const products = data.products || [];
+  const orders = (data.orders || []).filter(o => o.status === 'Completed');
+
+  return { products, orders };
 };
 
 export const getSalesHistory = async () => {
-  const [productsResponse, ordersResponse] = await Promise.all([
-    api.get('/products'),
-    api.get('/orders?status=Completed')
-  ]);
-  const products = productsResponse.data;
-  const orders = ordersResponse.data;
+  // const [productsResponse, ordersResponse] = await Promise.all([
+  //   api.get('/products'),
+  //   api.get('/orders?status=Completed')
+  // ]);
+  // const products = productsResponse.data;
+  // const orders = ordersResponse.data;
+
+  const response = await fetch('/db.json');
+  const data = await response.json();
+  const products = data.products || [];
+  const orders = (data.orders || []).filter(o => o.status === 'Completed');
 
 
   if (!products.length || !orders.length) {
@@ -24,7 +37,7 @@ export const getSalesHistory = async () => {
   const productMap = new Map(products.map(p => [p.id, p]));
 
   const salesHistory = orders
-    .filter(order => order.completedAt) // Ensure completedAt exists
+    .filter(order => order.completedAt)
     .flatMap(order =>
       order.products.map(item => {
         const product = productMap.get(item.productId);
@@ -38,18 +51,24 @@ export const getSalesHistory = async () => {
         };
       })
     )
-    .sort((a, b) => b.completedAt - a.completedAt); // Sort by most recent
+    .sort((a, b) => b.completedAt - a.completedAt);
 
   return salesHistory;
 };
 
 export const getInventoryAging = async () => {
-  const [productsResponse, stockResponse] = await Promise.all([
-    api.get('/products'),
-    api.get('/stock')
-  ]);
-  const products = productsResponse.data;
-  const stock = stockResponse.data;
+  // const [productsResponse, stockResponse] = await Promise.all([
+  //   api.get('/products'),
+  //   api.get('/stock')
+  // ]);
+  // const products = productsResponse.data;
+  // const stock = stockResponse.data;
+
+  const response = await fetch('/db.json');
+  const data = await response.json();
+  const products = data.products || [];
+  const stock = data.stock || [];
+
 
   if (!products.length) {
     return [];
@@ -72,20 +91,27 @@ export const getInventoryAging = async () => {
         ageInDays,
       };
     })
-    .sort((a, b) => b.ageInDays - a.ageInDays); // Sort by oldest first
+    .sort((a, b) => b.ageInDays - a.ageInDays);
 
   return agingReport;
 };
 
 export const getSupplierPerformance = async () => {
-  const [suppliersResponse, ordersResponse, productsResponse] = await Promise.all([
-    api.get('/suppliers'),
-    api.get('/orders'),
-    api.get('/products')
-  ]);
-  const suppliers = suppliersResponse.data;
-  const orders = ordersResponse.data;
-  const products = productsResponse.data;
+  // const [suppliersResponse, ordersResponse, productsResponse] = await Promise.all([
+  //   api.get('/suppliers'),
+  //   api.get('/orders'),
+  //   api.get('/products')
+  // ]);
+  // const suppliers = suppliersResponse.data;
+  // const orders = ordersResponse.data;
+  // const products = productsResponse.data;
+
+  const response = await fetch('/db.json');
+  const data = await response.json();
+  const suppliers = data.suppliers || [];
+  const orders = data.orders || [];
+  const products = data.products || [];
+
 
   if (!suppliers.length || !orders.length) {
     return [];

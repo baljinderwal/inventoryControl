@@ -1,4 +1,4 @@
-import api from './api';
+// import api from './api';
 
 export const getPOs = async () => {
   // Use _expand to automatically embed the supplier details in each order
@@ -20,21 +20,24 @@ export const getPO = async (id) => {
   // For the sake of this example, we will fetch a single order from a public db.json file
   const response = await fetch('/db.json');
   const data = await response.json();
-  const order = data.orders.find(o => o.id === id);
+  const order = (data.orders || []).find(o => o.id === id);
   return order || null;
 };
 
 export const addPO = async (poData) => {
-  const response = await api.post('/orders', poData);
-  return response.data;
+  // This is a read-only operation.
+  console.log('Read-only mode: addPO disabled.', poData);
+  return Promise.resolve(poData);
 };
 
 export const updatePO = async (poId, poData) => {
-  const response = await api.patch(`/orders/${poId}`, poData);
-  return response.data;
+  // This is a read-only operation.
+  console.log('Read-only mode: updatePO disabled.', poId, poData);
+  return Promise.resolve(poData);
 };
 
 export const deletePO = async (id) => {
-  const response = await api.delete(`/orders/${id}`);
-  return response.data;
+  // This is a read-only operation.
+  console.log('Read-only mode: deletePO disabled.', id);
+  return Promise.resolve();
 };

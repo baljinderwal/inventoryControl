@@ -1,48 +1,40 @@
-import api from './api';
+// import api from './api';
 
 export const getProducts = async () => {
-  const response = await api.get('/products');
-  return response.data;
+  // const response = await api.get('/products');
+  // return response.data;
+
+  // For the sake of this example, we will fetch products from a public db.json file
+  // This is useful for testing without a backend server
+  const response = await fetch('/db.json');
+  const data = await response.json();
+  return data.products || [];
 };
 
 export const getProduct = async (id) => {
-  const response = await api.get(`/products/${id}`);
-  return response.data;
+  // const response = await api.get(`/products/${id}`);
+  // return response.data;
+
+  const response = await fetch('/db.json');
+  const data = await response.json();
+  const products = data.products || [];
+  return products.find(p => p.id === id);
 };
 
 export const addProduct = async (productData) => {
-  // Separate product details from stock details
-  const { stock, batchNumber, expiryDate, ...productDetails } = productData;
-
-  // 1. Create the product
-  const productResponse = await api.post('/products', productDetails);
-  const newProduct = productResponse.data;
-
-  // 2. If initial stock is provided, create the stock entry
-  if (stock > 0) {
-    const newStockEntry = {
-      productId: newProduct.id,
-      quantity: stock,
-      warehouse: 'A', // Default warehouse
-      batches: [{
-        batchNumber: batchNumber || `B${newProduct.id}-INIT`, // Default batch number
-        expiryDate: expiryDate,
-        quantity: stock
-      }]
-    };
-    await api.post('/stock', newStockEntry);
-  }
-
-  return newProduct;
+  // This is a read-only operation.
+  console.log('Read-only mode: addProduct disabled.', productData);
+  return Promise.resolve(productData);
 };
 
 export const updateProduct = async (id, product) => {
-  // Using PATCH is better for partial updates
-  const response = await api.patch(`/products/${id}`, product);
-  return response.data;
+  // This is a read-only operation.
+  console.log('Read-only mode: updateProduct disabled.', id, product);
+  return Promise.resolve(product);
 };
 
 export const deleteProduct = async (id) => {
-  const response = await api.delete(`/products/${id}`);
-  return response.data;
+  // This is a read-only operation.
+  console.log('Read-only mode: deleteProduct disabled.', id);
+  return Promise.resolve();
 };

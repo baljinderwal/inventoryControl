@@ -1,4 +1,4 @@
-import api from './api';
+// import api from './api';
 
 export const getSuppliers = async () => {
   // const response = await api.get('/suppliers');
@@ -12,16 +12,19 @@ export const getSuppliers = async () => {
 };
 
 export const addSupplier = async (supplier) => {
-  const response = await api.post('/suppliers', supplier);
-  return response.data;
+  // This is a read-only operation.
+  console.log('Read-only mode: addSupplier disabled.', supplier);
+  return Promise.resolve(supplier);
 };
 
 export const updateSupplier = async (id, supplier) => {
-  const response = await api.put(`/suppliers/${id}`, supplier);
-  return response.data;
+  // This is a read-only operation.
+  console.log('Read-only mode: updateSupplier disabled.', id, supplier);
+  return Promise.resolve(supplier);
 };
 
 export const deleteSupplier = async (id) => {
-  const response = await api.delete(`/suppliers/${id}`);
-  return response.data;
+  // This is a read-only operation.
+  console.log('Read-only mode: deleteSupplier disabled.', id);
+  return Promise.resolve();
 };

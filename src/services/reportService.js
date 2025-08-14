@@ -1,27 +1,21 @@
+import api from './api';
+
 export const getProfitabilityReportData = async () => {
-  // In a real application, you might have a dedicated endpoint for this report.
-  // For this example, we fetch both products and orders and combine them on the client-side.
-
-  // const [productsResponse, ordersResponse] = await Promise.all([
-  //   api.get('/products'),
-  //   api.get('/orders')
-  // ]);
-  // return { products: productsResponse.data, orders: ordersResponse.data };
-
-  // For the sake of this example, we will fetch the whole db.json file
-  // and extract the products and orders from it.
-  const response = await fetch('/db.json');
-  const data = await response.json();
-  return {
-    products: data.products || [],
-    orders: data.orders || [],
-  };
+  const [productsResponse, ordersResponse] = await Promise.all([
+    api.get('/products'),
+    api.get('/orders?status=Completed') // Fetch only completed orders for profitability
+  ]);
+  return { products: productsResponse.data, orders: ordersResponse.data };
 };
 
 export const getSalesHistory = async () => {
-  const response = await fetch('/db.json');
-  const data = await response.json();
-  const { products = [], orders = [] } = data;
+  const [productsResponse, ordersResponse] = await Promise.all([
+    api.get('/products'),
+    api.get('/orders?status=Completed')
+  ]);
+  const products = productsResponse.data;
+  const orders = ordersResponse.data;
+
 
   if (!products.length || !orders.length) {
     return [];
@@ -30,7 +24,7 @@ export const getSalesHistory = async () => {
   const productMap = new Map(products.map(p => [p.id, p]));
 
   const salesHistory = orders
-    .filter(order => order.status === 'Completed' && order.completedAt)
+    .filter(order => order.completedAt) // Ensure completedAt exists
     .flatMap(order =>
       order.products.map(item => {
         const product = productMap.get(item.productId);
@@ -50,16 +44,25 @@ export const getSalesHistory = async () => {
 };
 
 export const getInventoryAging = async () => {
-  const response = await fetch('/db.json');
-  const data = await response.json();
-  const { products = [] } = data;
+  const [productsResponse, stockResponse] = await Promise.all([
+    api.get('/products'),
+    api.get('/stock')
+  ]);
+  const products = productsResponse.data;
+  const stock = stockResponse.data;
 
   if (!products.length) {
     return [];
   }
 
+  const stockMap = new Map(stock.map(s => [s.productId, s.quantity]));
+
   const today = new Date();
   const agingReport = products
+    .map(product => ({
+      ...product,
+      stock: stockMap.get(product.id) || 0,
+    }))
     .filter(p => p.stock > 0 && p.createdAt)
     .map(product => {
       const createdAt = new Date(product.createdAt);
@@ -75,9 +78,14 @@ export const getInventoryAging = async () => {
 };
 
 export const getSupplierPerformance = async () => {
-  const response = await fetch('/db.json');
-  const data = await response.json();
-  const { suppliers = [], orders = [], products = [] } = data;
+  const [suppliersResponse, ordersResponse, productsResponse] = await Promise.all([
+    api.get('/suppliers'),
+    api.get('/orders'),
+    api.get('/products')
+  ]);
+  const suppliers = suppliersResponse.data;
+  const orders = ordersResponse.data;
+  const products = productsResponse.data;
 
   if (!suppliers.length || !orders.length) {
     return [];

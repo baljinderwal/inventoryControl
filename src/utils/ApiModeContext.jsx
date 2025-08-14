@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useMemo } from 'react';
+import React, { createContext, useState, useContext, useMemo, useEffect } from 'react';
 import { productService } from '../services/productService';
 import { stockService } from '../services/stockService';
 import { reportService } from '../services/reportService';
@@ -6,41 +6,35 @@ import { poService } from '../services/poService';
 import { supplierService } from '../services/supplierService';
 import { userService } from '../services/userService';
 
-
 const ApiModeContext = createContext();
 
 export const ApiModeProvider = ({ children }) => {
-  const [mode, setMode] = useState('local'); // 'local' or 'api'
+  // Initialize state from localStorage or default to 'local'
+  const [mode, setMode] = useState(() => {
+    const savedMode = localStorage.getItem('apiMode');
+    return savedMode === 'api' ? 'api' : 'local';
+  });
 
   const toggleMode = () => {
     setMode(prevMode => {
       const newMode = prevMode === 'local' ? 'api' : 'local';
-      // You might want to store this preference in localStorage
-      // localStorage.setItem('apiMode', newMode);
-      alert(`Switched to ${newMode.toUpperCase()} mode. The page will now reload to apply changes.`);
-      // A full reload might be the simplest way to ensure all components refetch data
-      // with the new service implementations, especially with React Query's caching.
-      setTimeout(() => window.location.reload(), 500);
+      localStorage.setItem('apiMode', newMode);
       return newMode;
     });
   };
 
-  // useEffect(() => {
-  //   const savedMode = localStorage.getItem('apiMode');
-  //   if (savedMode) {
-  //     setMode(savedMode);
-  //   }
-  // }, []);
-
+  // The services object will be re-computed by useMemo whenever `mode` changes.
+  // React Query will automatically refetch queries whose query keys depend on `mode`.
   const services = useMemo(() => {
     console.log(`Providing services for mode: ${mode}`);
+    const serviceMode = mode === 'api' ? 'api' : 'local';
     return {
-      products: productService[mode],
-      stock: stockService[mode],
-      reports: reportService[mode],
-      po: poService[mode],
-      suppliers: supplierService[mode],
-      users: userService[mode],
+      products: productService[serviceMode],
+      stock: stockService[serviceMode],
+      reports: reportService[serviceMode],
+      po: poService[serviceMode],
+      suppliers: supplierService[serviceMode],
+      users: userService[serviceMode],
     };
   }, [mode]);
 

@@ -7,6 +7,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 
 const LoginPage = React.lazy(() => import('./pages/auth/LoginPage'));
+const SignupPage = React.lazy(() => import('./pages/auth/SignupPage'));
 const DashboardPage = React.lazy(() => import('./pages/dashboard/DashboardPage'));
 const ProductsPage = React.lazy(() => import('./pages/products/ProductsPage'));
 const StockPage = React.lazy(() => import('./pages/stock/StockPage'));
@@ -36,6 +37,7 @@ function App() {
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
           <Route element={<Layout />}>
             <Route element={<PrivateRoute roles={['Admin', 'Manager', 'Staff']} />}>
               <Route path="/" element={<DashboardPage />} />

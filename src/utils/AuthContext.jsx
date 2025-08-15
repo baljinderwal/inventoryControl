@@ -1,4 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { userService } from '../services/userService';
+import api from '../services/api';
 
 const AuthContext = createContext();
 
@@ -12,12 +14,9 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = async () => {
+  const login = async (email, password) => {
     try {
-      // In a real app, you'd use email and password to authenticate.
-      // Here, we're simulating a successful login for any of the predefined users.
-      // We'll just log in as the admin user for this example.
-      const response = { data: [{ "id": 1, "name": "Admin User", "email": "admin@example.com", "password": "password", "role": "Admin" }] };
+      const response = await api.get(`/users?email=${email}&password=${password}`);
 
       if (response.data.length > 0) {
         const loggedInUser = response.data[0];
@@ -33,6 +32,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const signup = async (name, email, password) => {
+    try {
+      // 1. Check if user with the same email already exists
+      const existingUsers = await api.get(`/users?email=${email}`);
+      if (existingUsers.data.length > 0) {
+        throw new Error('An account with this email already exists.');
+      }
+
+      // 2. If not, create the new user
+      const newUser = {
+        name,
+        email,
+        password, // In a real app, this should be hashed!
+        role: 'Staff', // Default role for new signups
+      };
+      const createdUser = await userService.api.addUser(newUser);
+      return createdUser;
+    } catch (error) {
+      console.error('Signup failed', error);
+      // Re-throw the error so the component can catch it
+      throw error;
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('user');
     setUser(null);
@@ -41,7 +64,7 @@ export const AuthProvider = ({ children }) => {
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, signup }}>
       {children}
     </AuthContext.Provider>
   );

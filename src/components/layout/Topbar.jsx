@@ -11,6 +11,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import ApiModeToggle from '../ui/ApiModeToggle';
+import ThemeSwitcher from '../ui/ThemeSwitcher';
 import Box from '@mui/material/Box';
 
 const Topbar = () => {
@@ -55,6 +56,7 @@ const Topbar = () => {
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <ApiModeToggle />
+          <ThemeSwitcher />
           <IconButton
             size="large"
             aria-label="account of current user"

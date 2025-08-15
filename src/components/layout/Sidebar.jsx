@@ -44,24 +44,12 @@ const navigation = [
     { name: 'Locations', href: '/settings/locations', icon: SettingsIcon, roles: ['Admin', 'Manager'] },
 ];
 
-// Animation Variants
+// Animation Variants for the drawer itself
 const sidebarVariants = {
   open: { width: drawerWidth, transition: { type: 'spring', stiffness: 300, damping: 30 } },
   closed: { width: collapsedDrawerWidth, transition: { type: 'spring', stiffness: 300, damping: 30 } }
 };
 
-const navListVariants = {
-  open: { transition: { staggerChildren: 0.07, delayChildren: 0.2 } },
-  closed: { transition: { staggerChildren: 0.05, staggerDirection: -1 } }
-};
-
-const navItemVariants = {
-  open: { y: 0, opacity: 1, transition: { y: { stiffness: 1000 } } },
-  closed: { y: 20, opacity: 0, transition: { y: { stiffness: 1000 } } }
-};
-
-// This component is defined outside of the Sidebar component render cycle
-// to prevent it from being recreated on every render, which is a React anti-pattern.
 const MotionDrawer = motion(Drawer);
 
 const Sidebar = () => {
@@ -82,41 +70,39 @@ const Sidebar = () => {
         const isActive = location.pathname === item.href;
 
         return (
-            <motion.div variants={navItemVariants}>
-                <Tooltip title={isCollapsed ? item.name : ''} placement="right" arrow>
-                    <ListItemButton
-                        component={NavLink}
-                        to={item.href}
-                        aria-label={item.name}
+            <Tooltip title={isCollapsed ? item.name : ''} placement="right" arrow>
+                <ListItemButton
+                    component={NavLink}
+                    to={item.href}
+                    aria-label={item.name}
+                    sx={{
+                        px: 3,
+                        py: 1.5,
+                        minHeight: 48,
+                        justifyContent: 'initial',
+                        bgcolor: isActive ? theme.palette.action.selected : 'transparent',
+                        borderLeft: `4px solid ${isActive ? theme.palette.primary.main : 'transparent'}`,
+                        transition: 'background-color 0.2s, border-left 0.2s',
+                        '&:hover': {
+                            bgcolor: theme.palette.action.hover,
+                        },
+                    }}
+                >
+                    <ListItemIcon sx={{ minWidth: 0, mr: isCollapsed ? 0 : 3, justifyContent: 'center', transition: 'margin 0.2s' }}>
+                        <motion.div whileHover={{ scale: 1.1 }}>
+                            <Icon />
+                        </motion.div>
+                    </ListItemIcon>
+                    <ListItemText
+                        primary={item.name}
                         sx={{
-                            px: 3,
-                            py: 1.5,
-                            minHeight: 48,
-                            justifyContent: 'initial',
-                            bgcolor: isActive ? theme.palette.action.selected : 'transparent',
-                            borderLeft: `4px solid ${isActive ? theme.palette.primary.main : 'transparent'}`,
-                            transition: 'background-color 0.2s, border-left 0.2s',
-                            '&:hover': {
-                                bgcolor: theme.palette.action.hover,
-                            },
+                            opacity: isCollapsed ? 0 : 1,
+                            transition: 'opacity 0.2s 0.1s',
+                            whiteSpace: 'nowrap',
                         }}
-                    >
-                        <ListItemIcon sx={{ minWidth: 0, mr: isCollapsed ? 0 : 3, justifyContent: 'center', transition: 'margin 0.2s' }}>
-                            <motion.div whileHover={{ scale: 1.1 }}>
-                                <Icon />
-                            </motion.div>
-                        </ListItemIcon>
-                        <ListItemText
-                            primary={item.name}
-                            sx={{
-                                opacity: isCollapsed ? 0 : 1,
-                                transition: 'opacity 0.2s 0.1s',
-                                whiteSpace: 'nowrap',
-                            }}
-                        />
-                    </ListItemButton>
-                </Tooltip>
-            </motion.div>
+                    />
+                </ListItemButton>
+            </Tooltip>
         );
     };
 
@@ -128,17 +114,11 @@ const Sidebar = () => {
           </Typography>
         </Toolbar>
         <Box sx={{ overflow: 'auto' }}>
-            <motion.div
-                variants={navListVariants}
-                initial="closed"
-                animate="open"
-            >
-                <List component="nav" sx={{ p: 0 }}>
-                    {filteredNavigation.map((item) => (
-                        <NavItem key={item.name} item={item} />
-                    ))}
-                </List>
-            </motion.div>
+            <List component="nav" sx={{ p: 0 }}>
+                {filteredNavigation.map((item) => (
+                    <NavItem key={item.name} item={item} />
+                ))}
+            </List>
         </Box>
       </>
     );

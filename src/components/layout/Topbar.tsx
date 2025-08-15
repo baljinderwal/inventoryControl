@@ -11,15 +11,18 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import ApiModeToggle from '../ui/ApiModeToggle';
 import Box from '@mui/material/Box';
+import { useSidebarStore } from '../world-class-sidebar/store';
+import { SIDEBAR_TOKENS } from '../world-class-sidebar/constants';
 
-const drawerWidth = 240;
-
-const Topbar = () => {
-  const [anchorEl, setAnchorEl] = useState(null);
+const Topbar: React.FC = () => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { isCollapsed, toggleMobileDrawer } = useSidebarStore();
 
-  const handleMenu = (event) => {
+  const sidebarWidth = isCollapsed ? SIDEBAR_TOKENS.width.collapsed : SIDEBAR_TOKENS.width.expanded;
+
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -37,8 +40,14 @@ const Topbar = () => {
     <AppBar
       position="fixed"
       sx={{
-        width: { md: `calc(100% - ${drawerWidth}px)` },
-        ml: { md: `${drawerWidth}px` },
+        width: { md: `calc(100% - ${sidebarWidth}px)` },
+        ml: { md: `${sidebarWidth}px` },
+        transition: (theme) =>
+          theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+        zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
     >
       <Toolbar>
@@ -46,6 +55,7 @@ const Topbar = () => {
           color="inherit"
           aria-label="open drawer"
           edge="start"
+          onClick={toggleMobileDrawer}
           sx={{ mr: 2, display: { md: 'none' } }}
         >
           <MenuIcon />

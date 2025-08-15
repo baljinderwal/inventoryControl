@@ -49,6 +49,11 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
     *   Helpful microinteractions like success checkmarks in fields and a "shake" animation for submission errors.
     *   Enhanced accessibility, including support for reduced motion preferences and Caps Lock detection.
     *   Progressive authentication options with UI for "Sign in with Google" and "Sign in with a passkey".
+*   **💎 World-Class Navigation Sidebar:** A highly interactive and responsive sidebar for a premium user experience.
+    *   **Collapsible & Persistent:** The sidebar can be collapsed to an icon-only view, and its state is saved in `localStorage` across sessions.
+    *   **Responsive Design:** Transitions seamlessly from a fixed permanent drawer on desktop to a swipeable drawer on mobile.
+    *   **Animated & Interactive:** Built with `framer-motion` for fluid animations, including a sliding active-route indicator, staggered item reveal, and hover effects.
+    *   **Accessible:** Includes tooltips for collapsed icons, full keyboard navigation support, and respects `prefers-reduced-motion` settings.
 
 
 ## 🚀 Technologies Used
@@ -108,7 +113,7 @@ The project follows a feature-based structure, which makes it scalable and easy 
 *   **`components/`**: Contains reusable components used across multiple pages.
     *   **`layout/`**: Components that define the overall structure of the application.
         *   `Layout.jsx`: The main layout for protected pages, including the `Topbar` and `Sidebar`.
-        *   `Sidebar.jsx`: The navigation sidebar with links to all the main pages.
+        *   `Sidebar.jsx`: A world-class, responsive, and animated navigation component. It is collapsible, persists its state, and adapts for mobile viewports. It features role-based filtering and is built with MUI and `framer-motion`.
         *   `Topbar.jsx`: The header bar of the application.
     *   **`ui/`**: Generic, reusable UI components.
         *   `ApiModeToggle.jsx`: A UI switch component placed in the top bar that allows the user to toggle the application's data fetching mode between `local` (static file) and `api` (live server).

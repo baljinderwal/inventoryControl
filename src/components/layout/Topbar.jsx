@@ -1,23 +1,32 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../utils/AuthContext';
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
+import { useSidebar } from '../../utils/SidebarContext';
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Menu,
+  MenuItem,
+  Box,
+  useTheme,
+  useMediaQuery,
+} from '@mui/material';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuIcon from '@mui/icons-material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import Menu from '@mui/material/Menu';
 import ApiModeToggle from '../ui/ApiModeToggle';
-import Box from '@mui/material/Box';
 
 const drawerWidth = 240;
+const collapsedDrawerWidth = 88;
 
 const Topbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { isCollapsed, toggleSidebar } = useSidebar();
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -33,20 +42,31 @@ const Topbar = () => {
     handleClose();
   };
 
+  const appBarWidth = isMobile
+    ? '100%'
+    : `calc(100% - ${isCollapsed ? collapsedDrawerWidth : drawerWidth}px)`;
+
+  const appBarMarginLeft = isMobile ? 0 : `${isCollapsed ? collapsedDrawerWidth : drawerWidth}px`;
+
   return (
     <AppBar
       position="fixed"
       sx={{
-        width: { md: `calc(100% - ${drawerWidth}px)` },
-        ml: { md: `${drawerWidth}px` },
+        width: isMobile ? '100%' : `calc(100% - ${isCollapsed ? collapsedDrawerWidth : drawerWidth}px)`,
+        ml: isMobile ? 0 : `${isCollapsed ? collapsedDrawerWidth : drawerWidth}px`,
+        transition: theme.transitions.create(['width', 'margin'], {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.enteringScreen,
+        }),
       }}
     >
       <Toolbar>
         <IconButton
           color="inherit"
-          aria-label="open drawer"
+          aria-label="toggle sidebar"
+          onClick={toggleSidebar}
           edge="start"
-          sx={{ mr: 2, display: { md: 'none' } }}
+          sx={{ mr: 2 }}
         >
           <MenuIcon />
         </IconButton>

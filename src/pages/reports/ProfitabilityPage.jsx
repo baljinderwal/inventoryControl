@@ -24,7 +24,7 @@ const ProfitabilityPage = () => {
   const profitabilityData = useMemo(() => {
     if (!data) return null;
 
-    const { products, orders } = data;
+    const { products, salesOrders } = data;
     const productsMap = new Map(products.map(p => [p.id, p]));
 
     const start = new Date(startDate);
@@ -34,12 +34,12 @@ const ProfitabilityPage = () => {
 
     const productMetrics = {};
 
-    orders.forEach(order => {
+    salesOrders.forEach(order => {
       if (order.status !== 'Completed') return;
-      const completedDate = new Date(order.completedAt);
+      const completedDate = new Date(order.createdAt);
       if (completedDate < start || completedDate > end) return;
 
-      order.products.forEach(item => {
+      order.items.forEach(item => {
         const product = productsMap.get(item.productId);
         if (!product) return;
 

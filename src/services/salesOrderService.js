@@ -1,23 +1,23 @@
 import api from './api';
-import * as data from '/db.json';
 
 const local = {
   getSalesOrders: async () => {
     console.log("Fetching local sales orders");
+    const response = await fetch('/db.json');
+    const data = await response.json();
     return data.salesOrders || [];
   },
   addSalesOrder: async (order) => {
-    console.log("Adding local sales order", order);
-    // This is a mock
-    return { ...order, id: new Date().getTime() };
+    console.warn("Read-only mode: addSalesOrder disabled.", order);
+    return Promise.resolve({ ...order, id: new Date().getTime() });
   },
   updateSalesOrder: async (id, order) => {
-    console.log("Updating local sales order", id, order);
-    return { ...order, id };
+    console.warn("Read-only mode: updateSalesOrder disabled.", id, order);
+    return Promise.resolve({ ...order, id });
   },
   deleteSalesOrder: async (id) => {
-    console.log("Deleting local sales order", id);
-    return { id };
+    console.warn("Read-only mode: deleteSalesOrder disabled.", id);
+    return Promise.resolve({ id });
   },
 };
 

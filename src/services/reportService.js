@@ -9,18 +9,18 @@ const local = {
   getProfitabilityReportData: async () => {
     const data = await getLocalData();
     const products = data.products || [];
-    const orders = (data.orders || []).filter(o => o.status === 'Completed');
-    return { products, orders };
+    const salesOrders = (data.salesOrders || []).filter(o => o.status === 'Completed');
+    return { products, salesOrders };
   },
   getSalesHistory: async () => {
     const data = await getLocalData();
     const products = data.products || [];
-    const orders = (data.orders || []).filter(o => o.status === 'Completed');
-    if (!products.length || !orders.length) return [];
+    const salesOrders = (data.salesOrders || []).filter(o => o.status === 'Completed');
+    if (!products.length || !salesOrders.length) return [];
     const productMap = new Map(products.map(p => [p.id, p]));
-    return orders.filter(o => o.completedAt).flatMap(o => o.products.map(item => {
+    return salesOrders.flatMap(o => o.items.map(item => {
       const p = productMap.get(item.productId);
-      return { ...item, completedAt: new Date(o.completedAt), productName: p?.name, price: p?.price, totalSale: p ? item.quantity * p.price : 0 };
+      return { ...item, orderId: o.id, completedAt: new Date(o.createdAt), productName: p?.name, totalSale: p ? item.quantity * p.price : 0 };
     })).sort((a, b) => b.completedAt - a.completedAt);
   },
   getInventoryAging: async ({ locationId } = {}) => {
@@ -52,17 +52,17 @@ const local = {
 
 const remote = {
   getProfitabilityReportData: async () => {
-    const [pRes, oRes] = await Promise.all([api.get('/products'), api.get('/orders?status=Completed')]);
-    return { products: pRes.data, orders: oRes.data };
+    const [pRes, oRes] = await Promise.all([api.get('/products'), api.get('/salesOrders?status=Completed')]);
+    return { products: pRes.data, salesOrders: oRes.data };
   },
   getSalesHistory: async () => {
-    const [pRes, oRes] = await Promise.all([api.get('/products'), api.get('/orders?status=Completed')]);
-    const products = pRes.data, orders = oRes.data;
-    if (!products.length || !orders.length) return [];
+    const [pRes, oRes] = await Promise.all([api.get('/products'), api.get('/salesOrders?status=Completed')]);
+    const products = pRes.data, salesOrders = oRes.data;
+    if (!products.length || !salesOrders.length) return [];
     const productMap = new Map(products.map(p => [p.id, p]));
-    return orders.filter(o => o.completedAt).flatMap(o => o.products.map(item => {
-      const p = productMap.get(item.productId);
-      return { ...item, completedAt: new Date(o.completedAt), productName: p?.name, price: p?.price, totalSale: p ? item.quantity * p.price : 0 };
+    return salesOrders.flatMap(o => o.items.map(item => {
+        const p = productMap.get(item.productId);
+        return { ...item, orderId: o.id, completedAt: new Date(o.createdAt), productName: p?.name, totalSale: p ? item.quantity * p.price : 0 };
     })).sort((a, b) => b.completedAt - a.completedAt);
   },
   getInventoryAging: async ({ locationId } = {}) => {

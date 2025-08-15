@@ -25,6 +25,10 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
     *   **Add to POs:** Quickly add items to a Purchase Order by scanning their barcodes.
     *   **Adjust Stock:** Streamline stock adjustments by scanning a product to bring up its adjustment form instantly.
     *   **Product Management:** Add and edit barcodes directly on the product management page.
+*   **🤝 Customer & Sales Order Management:**
+    *   **Full Customer CRM:** Add, edit, and manage a complete database of your customers.
+    *   **Sales Order Processing:** Create, track, and manage orders from customers, from pending to completed.
+    *   **Automated Stock Deduction:** Stock levels are automatically adjusted when a sales order is marked as completed.
 *   **📝 Advanced Reporting Suite:**
     *   **Stock by Expiry Date:** A new report to identify items nearing their expiry date.
     *   **Sales History:** Track sales trends over time.
@@ -215,6 +219,8 @@ The application uses `json-server` to simulate a backend API. The data is stored
     *   **`locations`**: `{id, name, address}`
     *   **`users`**: `{id, name, email, password, role}`
     *   **`sales`**: `{id, date, items: [{productId, productName, quantity, price, total}], totalRevenue}`
+    *   **`customers`**: `{id, name, email, phone, address}`
+    *   **`salesOrders`**: `{id, customerId, customerName, createdAt, status, items: [{productId, productName, quantity, price}], total}`
 
 `json-server` automatically creates RESTful endpoints for each of these keys. For example, a `GET` request to `http://localhost:3001/products` will return all products.
 

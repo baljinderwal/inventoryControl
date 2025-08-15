@@ -109,6 +109,7 @@ const AddEditSOForm = ({ open, onClose, so }) => {
             services.stock.adjustStockLevel({
                 productId: item.productId,
                 quantity: -item.quantity,
+                locationId: 1, // Defaulting to Main Warehouse (ID 1) for now
                 // Note: This simplified logic doesn't specify which batch to pull from.
                 // A real implementation would need FEFO/FIFO logic here.
             });

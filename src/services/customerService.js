@@ -1,5 +1,4 @@
 import api from './api';
-import * as data from '/db.json';
 
 const transformCustomer = (customer) => ({
   ...customer,
@@ -8,20 +7,21 @@ const transformCustomer = (customer) => ({
 const local = {
   getCustomers: async () => {
     console.log("Fetching local customers");
+    const response = await fetch('/db.json');
+    const data = await response.json();
     return data.customers.map(transformCustomer);
   },
   addCustomer: async (customer) => {
-    console.log("Adding local customer", customer);
-    // This is a mock, in a real scenario you'd update the source
-    return { ...customer, id: new Date().getTime() };
+    console.warn("Read-only mode: addCustomer disabled.", customer);
+    return Promise.resolve({ ...customer, id: new Date().getTime() });
   },
   updateCustomer: async (id, customer) => {
-    console.log("Updating local customer", id, customer);
-    return { ...customer, id };
+    console.warn("Read-only mode: updateCustomer disabled.", id, customer);
+    return Promise.resolve({ ...customer, id });
   },
   deleteCustomer: async (id) => {
-    console.log("Deleting local customer", id);
-    return { id };
+    console.warn("Read-only mode: deleteCustomer disabled.", id);
+    return Promise.resolve({ id });
   },
 };
 

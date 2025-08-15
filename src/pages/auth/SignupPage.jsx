@@ -20,7 +20,7 @@ import {
   CheckCircleOutline,
   PersonOutline,
 } from '@mui/icons-material';
-import { AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
 const SignupPage = () => {
   const [form, setForm] = useState({

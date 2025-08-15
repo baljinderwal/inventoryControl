@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Drawer,
   List,
@@ -44,14 +44,20 @@ const navigation = [
     { name: 'Locations', href: '/settings/locations', icon: SettingsIcon, roles: ['Admin', 'Manager'] },
 ];
 
+// Animation Variants
 const sidebarVariants = {
   open: { width: drawerWidth, transition: { type: 'spring', stiffness: 300, damping: 30 } },
   closed: { width: collapsedDrawerWidth, transition: { type: 'spring', stiffness: 300, damping: 30 } }
 };
 
-const textVariants = {
-  open: { opacity: 1, x: 0, display: 'block', transition: { duration: 0.2 } },
-  closed: { opacity: 0, x: -20, transitionEnd: { display: 'none' } }
+const navListVariants = {
+  open: { transition: { staggerChildren: 0.07, delayChildren: 0.2 } },
+  closed: { transition: { staggerChildren: 0.05, staggerDirection: -1 } }
+};
+
+const navItemVariants = {
+  open: { y: 0, opacity: 1, transition: { y: { stiffness: 1000 } } },
+  closed: { y: 20, opacity: 0, transition: { y: { stiffness: 1000 } } }
 };
 
 const Sidebar = () => {
@@ -72,13 +78,8 @@ const Sidebar = () => {
         const isActive = location.pathname === item.href;
 
         return (
-            <Box component={motion.div} variants={navItemVariants} sx={{ position: 'relative' }}>
-                <Tooltip
-                    title={item.name}
-                    placement="right"
-                    arrow
-                    disableHoverListener={!isCollapsed}
-                >
+            <motion.div variants={navItemVariants}>
+                <Tooltip title={isCollapsed ? item.name : ''} placement="right" arrow>
                     <ListItemButton
                         component={NavLink}
                         to={item.href}
@@ -88,63 +89,52 @@ const Sidebar = () => {
                             py: 1.5,
                             minHeight: 48,
                             justifyContent: 'initial',
-                            bgcolor: isActive ? 'action.selected' : 'transparent',
+                            bgcolor: isActive ? theme.palette.action.selected : 'transparent',
+                            borderLeft: `4px solid ${isActive ? theme.palette.primary.main : 'transparent'}`,
+                            transition: 'background-color 0.2s, border-left 0.2s',
                             '&:hover': {
-                                bgcolor: 'action.hover',
+                                bgcolor: theme.palette.action.hover,
                             },
                         }}
                     >
-                        {isActive && (
-                            <motion.div
-                                layoutId="active-indicator"
-                                style={{
-                                    position: 'absolute',
-                                    left: 0,
-                                    top: 0,
-                                    bottom: 0,
-                                    width: '4px',
-                                    backgroundColor: theme.palette.primary.main,
-                                    borderRadius: '0 4px 4px 0',
-                                }}
-                            />
-                        )}
                         <ListItemIcon sx={{ minWidth: 0, mr: isCollapsed ? 0 : 3, justifyContent: 'center', transition: 'margin 0.2s' }}>
-                            <motion.div whileHover={{ scale: 1.1 }} aria-hidden="true">
+                            <motion.div whileHover={{ scale: 1.1 }}>
                                 <Icon />
                             </motion.div>
                         </ListItemIcon>
-                        <AnimatePresence>
-                        {!isCollapsed && (
-                            <motion.div
-                                variants={textVariants}
-                                initial="closed"
-                                animate="open"
-                                exit="closed"
-                                style={{ whiteSpace: 'nowrap' }}
-                            >
-                                <ListItemText primary={item.name} />
-                            </motion.div>
-                        )}
-                        </AnimatePresence>
+                        <ListItemText
+                            primary={item.name}
+                            sx={{
+                                opacity: isCollapsed ? 0 : 1,
+                                transition: 'opacity 0.2s 0.1s',
+                                whiteSpace: 'nowrap',
+                            }}
+                        />
                     </ListItemButton>
                 </Tooltip>
-            </Box>
+            </motion.div>
         );
     };
 
     const drawerContent = (
       <>
-        <Toolbar sx={{ justifyContent: 'center', cursor: 'pointer' }} onClick={toggleSidebar}>
+        <Toolbar sx={{ justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }} onClick={toggleSidebar}>
           <Typography variant="h6" noWrap component="div">
             {isCollapsed ? 'I-C' : 'Inv-Ctrl'}
           </Typography>
         </Toolbar>
-        <Box component={motion.div} layout="position" sx={{ pt: 1 }}>
-            <List component="nav">
-                {filteredNavigation.map((item) => (
-                    <NavItem key={item.name} item={item} />
-                ))}
-            </List>
+        <Box sx={{ overflow: 'auto' }}>
+            <motion.div
+                variants={navListVariants}
+                initial="closed"
+                animate="open"
+            >
+                <List component="nav" sx={{ p: 0 }}>
+                    {filteredNavigation.map((item) => (
+                        <NavItem key={item.name} item={item} />
+                    ))}
+                </List>
+            </motion.div>
         </Box>
       </>
     );
@@ -157,7 +147,7 @@ const Sidebar = () => {
                 onClose={toggleSidebar}
                 onOpen={toggleSidebar}
                 ModalProps={{ keepMounted: true }}
-                sx={{ '& .MuiDrawer-paper': { width: drawerWidth, bgcolor: 'background.paper' } }}
+                sx={{ '& .MuiDrawer-paper': { width: drawerWidth, bgcolor: 'background.paper', display: 'flex', flexDirection: 'column' } }}
             >
                 {drawerContent}
             </SwipeableDrawer>
@@ -178,6 +168,8 @@ const Sidebar = () => {
                     boxSizing: 'border-box',
                     overflowX: 'hidden',
                     bgcolor: 'background.paper',
+                    display: 'flex',
+                    flexDirection: 'column',
                 },
             }}
         >

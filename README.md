@@ -42,13 +42,6 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
     *   **Manager:** Access to all features except user management, including location settings.
     *   **Staff:** Access to core features like dashboard, products, stock, and orders.
 *   **🚀 Fast & Modern Tech:** Built with Vite for a lightning-fast development experience and React for a reactive UI.
-*   **💅 Sleek UI:** A beautiful and intuitive user interface built with Material-UI.
-*   **🔐 World-Class Login Experience:** A modern, beautiful, and highly functional login page designed for a seamless and secure user experience. It features:
-    *   A focused, single-column layout with a vibrant, colorful background.
-    *   Real-time inline validation with clear, instructive error messages.
-    *   Helpful microinteractions like success checkmarks in fields and a "shake" animation for submission errors.
-    *   Enhanced accessibility, including support for reduced motion preferences and Caps Lock detection.
-    *   Progressive authentication options with UI for "Sign in with Google" and "Sign in with a passkey".
 
 ---
 
@@ -68,7 +61,12 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
     2.  **Sleek Dark:** A modern dark theme with a slate background and vibrant accents.
     3.  **Soothing Blue:** A light theme with calming blue hues.
 
-- **🔐 World-Class Login Experience:** A modern, beautiful, and highly functional login page designed for a seamless and secure user experience.
+- **🔐 World-Class Login Experience:** A modern, beautiful, and highly functional login page designed for a seamless and secure user experience. It features:
+    *   A focused, single-column layout with a vibrant, colorful background.
+    *   Real-time inline validation with clear, instructive error messages.
+    *   Helpful microinteractions like success checkmarks in fields and a "shake" animation for submission errors.
+    *   Enhanced accessibility, including support for reduced motion preferences and Caps Lock detection.
+    *   Progressive authentication options with UI for "Sign in with Google" and "Sign in with a passkey".
 
 ---
 
@@ -156,7 +154,7 @@ The project follows a feature-based structure, which makes it scalable and easy 
     *   `ApiModeContext.jsx`: A powerful development tool that manages the application's data fetching mode. It provides the rest of the application with the correct set of service functions (`local` or `api`) based on the user's selection from the `ApiModeToggle` component. It also persists the user's choice in `localStorage`.
     *   `AuthContext.jsx`: Manages user authentication state (`isAuthenticated`, `login`, `logout`).
     *   `NotificationContext.jsx`: Provides a global system for showing snackbar notifications.
-    
+
 ## ⚙️ Getting Started
 
 

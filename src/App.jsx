@@ -28,7 +28,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route element={<Layout />}>
           <Route element={<PrivateRoute roles={['Admin', 'Manager', 'Staff']} />}>
-            <Route path="/" element={<DashboardPage />} />
+          <Route path="/" element={<DashboardPage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/stock" element={<StockPage />} />
           <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />

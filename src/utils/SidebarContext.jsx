@@ -3,11 +3,8 @@ import React, { createContext, useState, useContext, useEffect, useMemo } from '
 const SidebarContext = createContext(null);
 
 export const SidebarProvider = ({ children }) => {
-  // Default to false and hydrate from localStorage in a useEffect.
-  // This is more robust in environments with server-rendering or strict mode.
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // On initial mount, check localStorage for a persisted state.
   useEffect(() => {
     try {
       const storedValue = localStorage.getItem('sidebar-collapsed');
@@ -17,11 +14,9 @@ export const SidebarProvider = ({ children }) => {
     } catch (error) {
       console.error("Failed to parse sidebar state from localStorage", error);
     }
-  }, []); // Empty dependency array ensures this runs only once on mount.
+  }, []);
 
-  // When the state changes, persist it to localStorage.
   useEffect(() => {
-    // A try-catch block is good practice for localStorage access.
     try {
       localStorage.setItem('sidebar-collapsed', JSON.stringify(isCollapsed));
     } catch (error) {

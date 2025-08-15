@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { Box, Toolbar, useMediaQuery, useTheme } from '@mui/material';
+import { Box, Toolbar, useTheme, useMediaQuery } from '@mui/material';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import { useSidebar } from '../../utils/SidebarContext';
@@ -10,15 +10,13 @@ const collapsedDrawerWidth = 88;
 
 const Layout = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { isCollapsed } = useSidebar();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const mainContentWidth = isMobile
-    ? '100%'
-    : `calc(100% - ${isCollapsed ? collapsedDrawerWidth : drawerWidth}px)`;
+  const mainContentMarginLeft = isMobile ? 0 : (isCollapsed ? collapsedDrawerWidth : drawerWidth);
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
+    <Box sx={{ display: 'flex' }}>
       <Topbar />
       <Sidebar />
       <Box
@@ -26,15 +24,18 @@ const Layout = () => {
         sx={{
           flexGrow: 1,
           p: 3,
-          width: mainContentWidth,
-          ml: isMobile ? 0 : `${isCollapsed ? collapsedDrawerWidth : drawerWidth}px`,
-          transition: theme.transitions.create(['width', 'margin'], {
+          width: {
+            xs: '100%',
+            md: `calc(100% - ${mainContentMarginLeft}px)`
+          },
+          marginLeft: { md: `${mainContentMarginLeft}px` },
+          transition: theme.transitions.create(['margin-left', 'width'], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.enteringScreen,
           }),
         }}
       >
-        <Toolbar /> {/* Spacer for the fixed AppBar */}
+        <Toolbar /> {/* Spacer for Topbar */}
         <Outlet />
       </Box>
     </Box>

@@ -5,13 +5,17 @@ import StockAdjustmentForm from './StockAdjustmentForm';
 import StockTransferForm from './StockTransferForm';
 import AppDialog from '../../components/ui/AppDialog';
 import MuiTable from '../../components/ui/Table';
+import BarcodeScanner from '../../components/ui/BarcodeScanner';
+import { useNotification } from '../../utils/NotificationContext';
 
 import Alert from '@mui/material/Alert';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import CircularProgress from '@mui/material/CircularProgress';
-import DialogContent from '@mui/material/DialogContent';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -20,12 +24,16 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
+import { QrCodeScanner } from '@mui/icons-material';
+
 const StockPage = () => {
   const [isAdjustmentModalOpen, setIsAdjustmentModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const { mode, services } = useApi();
+  const { showNotification } = useNotification();
 
   const { data: stockLevels = [], isLoading, isError, error } = useQuery({
     queryKey: ['stock', mode],
@@ -60,6 +68,16 @@ const StockPage = () => {
   const handleCloseTransferModal = () => {
     setSelectedProduct(null);
     setIsTransferModalOpen(false);
+  };
+
+  const handleScan = (scannedBarcode) => {
+    setIsScannerOpen(false);
+    const product = stockLevels?.find(p => p.barcode === scannedBarcode);
+    if (product) {
+      handleOpenAdjustmentModal(product);
+    } else {
+      showNotification(`Product with barcode ${scannedBarcode} not found.`, 'error');
+    }
   };
 
   const tableHeaders = ['Name', 'SKU', 'Total Stock', 'Status', 'Actions'];
@@ -100,10 +118,26 @@ const StockPage = () => {
 
   return (
     <div>
-      <Typography variant="h4" gutterBottom>
-        Stock Management
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h4" gutterBottom>
+          Stock Management
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<QrCodeScanner />}
+          onClick={() => setIsScannerOpen(true)}
+        >
+          Scan to Adjust
+        </Button>
+      </Box>
       <MuiTable headers={tableHeaders} data={tableData || []} />
+
+      <Dialog open={isScannerOpen} onClose={() => setIsScannerOpen(false)}>
+        <DialogTitle>Scan Barcode to Adjust Stock</DialogTitle>
+        <DialogContent>
+          {isScannerOpen && <BarcodeScanner onScan={handleScan} />}
+        </DialogContent>
+      </Dialog>
 
       {selectedProduct && (
         <AppDialog

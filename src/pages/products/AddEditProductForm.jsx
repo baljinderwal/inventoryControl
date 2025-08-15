@@ -26,6 +26,7 @@ const AddEditProductForm = ({
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
+    barcode: '',
     category: '',
     price: '',
     costPrice: '',
@@ -49,6 +50,7 @@ const AddEditProductForm = ({
       setFormData({
         name: product.name || '',
         sku: product.sku || '',
+        barcode: product.barcode || '',
         category: product.category || '',
         price: product.price || '',
         costPrice: product.costPrice || '',
@@ -103,7 +105,8 @@ const AddEditProductForm = ({
     <Box component="form" onSubmit={handleSubmit}>
       <TextField margin="dense" id="name" name="name" label="Product Name" type="text" fullWidth variant="standard" value={formData.name} onChange={handleChange} required />
       <TextField margin="dense" id="sku" name="sku" label="SKU" type="text" fullWidth variant="standard" value={formData.sku} onChange={handleChange} required />
-      <TextField margin="dense" id="category" name="category" label="Category" type="text" fullWidth variant="standard" value={formData.category} onChange={handleChange} required />
+      <TextField margin="dense" id="barcode" name="barcode" label="Barcode" type="text" fullWidth variant="standard" value={formData.barcode} onChange={handleChange} />
+      <TextField margin="dense"id="category" name="category" label="Category" type="text" fullWidth variant="standard" value={formData.category} onChange={handleChange} required />
       <TextField margin="dense" id="price" name="price" label="Price" type="number" fullWidth variant="standard" value={formData.price} onChange={handleChange} required />
       <TextField margin="dense" id="costPrice" name="costPrice" label="Cost Price" type="number" fullWidth variant="standard" value={formData.costPrice} onChange={handleChange} required />
       <TextField margin="dense" id="lowStockThreshold" name="lowStockThreshold" label="Low Stock Threshold" type="number" fullWidth variant="standard" value={formData.lowStockThreshold} onChange={handleChange} required />

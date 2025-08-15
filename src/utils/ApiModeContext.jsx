@@ -5,6 +5,8 @@ import { reportService } from '../services/reportService';
 import { poService } from '../services/poService';
 import { supplierService } from '../services/supplierService';
 import { userService } from '../services/userService';
+import { customerService } from '../services/customerService';
+import { salesOrderService } from '../services/salesOrderService';
 
 const ApiModeContext = createContext();
 
@@ -35,6 +37,8 @@ export const ApiModeProvider = ({ children }) => {
       po: poService[serviceMode],
       suppliers: supplierService[serviceMode],
       users: userService[serviceMode],
+      customers: customerService[serviceMode],
+      salesOrders: salesOrderService[serviceMode],
     };
   }, [mode]);
 

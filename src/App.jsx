@@ -15,6 +15,8 @@ import StockExpiryReport from './pages/reports/StockExpiryReport';
 import PurchaseOrdersPage from './pages/orders/PurchaseOrdersPage';
 import UsersPage from './pages/users/UsersPage';
 import LocationsPage from './pages/settings/LocationsPage';
+import CustomersPage from './pages/customers/CustomersPage';
+import SalesOrdersPage from './pages/sales/SalesOrdersPage';
 import Layout from './components/layout/Layout';
 import PrivateRoute from './components/PrivateRoute';
 
@@ -31,6 +33,8 @@ function App() {
         </Route>
         <Route element={<PrivateRoute roles={['Admin', 'Manager']} />}>
           <Route path="/suppliers" element={<SuppliersPage />} />
+          <Route path="/customers" element={<CustomersPage />} />
+          <Route path="/sales-orders" element={<SalesOrdersPage />} />
           <Route path="/reports" element={<ReportsLayout />}>
             <Route index element={<Navigate to="profitability" replace />} />
             <Route path="profitability" element={<ProfitabilityPage />} />

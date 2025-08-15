@@ -1,13 +1,13 @@
 {
   "products": [
-    { "id": 1, "name": "Wireless Mouse", "sku": "WM-001", "category": "Electronics", "price": 25.99, "costPrice": 15.50, "lowStockThreshold": 20, "createdAt": "2024-11-10T10:00:00Z" },
-    { "id": 2, "name": "Mechanical Keyboard", "sku": "MK-001", "category": "Electronics", "price": 120.00, "costPrice": 80.00, "lowStockThreshold": 50, "createdAt": "2025-01-15T11:30:00Z" },
-    { "id": 3, "name": "USB-C Hub", "sku": "UCH-001", "category": "Accessories", "price": 45.50, "costPrice": 30.00, "lowStockThreshold": 25, "createdAt": "2025-05-20T14:00:00Z" },
-    { "id": 4, "name": "14\" Laptop Sleeve", "sku": "LS-014", "category": "Accessories", "price": 18.99, "costPrice": 10.00, "lowStockThreshold": 50, "createdAt": "2024-09-05T09:00:00Z" },
-    { "id": 5, "name": "27\" 4K Monitor", "sku": "M-4K-027", "category": "Monitors", "price": 499.99, "costPrice": 350.00, "lowStockThreshold": 50, "createdAt": "2025-07-22T18:00:00Z" },
-    { "id": 6, "name": "Ergonomic Chair", "sku": "EC-001", "category": "Furniture", "price": 299.00, "costPrice": 200.00, "lowStockThreshold": 35, "createdAt": "2024-03-12T12:00:00Z" },
-    { "id": 7, "name": "Standing Desk", "sku": "SD-001", "category": "Furniture", "price": 350.00, "costPrice": 250.00, "lowStockThreshold": 20, "createdAt": "2025-06-30T16:45:00Z" },
-    { "id": 8, "name": "Webcam 1080p", "sku": "WC-1080", "category": "Electronics", "price": 65.00, "costPrice": 40.00, "lowStockThreshold": 100, "createdAt": "2025-08-01T08:00:00Z" }
+    { "id": 1, "name": "Wireless Mouse", "sku": "WM-001", "category": "Electronics", "price": 25.99, "costPrice": 15.50, "lowStockThreshold": 20, "createdAt": "2024-11-10T10:00:00Z", "barcode": "8901234567890" },
+    { "id": 2, "name": "Mechanical Keyboard", "sku": "MK-001", "category": "Electronics", "price": 120.00, "costPrice": 80.00, "lowStockThreshold": 50, "createdAt": "2025-01-15T11:30:00Z", "barcode": "8902345678901" },
+    { "id": 3, "name": "USB-C Hub", "sku": "UCH-001", "category": "Accessories", "price": 45.50, "costPrice": 30.00, "lowStockThreshold": 25, "createdAt": "2025-05-20T14:00:00Z", "barcode": "8903456789012" },
+    { "id": 4, "name": "14\" Laptop Sleeve", "sku": "LS-014", "category": "Accessories", "price": 18.99, "costPrice": 10.00, "lowStockThreshold": 50, "createdAt": "2024-09-05T09:00:00Z", "barcode": "8904567890123" },
+    { "id": 5, "name": "27\" 4K Monitor", "sku": "M-4K-027", "category": "Monitors", "price": 499.99, "costPrice": 350.00, "lowStockThreshold": 50, "createdAt": "2025-07-22T18:00:00Z", "barcode": "8905678901234" },
+    { "id": 6, "name": "Ergonomic Chair", "sku": "EC-001", "category": "Furniture", "price": 299.00, "costPrice": 200.00, "lowStockThreshold": 35, "createdAt": "2024-03-12T12:00:00Z", "barcode": "8906789012345" },
+    { "id": 7, "name": "Standing Desk", "sku": "SD-001", "category": "Furniture", "price": 350.00, "costPrice": 250.00, "lowStockThreshold": 20, "createdAt": "2025-06-30T16:45:00Z", "barcode": "8907890123456" },
+    { "id": 8, "name": "Webcam 1080p", "sku": "WC-1080", "category": "Electronics", "price": 65.00, "costPrice": 40.00, "lowStockThreshold": 100, "createdAt": "2025-08-01T08:00:00Z", "barcode": "8908901234567" }
   ],
   "suppliers": [
     { "id": 1, "name": "ElectroSupply", "contact": "John Doe", "email": "john.doe@electrosupply.com", "products": [1, 2, 8] },
@@ -43,5 +43,34 @@
   ],
   "sales": [
     { "id": 1, "date": "2025-08-13T14:30:00Z", "items": [{ "productId": 1, "productName": "Wireless Mouse", "quantity": 2, "price": 25.99, "total": 51.98 }], "totalRevenue": 51.98 }
+  ],
+  "customers": [
+    { "id": 1, "name": "John Smith", "email": "john.smith@example.com", "phone": "555-1234", "address": "123 Main St, Anytown, USA" },
+    { "id": 2, "name": "Jane Doe", "email": "jane.doe@example.com", "phone": "555-5678", "address": "456 Oak Ave, Othertown, USA" }
+  ],
+  "salesOrders": [
+    {
+      "id": 1,
+      "customerId": 1,
+      "customerName": "John Smith",
+      "createdAt": "2025-08-14T10:00:00Z",
+      "status": "Completed",
+      "items": [
+        { "productId": 1, "productName": "Wireless Mouse", "quantity": 1, "price": 25.99 },
+        { "productId": 2, "productName": "Mechanical Keyboard", "quantity": 1, "price": 120.00 }
+      ],
+      "total": 145.99
+    },
+    {
+      "id": 2,
+      "customerId": 2,
+      "customerName": "Jane Doe",
+      "createdAt": "2025-08-15T11:30:00Z",
+      "status": "Pending",
+      "items": [
+        { "productId": 3, "productName": "USB-C Hub", "quantity": 2, "price": 45.50 }
+      ],
+      "total": 91.00
+    }
   ]
 }

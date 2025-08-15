@@ -13,23 +13,23 @@ import './index.css';
 // Create a client
 const queryClient = new QueryClient();
 
-// A sleek, modern dark theme
+// A clean and professional light theme
 let theme = createTheme({
   palette: {
-    mode: 'dark',
+    mode: 'light',
     primary: {
-      main: '#6366f1', // Indigo
+      main: '#4f46e5', // A strong Indigo
     },
     secondary: {
-      main: '#ec4899', // Pink
+      main: '#10b981', // A vibrant Green
     },
     background: {
-      default: '#0f172a', // Slate 900
-      paper: '#1e293b',   // Slate 800
+      default: '#f8fafc', // Slate 50 - very light grey
+      paper: '#ffffff',   // Pure white
     },
     text: {
-      primary: '#e2e8f0', // Slate 200
-      secondary: '#94a3b8', // Slate 400
+      primary: '#1e293b', // Slate 800
+      secondary: '#64748b', // Slate 500
     },
   },
   shape: {
@@ -39,22 +39,25 @@ let theme = createTheme({
     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"',
     h4: {
       fontWeight: 700,
+      color: '#1e293b',
     },
     h5: {
       fontWeight: 600,
+      color: '#334155',
     },
     h6: {
       fontWeight: 600,
+      color: '#475569',
     },
   },
   components: {
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: '#1e293b', // Slate 800
-          backgroundImage: 'none',
-          boxShadow: 'none',
-          borderBottom: '1px solid #334155', // Slate 700
+          backgroundColor: '#ffffff',
+          color: '#1e293b',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+          borderBottom: '1px solid #e2e8f0', // Slate 200
         },
       },
     },

@@ -52,20 +52,8 @@ const navListVariants = {
 };
 
 const navItemVariants = {
-  open: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      y: { stiffness: 1000, velocity: -100 }
-    }
-  },
-  closed: {
-    y: 20,
-    opacity: 0,
-    transition: {
-      y: { stiffness: 1000 }
-    }
-  }
+  open: { y: 0, opacity: 1, transition: { y: { stiffness: 1000 } } },
+  closed: { y: 20, opacity: 0, transition: { y: { stiffness: 1000 } } }
 };
 
 
@@ -102,18 +90,17 @@ const Sidebar = () => {
                     py: 1.5,
                     minHeight: 48,
                     justifyContent: 'initial',
-                    color: 'grey.400',
+                    color: 'text.secondary',
                     borderLeft: `4px solid transparent`,
-                    transition: 'background-color 0.2s, border-left 0.2s, color 0.2s',
                     '&:hover': {
-                    bgcolor: 'rgba(255, 255, 255, 0.08)',
-                    color: 'common.white',
+                      color: 'primary.main',
+                      bgcolor: 'action.hover',
                     },
                     ...(isActive && {
-                    color: 'common.white',
-                    fontWeight: 'fontWeightBold',
-                    bgcolor: 'rgba(255, 255, 255, 0.1)',
-                    borderLeft: `4px solid ${theme.palette.primary.main}`,
+                      color: 'primary.main',
+                      fontWeight: 'fontWeightBold',
+                      bgcolor: theme.palette.action.selected,
+                      borderLeft: `4px solid ${theme.palette.primary.main}`,
                     }),
                 }}
                 >
@@ -171,8 +158,8 @@ const Sidebar = () => {
       boxSizing: 'border-box',
       overflowX: 'hidden',
       borderRight: { md: `1px solid ${theme.palette.divider}` },
-      background: `linear-gradient(180deg, ${theme.palette.grey[900]}, ${theme.palette.grey[800]})`,
-      color: theme.palette.common.white,
+      // Light theme styles
+      backgroundColor: 'background.paper',
     },
   };
 

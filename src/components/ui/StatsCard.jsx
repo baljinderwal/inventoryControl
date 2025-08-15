@@ -12,13 +12,12 @@ const StatsCard = ({ title, value, icon }) => {
   return (
     <Card
       sx={{
-        backgroundColor: 'background.paper',
         border: `1px solid ${theme.palette.divider}`,
         boxShadow: 'none',
         transition: 'border-color 0.3s, box-shadow 0.3s',
         '&:hover': {
           borderColor: theme.palette.primary.main,
-          boxShadow: `0 0 15px ${theme.palette.primary.main}33`,
+          boxShadow: `0 4px 20px -2px ${theme.palette.primary.main}40`,
         },
       }}
     >
@@ -26,7 +25,7 @@ const StatsCard = ({ title, value, icon }) => {
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Avatar
             sx={{
-              bgcolor: 'primary.dark',
+              bgcolor: 'primary.main',
               color: 'primary.contrastText',
               mr: 2
             }}

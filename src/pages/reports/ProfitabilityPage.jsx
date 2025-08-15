@@ -1,11 +1,47 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import {
   Paper, Typography, Box, CircularProgress, Alert, Grid, Card, CardContent,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField
 } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie } from 'recharts';
+
+const LazyBarChart = React.lazy(() => 
+  import('recharts').then(module => ({ 
+    default: ({ data, ...props }) => {
+      const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = module;
+      return (
+        <ResponsiveContainer>
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+            <Legend />
+            <Bar dataKey="totalGrossProfit" fill="#8884d8" name="Gross Profit" />
+          </BarChart>
+        </ResponsiveContainer>
+      );
+    }
+  }))
+);
+
+const LazyPieChart = React.lazy(() => 
+  import('recharts').then(module => ({ 
+    default: ({ data, ...props }) => {
+      const { PieChart, Pie, Tooltip, Legend, ResponsiveContainer } = module;
+      return (
+        <ResponsiveContainer>
+          <PieChart>
+            <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={120} fill="#8884d8" label />
+            <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
+      );
+    }
+  }))
+);
 
 const ProfitabilityPage = () => {
   const [startDate, setStartDate] = useState(() => {
@@ -105,13 +141,17 @@ const ProfitabilityPage = () => {
             <Grid item xs={12} md={8}>
               <Paper sx={{ p: 2, height: 400 }}>
                 <Typography variant="h6">Top 5 Most Profitable Products</Typography>
-                <ResponsiveContainer><BarChart data={profitabilityData.top5ProfitableProducts}><CartesianGrid strokeDasharray="3 3" /><XAxis dataKey="name" /><YAxis /><Tooltip formatter={(value) => `$${value.toFixed(2)}`} /><Legend /><Bar dataKey="totalGrossProfit" fill="#8884d8" name="Gross Profit" /></BarChart></ResponsiveContainer>
+                <Suspense fallback={<CircularProgress />}>
+                  <LazyBarChart data={profitabilityData.top5ProfitableProducts} />
+                </Suspense>
               </Paper>
             </Grid>
             <Grid item xs={12} md={4}>
               <Paper sx={{ p: 2, height: 400 }}>
                 <Typography variant="h6">Profit by Category</Typography>
-                <ResponsiveContainer><PieChart><Pie data={profitabilityData.profitByCategory} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={120} fill="#8884d8" label /><Tooltip formatter={(value) => `$${value.toFixed(2)}`} /><Legend /></PieChart></ResponsiveContainer>
+                <Suspense fallback={<CircularProgress />}>
+                  <LazyPieChart data={profitabilityData.profitByCategory} />
+                </Suspense>
               </Paper>
             </Grid>
           </Grid>

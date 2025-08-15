@@ -42,19 +42,11 @@ const navigation = [
     { name: 'Locations', href: '/settings/locations', icon: SettingsIcon, roles: ['Admin', 'Manager'] },
 ];
 
-const sidebarVariants = {
-  open: { width: drawerWidth, transition: { type: 'spring', stiffness: 300, damping: 30 } },
-  closed: { width: collapsedDrawerWidth, transition: { type: 'spring', stiffness: 300, damping: 30 } },
-};
-
-const MotionDrawer = motion(Drawer);
-
 const Sidebar = () => {
   const { user } = useAuth();
   const { isCollapsed, toggleSidebar } = useSidebar();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const prefersReducedMotion = useMediaQuery('@media (prefers-reduced-motion: reduce)');
   const location = useLocation();
 
   const filteredNavigation = navigation.filter(item => {
@@ -94,7 +86,7 @@ const Sidebar = () => {
             primary={item.name}
             sx={{
               opacity: isCollapsed ? 0 : 1,
-              transition: 'opacity 0.2s 0.1s',
+              transition: 'opacity 0.2s ease-in-out',
               whiteSpace: 'nowrap',
             }}
           />
@@ -125,24 +117,32 @@ const Sidebar = () => {
         ModalProps={{ keepMounted: true }}
         sx={{ '& .MuiDrawer-paper': { width: drawerWidth } }}
       >
-        {/* Toolbar spacer to push content below the main app bar */}
-        <Box sx={theme.mixins.toolbar} />
+        <Box sx={theme.mixins.toolbar} /> {/* Spacer */}
         {drawerContent}
       </SwipeableDrawer>
     );
   }
 
+  const currentWidth = isCollapsed ? collapsedDrawerWidth : drawerWidth;
+
   return (
-    <MotionDrawer
+    <Drawer
       variant="permanent"
-      open
-      variants={prefersReducedMotion ? {} : sidebarVariants}
-      animate={isCollapsed ? 'closed' : 'open'}
       sx={{
+        width: currentWidth,
         flexShrink: 0,
+        whiteSpace: 'nowrap',
+        transition: theme.transitions.create('width', {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.enteringScreen,
+        }),
         '& .MuiDrawer-paper': {
-          // Position the drawer below the AppBar
-          top: `64px`, // Standard AppBar height
+          width: currentWidth,
+          transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+          }),
+          top: `64px`,
           height: `calc(100% - 64px)`,
           boxSizing: 'border-box',
           overflowX: 'hidden',
@@ -152,7 +152,7 @@ const Sidebar = () => {
       }}
     >
       {drawerContent}
-    </MotionDrawer>
+    </Drawer>
   );
 };
 

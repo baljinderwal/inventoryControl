@@ -1,7 +1,6 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
+import { Box, Toolbar } from '@mui/material';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 
@@ -12,9 +11,12 @@ const Layout = () => {
       <Sidebar />
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 3, width: { md: `calc(100% - 240px)` } }}
+        sx={{
+          flexGrow: 1,
+          p: 3,
+        }}
       >
-        <Toolbar /> {/* Spacer for the fixed AppBar */}
+        <Toolbar /> {/* Spacer for Topbar */}
         <Outlet />
       </Box>
     </Box>

@@ -4,19 +4,51 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
 
 ## ✨ Features
 
-- **📊 Interactive Dashboard:** Get a quick overview of your business performance with key metrics and charts.
-- **📦 Product Management:** Full CRUD (Create, Read, Update, Delete) functionality for your products.
-- **🏢 Supplier Tracking:** Manage your suppliers and the products they provide.
-- **🚚 Order Processing:** Keep track of purchase orders and their statuses.
-- **📈 Stock Control with Batch and Expiry Tracking:** View and manage your current stock levels, track products by batch number and expiry date, and deduct stock using FEFO (First-Expiring, First-Out) logic.
-- **🌐 Multi-Location Inventory Management:** Manage locations, view location-specific stock, transfer stock between locations, and filter reports by location.
-- **⚡ Barcode Scanning for Efficiency:** Use a device's camera to scan product barcodes to accelerate workflows like adding items to purchase orders and adjusting stock.
-- **🤝 Customer & Sales Order Management:** A full customer CRM with sales order processing and automated stock deduction.
-- **📝 Advanced Reporting Suite:** A comprehensive set of reports including Stock by Expiry Date, Sales History, Inventory Aging, Supplier Performance, and Profitability Analysis.
-- **📄 CSV Data Export:** Export data from main pages and all reports to CSV format.
-- **👤 User Administration:** Manage users and their roles within the system.
-- **🔐 Role-Based Access Control (RBAC):** Predefined roles (Admin, Manager, Staff) with different levels of access.
-- **🚀 Fast & Modern Tech:** Built with Vite for a lightning-fast development experience and React for a reactive UI.
+  **📊 Interactive Dashboard:** Get a quick overview of your business performance with key metrics and charts.
+    *   **Sales & Revenue Analytics:** View total sales and revenue at a glance.
+    *   **Sales Trends:** A dynamic line chart visualizes sales revenue over time.
+    *   **Low Stock Alerts:** Immediately see which products are running low on stock.
+*   **📦 Product Management:** Full CRUD (Create, Read, Update, Delete) functionality for your products.
+*   **🏢 Supplier Tracking:** Manage your suppliers and the products they provide.
+*   **🚚 Order Processing:** Keep track of purchase orders and their statuses.
+*   **📈 Stock Control with Batch and Expiry Tracking:**
+    *   View and manage your current stock levels.
+    *   Track products by batch number and expiry date.
+    *   Deduct stock using FEFO (First-Expiring, First-Out) logic.
+*   **🌐 Multi-Location Inventory Management:**
+    *   **Manage Locations:** Admins and Managers can add, edit, and delete inventory locations via the "Locations" settings page.
+    *   **Location-Specific Stock:** View stock levels for each product broken down by location on the Stock page.
+    *   **Stock Transfers:** Easily transfer stock between locations using a dedicated transfer form on the Stock page.
+    *   **Filtered Reports:** Reports like Inventory Aging and Stock Value can be filtered by location to provide more granular insights.
+*   **⚡ Barcode Scanning for Efficiency:**
+    *   **Accelerated Workflows:** Use a device's camera to scan product barcodes, significantly speeding up data entry.
+    *   **Add to POs:** Quickly add items to a Purchase Order by scanning their barcodes.
+    *   **Adjust Stock:** Streamline stock adjustments by scanning a product to bring up its adjustment form instantly.
+    *   **Product Management:** Add and edit barcodes directly on the product management page.
+*   **🤝 Customer & Sales Order Management:**
+    *   **Full Customer CRM:** Add, edit, and manage a complete database of your customers.
+    *   **Sales Order Processing:** Create, track, and manage orders from customers, from pending to completed.
+    *   **Automated Stock Deduction:** Stock levels are automatically adjusted when a sales order is marked as completed.
+*   **📝 Advanced Reporting Suite:**
+    *   **Stock by Expiry Date:** A new report to identify items nearing their expiry date.
+    *   **Sales History:** Track sales trends over time.
+    *   **Inventory Aging:** Identify slow-moving and obsolete stock.
+    *   **Supplier Performance:** Evaluate supplier reliability and order history.
+    *   **Profitability Analysis:** Analyze revenue, costs, and profit margins.
+*   **📄 CSV Data Export:** Export data from main pages (Products, Orders, Suppliers) and all reports to CSV format for offline analysis.
+*   **👤 User Administration:** Manage users and their roles within the system.
+*   **🔐 Role-Based Access Control (RBAC):**
+    *   **Admin:** Full access to all features, including user management and location settings.
+    *   **Manager:** Access to all features except user management, including location settings.
+    *   **Staff:** Access to core features like dashboard, products, stock, and orders.
+*   **🚀 Fast & Modern Tech:** Built with Vite for a lightning-fast development experience and React for a reactive UI.
+*   **💅 Sleek UI:** A beautiful and intuitive user interface built with Material-UI.
+*   **🔐 World-Class Login Experience:** A modern, beautiful, and highly functional login page designed for a seamless and secure user experience. It features:
+    *   A focused, single-column layout with a vibrant, colorful background.
+    *   Real-time inline validation with clear, instructive error messages.
+    *   Helpful microinteractions like success checkmarks in fields and a "shake" animation for submission errors.
+    *   Enhanced accessibility, including support for reduced motion preferences and Caps Lock detection.
+    *   Progressive authentication options with UI for "Sign in with Google" and "Sign in with a passkey".
 
 ---
 
@@ -67,32 +99,64 @@ The project follows a feature-based structure, which makes it scalable and easy 
 │   │   ├── ui/
 │   │   └── PrivateRoute.jsx
 │   ├── pages/
+│   │   ├── auth/
+│   │   ├── dashboard/
+│   │   ├── orders/
+│   │   ├── products/
+│   │   ├── reports/
+│   │   ├── settings/
+│   │   ├── stock/
+│   │   ├── suppliers/
+│   │   └── users/
 │   ├── services/
 │   ├── utils/
 │   ├── App.jsx
 │   ├── main.jsx
 │   └── index.css
-...
+├── .eslintrc.js
+├── .gitignore
+├── db.json
+├── index.html
+├── package.json
+└── vite.config.js
 ```
 
 ### File-by-File Breakdown (`src` directory)
 
-*   **`main.jsx`**: The application's entry point. It defines all three application themes, wraps the app in all necessary context providers (including the new `CustomThemeProvider`), and renders the `App` component.
-*   **`App.jsx`**: The root component that defines the application's routing structure. It's wrapped by the `SidebarProvider` to enable sidebar state management.
-*   **`components/`**: Contains reusable components.
-    *   **`layout/`**: Components that define the application's chrome.
-        *   `Layout.jsx`: The main layout for protected pages. It arranges the `Topbar`, `Sidebar`, and the main content area (`Outlet`).
-        *   `Sidebar.jsx`: A world-class, responsive, and animated navigation component. It is collapsible, persists its state, adapts for mobile, and is styled to sit below the `Topbar`.
-        *   `Topbar.jsx`: The full-width header bar of the application. It contains the sidebar toggle, the new `ThemeSwitcher` component, and the user account menu.
-    *   **`ui/`**: Generic, reusable UI components.
-        *   `ThemeSwitcher.jsx`: A new dropdown component that allows the user to select a theme.
-        *   `StatsCard.jsx`: A restyled card for displaying key metrics on the dashboard, designed to adapt to the selected theme.
-        *   `Button.jsx`: A custom button component built on top of MUI's `Button` that respects the application's theme.
-*   **`utils/`**: Contains shared utilities and React contexts.
-    *   **`ThemeContext.jsx`**: A new context to manage the currently active theme and persist the user's choice.
-    *   `SidebarContext.jsx`: A context to manage the collapsed state of the sidebar.
-    *   ... (other contexts and utils)
+*   **`main.jsx`**: The application's entry point. It renders the `App` component and wraps it with necessary context providers (`BrowserRouter`, `QueryClientProvider`, `AuthProvider`, `NotificationProvider`).
+*   **`App.jsx`**: The root component that defines the application's routing structure using `react-router-dom`. It sets up the main layout and distinguishes between public (`/login`) and private routes.
+*   **`index.css` / `App.css`**: Global stylesheets for the application.
 
+*   **`components/`**: Contains reusable components used across multiple pages.
+    *   **`layout/`**: Components that define the overall structure of the application.
+        *   `Layout.jsx`: The main layout for protected pages, including the `Topbar` and `Sidebar`.
+        *   `Sidebar.jsx`: The navigation sidebar with links to all the main pages.
+        *   `Topbar.jsx`: The header bar of the application.
+    *   **`ui/`**: Generic, reusable UI components.
+        *   `ApiModeToggle.jsx`: A UI switch component placed in the top bar that allows the user to toggle the application's data fetching mode between `local` (static file) and `api` (live server).
+        *   `AppDialog.jsx`: A customizable modal dialog.
+        *   `Button.jsx`: A styled button component.
+        *   `ConfirmationDialog.jsx`: A specific dialog for "Are you sure?" prompts.
+        *   `SearchBar.jsx`: A search input field.
+        *   `StatsCard.jsx`: A card for displaying key metrics on the dashboard.
+        *   `Table.jsx`: A reusable table component.
+    *   `PrivateRoute.jsx`: A component that protects routes from unauthenticated access. It redirects to the login page if the user is not logged in.
+
+*   **`pages/`**: Each subdirectory represents a major feature or page of the application.
+    *   **`auth/LoginPage.jsx`**: A modern, feature-rich login page component.
+    *   **`dashboard/DashboardPage.jsx`**: The main dashboard page, displaying stats and charts.
+    *   ... (and so on for `suppliers`, `stock`, `products`, and `users`).
+    *   **`reports/StockExpiryReport.jsx`**: A new report page that lists all inventory batches, sorted by the nearest expiry date. This is critical for managing perishable goods.
+
+*   **`services/`**: Handles all API communication. Each service file is structured to export two objects: `local` and `api`. This allows the application to dynamically switch between fetching from a static JSON file (for read-only local mode) and a live API server.
+    *   `api.js`: Creates a central `axios` instance with the base URL for the mock API.
+    *   `productService.js`, `stockService.js`, etc.: These files contain the logic for both local and remote data operations for each feature.
+
+*   **`utils/`**: Contains shared utilities and React contexts.
+    *   `ApiModeContext.jsx`: A powerful development tool that manages the application's data fetching mode. It provides the rest of the application with the correct set of service functions (`local` or `api`) based on the user's selection from the `ApiModeToggle` component. It also persists the user's choice in `localStorage`.
+    *   `AuthContext.jsx`: Manages user authentication state (`isAuthenticated`, `login`, `logout`).
+    *   `NotificationContext.jsx`: Provides a global system for showing snackbar notifications.
+    
 ## ⚙️ Getting Started
 
 

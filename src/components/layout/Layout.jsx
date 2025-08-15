@@ -14,10 +14,6 @@ const Layout = () => {
         sx={{
           flexGrow: 1,
           p: 3,
-          // The Sidebar is a fixed-position Drawer that floats over the content.
-          // Therefore, the main content does not need a margin-left.
-          // It will correctly start below the Topbar (due to the Toolbar spacer)
-          // and expand to fill the full width.
         }}
       >
         <Toolbar /> {/* Spacer for Topbar */}

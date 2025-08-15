@@ -28,34 +28,34 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route element={<Layout />}>
           <Route element={<PrivateRoute roles={['Admin', 'Manager', 'Staff']} />}>
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/products" element={<ProductsPage />} />
-          <Route path="/stock" element={<StockPage />} />
-          <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />
-        </Route>
-        <Route element={<PrivateRoute roles={['Admin', 'Manager']} />}>
-          <Route path="/suppliers" element={<SuppliersPage />} />
-          <Route path="/customers" element={<CustomersPage />} />
-          <Route path="/sales-orders" element={<SalesOrdersPage />} />
-          <Route path="/reports" element={<ReportsLayout />}>
-            <Route index element={<Navigate to="profitability" replace />} />
-            <Route path="profitability" element={<ProfitabilityPage />} />
-            <Route path="sales-history" element={<SalesHistoryReport />} />
-            <Route path="inventory-aging" element={<InventoryAgingReport />} />
-            <Route path="supplier-performance" element={<SupplierPerformanceReport />} />
-            <Route path="stock-value" element={<StockValueReport />} />
-            <Route path="stock-expiry" element={<StockExpiryReport />} />
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/stock" element={<StockPage />} />
+            <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />
+          </Route>
+          <Route element={<PrivateRoute roles={['Admin', 'Manager']} />}>
+            <Route path="/suppliers" element={<SuppliersPage />} />
+            <Route path="/customers" element={<CustomersPage />} />
+            <Route path="/sales-orders" element={<SalesOrdersPage />} />
+            <Route path="/reports" element={<ReportsLayout />}>
+              <Route index element={<Navigate to="profitability" replace />} />
+              <Route path="profitability" element={<ProfitabilityPage />} />
+              <Route path="sales-history" element={<SalesHistoryReport />} />
+              <Route path="inventory-aging" element={<InventoryAgingReport />} />
+              <Route path="supplier-performance" element={<SupplierPerformanceReport />} />
+              <Route path="stock-value" element={<StockValueReport />} />
+              <Route path="stock-expiry" element={<StockExpiryReport />} />
+            </Route>
+          </Route>
+          <Route element={<PrivateRoute roles={['Admin', 'Manager']} />}>
+            <Route path="/settings/locations" element={<LocationsPage />} />
+          </Route>
+          <Route element={<PrivateRoute roles={['Admin']} />}>
+            <Route path="/users" element={<UsersPage />} />
           </Route>
         </Route>
-        <Route element={<PrivateRoute roles={['Admin', 'Manager']} />}>
-          <Route path="/settings/locations" element={<LocationsPage />} />
-        </Route>
-        <Route element={<PrivateRoute roles={['Admin']} />}>
-          <Route path="/users" element={<UsersPage />} />
-        </Route>
-      </Route>
-    </Routes>
-  </SidebarProvider>
+      </Routes>
+    </SidebarProvider>
   );
 }
 

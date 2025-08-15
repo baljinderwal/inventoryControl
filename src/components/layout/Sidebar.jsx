@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -42,12 +42,44 @@ const navigation = [
     { name: 'Locations', href: '/settings/locations', icon: SettingsIcon, roles: ['Admin', 'Manager'] },
 ];
 
+const navListVariants = {
+  open: {
+    transition: { staggerChildren: 0.05, delayChildren: 0.2 }
+  },
+  closed: {
+    transition: { staggerChildren: 0.03, staggerDirection: -1 }
+  }
+};
+
+const navItemVariants = {
+  open: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      y: { stiffness: 1000, velocity: -100 }
+    }
+  },
+  closed: {
+    y: 20,
+    opacity: 0,
+    transition: {
+      y: { stiffness: 1000 }
+    }
+  }
+};
+
+
 const Sidebar = () => {
   const { user } = useAuth();
   const { isCollapsed, toggleSidebar } = useSidebar();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    setHasAnimated(true);
+  }, []);
 
   const filteredNavigation = navigation.filter(item => {
     if (!item.roles || !user) return false;
@@ -59,53 +91,90 @@ const Sidebar = () => {
     const isActive = location.pathname === item.href;
 
     return (
-      <Tooltip title={isCollapsed ? item.name : ''} placement="right" arrow>
-        <ListItemButton
-          component={NavLink}
-          to={item.href}
-          aria-label={item.name}
-          sx={{
-            px: 3,
-            py: 1.5,
-            minHeight: 48,
-            justifyContent: 'initial',
-            bgcolor: isActive ? theme.palette.action.selected : 'transparent',
-            borderLeft: `4px solid ${isActive ? theme.palette.primary.main : 'transparent'}`,
-            transition: 'background-color 0.2s, border-left 0.2s',
-            '&:hover': {
-              bgcolor: theme.palette.action.hover,
-            },
-          }}
-        >
-          <ListItemIcon sx={{ minWidth: 0, mr: isCollapsed ? 0 : 3, justifyContent: 'center', transition: 'margin 0.2s' }}>
-            <motion.div whileHover={{ scale: 1.1 }}>
-              <Icon />
-            </motion.div>
-          </ListItemIcon>
-          <ListItemText
-            primary={item.name}
-            sx={{
-              opacity: isCollapsed ? 0 : 1,
-              transition: 'opacity 0.2s ease-in-out',
-              whiteSpace: 'nowrap',
-            }}
-          />
-        </ListItemButton>
-      </Tooltip>
+        <motion.div variants={navItemVariants}>
+            <Tooltip title={isCollapsed ? item.name : ''} placement="right" arrow>
+                <ListItemButton
+                component={NavLink}
+                to={item.href}
+                aria-label={item.name}
+                sx={{
+                    px: 3,
+                    py: 1.5,
+                    minHeight: 48,
+                    justifyContent: 'initial',
+                    color: 'grey.400',
+                    borderLeft: `4px solid transparent`,
+                    transition: 'background-color 0.2s, border-left 0.2s, color 0.2s',
+                    '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.08)',
+                    color: 'common.white',
+                    },
+                    ...(isActive && {
+                    color: 'common.white',
+                    fontWeight: 'fontWeightBold',
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    borderLeft: `4px solid ${theme.palette.primary.main}`,
+                    }),
+                }}
+                >
+                <ListItemIcon sx={{ minWidth: 0, mr: isCollapsed ? 0 : 3, justifyContent: 'center', transition: 'margin 0.2s', color: 'inherit' }}>
+                    <motion.div whileHover={{ scale: 1.1 }}>
+                    <Icon />
+                    </motion.div>
+                </ListItemIcon>
+                <ListItemText
+                    primary={item.name}
+                    primaryTypographyProps={{
+                        style: {
+                            opacity: isCollapsed ? 0 : 1,
+                            transition: 'opacity 0.2s ease-in-out',
+                            whiteSpace: 'nowrap',
+                        }
+                    }}
+                />
+                </ListItemButton>
+            </Tooltip>
+        </motion.div>
     );
   };
 
   const drawerContent = (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <Box sx={{ overflowY: 'auto', overflowX: 'hidden', flexGrow: 1 }}>
-        <List component="nav" sx={{ pt: 2 }}>
-          {filteredNavigation.map(item => (
-            <NavItem key={item.name} item={item} />
-          ))}
-        </List>
+      <Box sx={{ overflowY: 'auto', overflowX: 'hidden', flexGrow: 1, pt: 2 }}>
+        <motion.div
+            component="nav"
+            variants={navListVariants}
+            initial={hasAnimated ? false : 'closed'}
+            animate="open"
+        >
+            <List sx={{ p: 0 }}>
+            {filteredNavigation.map(item => (
+                <NavItem key={item.name} item={item} />
+            ))}
+            </List>
+        </motion.div>
       </Box>
     </Box>
   );
+
+  const drawerSx = {
+    width: (isCollapsed ? collapsedDrawerWidth : drawerWidth),
+    transition: theme.transitions.create('width', {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    '& .MuiDrawer-paper': {
+      width: 'inherit',
+      transition: 'inherit',
+      top: { xs: 0, md: `64px`},
+      height: { xs: '100%', md: `calc(100% - 64px)`},
+      boxSizing: 'border-box',
+      overflowX: 'hidden',
+      borderRight: { md: `1px solid ${theme.palette.divider}` },
+      background: `linear-gradient(180deg, ${theme.palette.grey[900]}, ${theme.palette.grey[800]})`,
+      color: theme.palette.common.white,
+    },
+  };
 
   if (isMobile) {
     return (
@@ -115,7 +184,7 @@ const Sidebar = () => {
         onClose={toggleSidebar}
         onOpen={toggleSidebar}
         ModalProps={{ keepMounted: true }}
-        sx={{ '& .MuiDrawer-paper': { width: drawerWidth } }}
+        sx={drawerSx}
       >
         <Box sx={theme.mixins.toolbar} /> {/* Spacer */}
         {drawerContent}
@@ -123,34 +192,8 @@ const Sidebar = () => {
     );
   }
 
-  const currentWidth = isCollapsed ? collapsedDrawerWidth : drawerWidth;
-
   return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        width: currentWidth,
-        flexShrink: 0,
-        whiteSpace: 'nowrap',
-        transition: theme.transitions.create('width', {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.enteringScreen,
-        }),
-        '& .MuiDrawer-paper': {
-          width: currentWidth,
-          transition: theme.transitions.create('width', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-          top: `64px`,
-          height: `calc(100% - 64px)`,
-          boxSizing: 'border-box',
-          overflowX: 'hidden',
-          borderRight: '1px solid',
-          borderColor: 'divider',
-        },
-      }}
-    >
+    <Drawer variant="permanent" sx={drawerSx}>
       {drawerContent}
     </Drawer>
   );

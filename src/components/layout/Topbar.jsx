@@ -38,7 +38,6 @@ const Topbar = () => {
       position="fixed"
       sx={{
         zIndex: (theme) => theme.zIndex.drawer + 1,
-        // No dynamic width or margin needed, it's always full-width
       }}
     >
       <Toolbar>
@@ -47,7 +46,7 @@ const Topbar = () => {
           aria-label="toggle sidebar"
           edge="start"
           onClick={toggleSidebar}
-          sx={{ mr: 2 }} // Removed display: { md: 'none' }
+          sx={{ mr: 2 }}
         >
           <MenuIcon />
         </IconButton>

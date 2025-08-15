@@ -3,19 +3,20 @@ import React, { createContext, useState, useContext, useEffect, useMemo } from '
 const SidebarContext = createContext(null);
 
 export const SidebarProvider = ({ children }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
-  useEffect(() => {
+  // Initialize state directly and synchronously from localStorage.
+  // This is the most robust way to prevent state flickering on re-renders
+  // after the initial load.
+  const [isCollapsed, setIsCollapsed] = useState(() => {
     try {
       const storedValue = localStorage.getItem('sidebar-collapsed');
-      if (storedValue !== null) {
-        setIsCollapsed(JSON.parse(storedValue));
-      }
-    } catch (error) {
-      console.error("Failed to parse sidebar state from localStorage", error);
+      // The `!!` converts the parsed value (or null) to a boolean.
+      return !!JSON.parse(storedValue);
+    } catch {
+      return false; // Default to false if localStorage is invalid or missing
     }
-  }, []);
+  });
 
+  // This effect syncs state changes back to localStorage.
   useEffect(() => {
     try {
       localStorage.setItem('sidebar-collapsed', JSON.stringify(isCollapsed));

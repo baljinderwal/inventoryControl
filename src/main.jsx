@@ -113,7 +113,7 @@ const AppWrapper = () => {
           <AuthProvider>
             <ApiModeProvider>
               <App />
-            </A piModeProvider>
+            </ApiModeProvider>
           </AuthProvider>
         </BrowserRouter>
       </NotificationProvider>

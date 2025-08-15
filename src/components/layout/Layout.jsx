@@ -1,20 +1,10 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { Box, Toolbar, useTheme, useMediaQuery } from '@mui/material';
+import { Box, Toolbar } from '@mui/material';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
-import { useSidebar } from '../../utils/SidebarContext';
-
-const drawerWidth = 240;
-const collapsedDrawerWidth = 88;
 
 const Layout = () => {
-  const theme = useTheme();
-  const { isCollapsed } = useSidebar();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-
-  const mainContentMarginLeft = isMobile ? 0 : (isCollapsed ? collapsedDrawerWidth : drawerWidth);
-
   return (
     <Box sx={{ display: 'flex' }}>
       <Topbar />
@@ -24,15 +14,10 @@ const Layout = () => {
         sx={{
           flexGrow: 1,
           p: 3,
-          width: {
-            xs: '100%',
-            md: `calc(100% - ${mainContentMarginLeft}px)`
-          },
-          marginLeft: { md: `${mainContentMarginLeft}px` },
-          transition: theme.transitions.create(['margin-left', 'width'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
+          // The Sidebar is a fixed-position Drawer that floats over the content.
+          // Therefore, the main content does not need a margin-left.
+          // It will correctly start below the Topbar (due to the Toolbar spacer)
+          // and expand to fill the full width.
         }}
       >
         <Toolbar /> {/* Spacer for Topbar */}

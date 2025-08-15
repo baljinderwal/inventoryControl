@@ -352,6 +352,13 @@
       "email": "testuser_1755264294@example.com",
       "password": "Password123",
       "role": "Staff"
+    },
+    {
+      "id": "7644",
+      "name": "Test User",
+      "email": "testuser_1755268089@example.com",
+      "password": "Password123",
+      "role": "Staff"
     }
   ],
   "locations": [

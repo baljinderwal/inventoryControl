@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import { Parser } from '@json2csv/plainjs';
@@ -11,7 +11,6 @@ import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import DownloadIcon from '@mui/icons-material/Download';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import {
   Table,
   TableBody,
@@ -21,6 +20,26 @@ import {
   TableRow,
   TablePagination,
 } from '@mui/material';
+
+const LazyBarChart = React.lazy(() => 
+  import('recharts').then(module => ({ 
+    default: ({ data, ...props }) => {
+      const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = module;
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+            <Legend />
+            <Bar dataKey="totalSales" fill="#8884d8" name="Total Sales" />
+          </BarChart>
+        </ResponsiveContainer>
+      );
+    }
+  }))
+);
 
 const SalesHistoryReport = () => {
   const [page, setPage] = React.useState(0);
@@ -90,16 +109,9 @@ const SalesHistoryReport = () => {
               Export Full Report
             </Button>
           </Box>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={monthlySales}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-              <Legend />
-              <Bar dataKey="totalSales" fill="#8884d8" name="Total Sales" />
-            </BarChart>
-          </ResponsiveContainer>
+          <Suspense fallback={<CircularProgress />}>
+            <LazyBarChart data={monthlySales} />
+          </Suspense>
         </Paper>
       </Grid>
       <Grid item xs={12}>

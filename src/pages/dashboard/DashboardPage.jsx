@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { useApi } from '../../utils/ApiModeContext';
@@ -7,7 +7,6 @@ import StatsCard from '../../components/ui/StatsCard';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -16,6 +15,27 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import CircularProgress from '@mui/material/CircularProgress';
+
+const LazyBarChart = React.lazy(() => 
+  import('recharts').then(module => ({ 
+    default: ({ data, ...props }) => {
+      const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = module;
+      return (
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+            <XAxis dataKey="name" />
+            <YAxis />
+            <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }} />
+            <Legend />
+            <Bar dataKey="Stock" fill="#6366f1" />
+            <Bar dataKey="Sales" fill="#ec4899" />
+          </BarChart>
+        </ResponsiveContainer>
+      );
+    }
+  }))
+);
 
 const chartData = [
   { name: 'Jan', Sales: 4000, Stock: 2400 },
@@ -112,17 +132,9 @@ const DashboardPage = () => {
             <Typography variant="h6" gutterBottom>
               Inventory Trends
             </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }} />
-                <Legend />
-                <Bar dataKey="Stock" fill="#6366f1" />
-                <Bar dataKey="Sales" fill="#ec4899" />
-              </BarChart>
-            </ResponsiveContainer>
+            <Suspense fallback={<CircularProgress />}>
+              <LazyBarChart data={chartData} />
+            </Suspense>
           </Paper>
         </Grid>
 

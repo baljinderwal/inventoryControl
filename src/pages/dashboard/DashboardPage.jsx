@@ -55,30 +55,42 @@ const DashboardPage = () => {
     { name: 'Revenue', stat: '$405,091', icon: <AttachMoneyIcon /> },
   ];
 
-  const originalLayout = [
-    { i: 'a', x: 0, y: 0, w: 3, h: 2 },
-    { i: 'b', x: 3, y: 0, w: 3, h: 2 },
-    { i: 'c', x: 6, y: 0, w: 3, h: 2 },
-    { i: 'd', x: 9, y: 0, w: 3, h: 2 },
-    { i: 'e', x: 0, y: 2, w: 6, h: 4 },
-    { i: 'f', x: 6, y: 2, w: 6, h: 4 },
-    { i: 'g', x: 0, y: 6, w: 6, h: 4 },
-    { i: 'h', x: 6, y: 6, w: 6, h: 4 },
-  ];
+  const originalLayouts = {
+    lg: [
+        { i: 'a', x: 0, y: 0, w: 3, h: 2 },
+        { i: 'b', x: 3, y: 0, w: 3, h: 2 },
+        { i: 'c', x: 6, y: 0, w: 3, h: 2 },
+        { i: 'd', x: 9, y: 0, w: 3, h: 2 },
+        { i: 'e', x: 0, y: 2, w: 6, h: 5 },
+        { i: 'f', x: 6, y: 2, w: 6, h: 5 },
+        { i: 'g', x: 0, y: 7, w: 6, h: 5 },
+        { i: 'h', x: 6, y: 7, w: 6, h: 5 },
+    ],
+    md: [
+        { i: 'a', x: 0, y: 0, w: 5, h: 2 },
+        { i: 'b', x: 5, y: 0, w: 5, h: 2 },
+        { i: 'c', x: 0, y: 2, w: 5, h: 2 },
+        { i: 'd', x: 5, y: 2, w: 5, h: 2 },
+        { i: 'e', x: 0, y: 4, w: 10, h: 5 },
+        { i: 'f', x: 0, y: 9, w: 10, h: 5 },
+        { i: 'g', x: 0, y: 14, w: 10, h: 5 },
+        { i: 'h', x: 0, y: 19, w: 10, h: 5 },
+    ]
+  };
 
-  const [layout, setLayout] = useState(() => {
+  const [layouts, setLayouts] = useState(() => {
     if (typeof window !== 'undefined') {
-      const savedLayout = localStorage.getItem('dashboard-layout');
-      return savedLayout ? JSON.parse(savedLayout) : originalLayout;
+      const savedLayouts = localStorage.getItem('dashboard-layouts');
+      return savedLayouts ? JSON.parse(savedLayouts) : originalLayouts;
     }
-    return originalLayout;
+    return originalLayouts;
   });
 
-  const onLayoutChange = (newLayout) => {
+  const onLayoutChange = (layout, newLayouts) => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('dashboard-layout', JSON.stringify(newLayout));
+        localStorage.setItem('dashboard-layouts', JSON.stringify(newLayouts));
     }
-    setLayout(newLayout);
+    setLayouts(newLayouts);
   };
 
   const allWidgets = [
@@ -123,7 +135,7 @@ const DashboardPage = () => {
         </Box>
         <ResponsiveGridLayout
             className="layout"
-            layouts={{ lg: layout }}
+            layouts={layouts}
             onLayoutChange={onLayoutChange}
             breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
             cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}

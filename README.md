@@ -68,6 +68,12 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
     *   Enhanced accessibility, including support for reduced motion preferences and Caps Lock detection.
     *   Progressive authentication options with UI for "Sign in with Google" and "Sign in with a passkey".
 
+- **✍️ World-Class Signup Feature:** A brand-new, feature-rich signup page that complements the login experience, allowing new users to register with ease.
+    *   **Consistent & Intuitive UI:** The signup page mirrors the modern design of the login page for a cohesive user experience.
+    *   **Comprehensive Validation:** Includes real-time validation for all fields (name, email, password, and confirmation), guiding users to set up a secure password.
+    *   **Seamless Flow:** After a successful registration, users are automatically redirected to the login page with a success message, ready to sign in.
+    *   **Duplicate Email Prevention:** The backend logic prevents users from registering with an email that is already in use.
+
 ---
 
 ## 🚀 Technologies Used

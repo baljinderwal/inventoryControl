@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../utils/AuthContext';
-import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Button,
   TextField,
@@ -13,33 +13,38 @@ import {
   CircularProgress,
   Divider,
   Link,
-  Alert,
 } from '@mui/material';
 import {
   Visibility,
   VisibilityOff,
   CheckCircleOutline,
-  Google,
-  VpnKey,
+  PersonOutline,
 } from '@mui/icons-material';
 import { AnimatePresence, useReducedMotion } from 'framer-motion';
 
-const LoginPage = () => {
+const SignupPage = () => {
   const [form, setForm] = useState({
+    name: { value: '', valid: false, touched: false, error: '' },
     email: { value: '', valid: false, touched: false, error: '' },
     password: { value: '', valid: false, touched: false, error: '' },
+    confirmPassword: { value: '', valid: false, touched: false, error: '' },
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isCapsLockOn, setIsCapsLockOn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [animateShake, setAnimateShake] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
-  const { login } = useAuth();
+  const { signup } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from?.pathname || '/';
+
+  const validateName = (name) => {
+    if (!name) return "Name is required.";
+    if (name.length < 2) return "Name must be at least 2 characters long.";
+    return "";
+  };
 
   const validateEmail = (email) => {
     if (!email) return "Email is required.";
@@ -51,17 +56,39 @@ const LoginPage = () => {
   const validatePassword = (password) => {
     if (!password) return "Password is required.";
     if (password.length < 8) return "Password must be at least 8 characters long.";
+    // Example: require uppercase, lowercase, and a number
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(password)) return "Password must include uppercase, lowercase, and a number.";
+    return "";
+  };
+
+  const validateConfirmPassword = (confirmPassword, password) => {
+    if (!confirmPassword) return "Please confirm your password.";
+    if (confirmPassword !== password) return "Passwords do not match.";
     return "";
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let error = '';
-    if (name === 'email') {
+    if (name === 'name') {
+      error = validateName(value);
+    } else if (name === 'email') {
       error = validateEmail(value);
     } else if (name === 'password') {
       error = validatePassword(value);
+      // Also re-validate confirm password if password changes
+      if (form.confirmPassword.value) {
+        const confirmError = validateConfirmPassword(form.confirmPassword.value, value);
+        setForm((prev) => ({
+          ...prev,
+          confirmPassword: { ...prev.confirmPassword, error: confirmError, valid: !confirmError },
+        }));
+      }
+    } else if (name === 'confirmPassword') {
+      error = validateConfirmPassword(value, form.password.value);
     }
+
     setForm((prev) => ({
       ...prev,
       [name]: { ...prev[name], value, error, valid: !error },
@@ -95,16 +122,20 @@ const LoginPage = () => {
     e.preventDefault();
     setSubmitError('');
 
+    const nameError = validateName(form.name.value);
     const emailError = validateEmail(form.email.value);
     const passwordError = validatePassword(form.password.value);
+    const confirmPasswordError = validateConfirmPassword(form.confirmPassword.value, form.password.value);
 
     setForm((prev) => ({
       ...prev,
+      name: { ...prev.name, touched: true, error: nameError },
       email: { ...prev.email, touched: true, error: emailError },
       password: { ...prev.password, touched: true, error: passwordError },
+      confirmPassword: { ...prev.confirmPassword, touched: true, error: confirmPasswordError },
     }));
 
-    if (emailError || passwordError) {
+    if (nameError || emailError || passwordError || confirmPasswordError) {
       setAnimateShake(true);
       setTimeout(() => setAnimateShake(false), 500);
       return;
@@ -112,16 +143,17 @@ const LoginPage = () => {
 
     try {
       setLoading(true);
-      await login(form.email.value, form.password.value);
-      navigate(from, { replace: true });
-    } catch {
-      setSubmitError('Invalid credentials. Please try again.');
+      await signup(form.name.value, form.email.value, form.password.value);
+      navigate('/login', { state: { successMessage: 'Signup successful! Please log in.' } });
+    } catch (error) {
+      console.error("Signup failed:", error);
+      setSubmitError(error.message || 'An error occurred during signup. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const isFormValid = form.email.valid && form.password.valid;
+  const isFormValid = form.name.valid && form.email.valid && form.password.valid && form.confirmPassword.valid;
 
   const formVariants = {
     hidden: { opacity: 0, y: -20 },
@@ -152,15 +184,15 @@ const LoginPage = () => {
       >
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
           <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 2 }}>
-            MyBrand
+            Join Us
           </Typography>
           <Typography variant="h6" sx={{ maxWidth: 400, textAlign: 'center' }}>
-            Your productivity starts here — secure, fast, and beautifully simple.
+            Create your account to start managing your inventory like a pro.
           </Typography>
         </motion.div>
       </Box>
 
-      {/* Right Side: Login Form */}
+      {/* Right Side: Signup Form */}
       <Box
         sx={{
           flex: 1,
@@ -187,23 +219,13 @@ const LoginPage = () => {
               }}
             >
               <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
-                Welcome Back
+                Create Your Account
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
-                Sign in to access your dashboard.
+                Fill out the form to get started.
               </Typography>
 
               <AnimatePresence>
-                {location.state?.successMessage && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    style={{ width: '100%', marginBottom: '16px' }}
-                  >
-                    <Alert severity="success">{location.state.successMessage}</Alert>
-                  </motion.div>
-                )}
                 {submitError && (
                   <motion.div
                     initial={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
@@ -231,19 +253,43 @@ const LoginPage = () => {
                 <TextField
                   margin="normal"
                   fullWidth
+                  id="name"
+                  label="Full Name"
+                  name="name"
+                  autoComplete="name"
+                  autoFocus
+                  value={form.name.value}
+                  onChange={handleInputChange}
+                  onBlur={handleInputBlur}
+                  error={form.name.touched && !!form.name.error}
+                  helperText={form.name.touched && form.name.error}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <AnimatePresence>
+                          {form.name.touched && form.name.valid && (
+                            <motion.div initial={shouldReduceMotion ? {} : { scale: 0 }} animate={{ scale: 1 }} exit={shouldReduceMotion ? {} : { scale: 0 }}>
+                              <CheckCircleOutline color="success" />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <TextField
+                  margin="normal"
+                  fullWidth
                   id="email"
                   label="Email Address"
                   name="email"
                   autoComplete="email"
-                  autoFocus
                   value={form.email.value}
                   onChange={handleInputChange}
                   onBlur={handleInputBlur}
                   error={form.email.touched && !!form.email.error}
                   helperText={form.email.touched && form.email.error}
-                  FormHelperTextProps={{ id: 'email-error-text' }}
                   InputProps={{
-                    'aria-describedby': 'email-error-text',
                     endAdornment: (
                       <InputAdornment position="end">
                         <AnimatePresence>
@@ -257,7 +303,6 @@ const LoginPage = () => {
                     ),
                   }}
                 />
-
                 <TextField
                   margin="normal"
                   fullWidth
@@ -265,7 +310,7 @@ const LoginPage = () => {
                   label="Password"
                   type={showPassword ? 'text' : 'password'}
                   id="password"
-                  autoComplete="current-password"
+                  autoComplete="new-password"
                   value={form.password.value}
                   onChange={handleInputChange}
                   onBlur={handleInputBlur}
@@ -276,9 +321,7 @@ const LoginPage = () => {
                     (form.password.touched && form.password.error) ||
                     (isCapsLockOn ? 'Warning: Caps Lock is on' : '')
                   }
-                  FormHelperTextProps={{ id: 'password-error-text' }}
                   InputProps={{
-                    'aria-describedby': 'password-error-text',
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
@@ -292,12 +335,33 @@ const LoginPage = () => {
                     ),
                   }}
                 />
-
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 1 }}>
-                  <Button size="small" sx={{ textTransform: 'none' }}>
-                    Forgot password?
-                  </Button>
-                </Box>
+                <TextField
+                  margin="normal"
+                  fullWidth
+                  name="confirmPassword"
+                  label="Confirm Password"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  id="confirmPassword"
+                  autoComplete="new-password"
+                  value={form.confirmPassword.value}
+                  onChange={handleInputChange}
+                  onBlur={handleInputBlur}
+                  error={form.confirmPassword.touched && !!form.confirmPassword.error}
+                  helperText={form.confirmPassword.touched && form.confirmPassword.error}
+                   InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowConfirmPassword((prev) => !prev)}
+                          edge="end"
+                          aria-label="toggle password visibility"
+                        >
+                          {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
 
                 <motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
                   <Button
@@ -305,70 +369,17 @@ const LoginPage = () => {
                     fullWidth
                     variant="contained"
                     size="large"
-                    sx={{
-                      mt: 2,
-                      mb: 2,
-                      py: 1.5,
-                      fontWeight: 'bold',
-                      '&:disabled': {
-                        background: '#e0e0e0'
-                      }
-                    }}
+                    sx={{ mt: 3, mb: 2, py: 1.5, fontWeight: 'bold' }}
                     disabled={loading || !isFormValid}
                   >
-                    {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Sign In'}
-                  </Button>
-                </motion.div>
-
-                <Divider sx={{ my: 2 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    OR
-                  </Typography>
-                </Divider>
-
-                <motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    startIcon={<Google />}
-                    sx={{
-                      mb: 1,
-                      textTransform: 'none',
-                      borderColor: '#ddd',
-                      color: 'text.primary',
-                      '&:hover': {
-                        borderColor: '#ccc',
-                        backgroundColor: '#f5f5f5'
-                      }
-                    }}
-                  >
-                    Sign in with Google
-                  </Button>
-                </motion.div>
-                <motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    startIcon={<VpnKey />}
-                    sx={{
-                      mb: 1,
-                      textTransform: 'none',
-                      borderColor: '#ddd',
-                      color: 'text.primary',
-                      '&:hover': {
-                        borderColor: '#ccc',
-                        backgroundColor: '#f5f5f5'
-                      }
-                    }}
-                  >
-                    Sign in with a passkey
+                    {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign Up'}
                   </Button>
                 </motion.div>
 
                 <Typography variant="body2" align="center" sx={{ mt: 3 }}>
-                  Don't have an account?{' '}
-                  <Link component={RouterLink} to="/signup" variant="body2">
-                    Sign Up
+                  Already have an account?{' '}
+                  <Link component={RouterLink} to="/login" variant="body2">
+                    Sign In
                   </Link>
                 </Typography>
               </Box>
@@ -380,4 +391,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default SignupPage;

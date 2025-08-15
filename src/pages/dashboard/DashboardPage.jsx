@@ -56,14 +56,14 @@ const DashboardPage = () => {
   ];
 
   const originalLayout = [
-    { i: 'a', x: 0, y: 0, w: 3, h: 1 },
-    { i: 'b', x: 3, y: 0, w: 3, h: 1 },
-    { i: 'c', x: 6, y: 0, w: 3, h: 1 },
-    { i: 'd', x: 9, y: 0, w: 3, h: 1 },
-    { i: 'e', x: 0, y: 1, w: 6, h: 4 },
-    { i: 'f', x: 6, y: 1, w: 6, h: 4 },
-    { i: 'g', x: 0, y: 5, w: 6, h: 4 },
-    { i: 'h', x: 6, y: 5, w: 6, h: 4 },
+    { i: 'a', x: 0, y: 0, w: 3, h: 2 },
+    { i: 'b', x: 3, y: 0, w: 3, h: 2 },
+    { i: 'c', x: 6, y: 0, w: 3, h: 2 },
+    { i: 'd', x: 9, y: 0, w: 3, h: 2 },
+    { i: 'e', x: 0, y: 2, w: 6, h: 4 },
+    { i: 'f', x: 6, y: 2, w: 6, h: 4 },
+    { i: 'g', x: 0, y: 6, w: 6, h: 4 },
+    { i: 'h', x: 6, y: 6, w: 6, h: 4 },
   ];
 
   const [layout, setLayout] = useState(() => {
@@ -126,7 +126,8 @@ const DashboardPage = () => {
             layouts={{ lg: layout }}
             onLayoutChange={onLayoutChange}
             breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-            cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}>
+            cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+            rowHeight={30}>
             {widgets.includes('a') && <div key="a"><StatsCard title={stats[0].name} value={stats[0].stat} icon={stats[0].icon} /></div>}
             {widgets.includes('b') && <div key="b"><StatsCard title={stats[1].name} value={stats[1].stat} icon={stats[1].icon} /></div>}
             {widgets.includes('c') && <div key="c"><StatsCard title={stats[2].name} value={stats[2].stat} icon={stats[2].icon} /></div>}

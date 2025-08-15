@@ -60,6 +60,10 @@ const navItemVariants = {
   closed: { y: 20, opacity: 0, transition: { y: { stiffness: 1000 } } }
 };
 
+// This component is defined outside of the Sidebar component render cycle
+// to prevent it from being recreated on every render, which is a React anti-pattern.
+const MotionDrawer = motion(Drawer);
+
 const Sidebar = () => {
     const { user } = useAuth();
     const { isCollapsed, toggleSidebar } = useSidebar();
@@ -153,8 +157,6 @@ const Sidebar = () => {
             </SwipeableDrawer>
         );
     }
-
-    const MotionDrawer = motion(Drawer);
 
     return (
         <MotionDrawer

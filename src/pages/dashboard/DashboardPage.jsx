@@ -1,20 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
+import { Responsive, WidthProvider } from 'react-grid-layout';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
+import {
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  Box
+} from '@mui/material';
 
 import StatsCard from '../../components/ui/StatsCard';
-import Grid from '@mui/material/Grid';
-import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import WarningIcon from '@mui/icons-material/Warning';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import CircularProgress from '@mui/material/CircularProgress';
+import LowStockWidget from '../../components/dashboard/LowStockWidget';
+import InventoryTrendsWidget from '../../components/dashboard/InventoryTrendsWidget';
+import RecentSalesWidget from '../../components/dashboard/RecentSalesWidget';
+import TopCustomersWidget from '../../components/dashboard/TopCustomersWidget';
+
+const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const chartData = [
   { name: 'Jan', Sales: 4000, Stock: 2400 },
@@ -28,7 +41,6 @@ const chartData = [
 const DashboardPage = () => {
   const { mode, services } = useApi();
 
-  // Fetch stock levels which include product data
   const { data: products, isLoading, error } = useQuery({
     queryKey: ['stock', mode],
     queryFn: services.stock.getStockLevels,
@@ -38,69 +50,109 @@ const DashboardPage = () => {
 
   const stats = [
     { name: 'Total Products', stat: products?.length || 0, icon: <InventoryIcon /> },
-    { name: 'Total Orders', stat: '2,310', icon: <ShoppingCartIcon /> }, // This is still hardcoded
+    { name: 'Total Orders', stat: '2,310', icon: <ShoppingCartIcon /> },
     { name: 'Low Stock', stat: lowStockProducts.length, icon: <WarningIcon /> },
-    { name: 'Revenue', stat: '$405,091', icon: <AttachMoneyIcon /> }, // This is still hardcoded
+    { name: 'Revenue', stat: '$405,091', icon: <AttachMoneyIcon /> },
   ];
+
+  const originalLayout = [
+    { i: 'a', x: 0, y: 0, w: 3, h: 1 },
+    { i: 'b', x: 3, y: 0, w: 3, h: 1 },
+    { i: 'c', x: 6, y: 0, w: 3, h: 1 },
+    { i: 'd', x: 9, y: 0, w: 3, h: 1 },
+    { i: 'e', x: 0, y: 1, w: 6, h: 4 },
+    { i: 'f', x: 6, y: 1, w: 6, h: 4 },
+    { i: 'g', x: 0, y: 5, w: 6, h: 4 },
+    { i: 'h', x: 6, y: 5, w: 6, h: 4 },
+  ];
+
+  const [layout, setLayout] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedLayout = localStorage.getItem('dashboard-layout');
+      return savedLayout ? JSON.parse(savedLayout) : originalLayout;
+    }
+    return originalLayout;
+  });
+
+  const onLayoutChange = (newLayout) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dashboard-layout', JSON.stringify(newLayout));
+    }
+    setLayout(newLayout);
+  };
+
+  const allWidgets = [
+    { id: 'a', name: 'Total Products' },
+    { id: 'b', name: 'Total Orders' },
+    { id: 'c', name: 'Low Stock' },
+    { id: 'd', name: 'Revenue' },
+    { id: 'e', name: 'Low Stock Alerts' },
+    { id: 'f', name: 'Inventory Trends' },
+    { id: 'g', name: 'Recent Sales' },
+    { id: 'h', name: 'Top Customers' },
+  ];
+
+  const [widgets, setWidgets] = useState(() => {
+    if (typeof window !== 'undefined') {
+        const savedWidgets = localStorage.getItem('dashboard-widgets');
+        return savedWidgets ? JSON.parse(savedWidgets) : allWidgets.map(w => w.id);
+    }
+    return allWidgets.map(w => w.id);
+  });
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleWidgetChange = (event) => {
+    const { name, checked } = event.target;
+    setWidgets(prev => {
+        const newWidgets = checked ? [...prev, name] : prev.filter(w => w !== name);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('dashboard-widgets', JSON.stringify(newWidgets));
+        }
+        return newWidgets;
+    });
+  };
 
   return (
     <div>
-      <Typography variant="h4" gutterBottom>
-        Dashboard
-      </Typography>
-      <Grid container spacing={3}>
-        {stats.map((item) => (
-          <Grid item xs={12} sm={6} md={3} key={item.name}>
-            <StatsCard title={item.name} value={item.stat} icon={item.icon} />
-          </Grid>
-        ))}
-
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, mt: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Low Stock Alerts
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h4" gutterBottom>
+                Dashboard
             </Typography>
-            {isLoading ? (
-              <CircularProgress />
-            ) : error ? (
-              <Typography color="error">Error fetching products.</Typography>
-            ) : lowStockProducts.length > 0 ? (
-              <List>
-                {lowStockProducts.map((product) => (
-                  <ListItem key={product.id}>
-                    <ListItemText
-                      primary={product.name}
-                      secondary={`Current Stock: ${product.stock} | Threshold: ${product.lowStockThreshold}`}
-                    />
-                  </ListItem>
-                ))}
-              </List>
-            ) : (
-              <Typography>No products are currently low on stock. Great job!</Typography>
-            )}
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, mt: 2 }}>
-            <Typography variant="h6" gutterBottom>
-              Inventory Trends
-            </Typography>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="Stock" fill="#8884d8" />
-                <Bar dataKey="Sales" fill="#82ca9d" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Paper>
-        </Grid>
-
-      </Grid>
+            <Button variant="outlined" onClick={() => setIsModalOpen(true)}>Customize</Button>
+        </Box>
+        <ResponsiveGridLayout
+            className="layout"
+            layouts={{ lg: layout }}
+            onLayoutChange={onLayoutChange}
+            breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+            cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}>
+            {widgets.includes('a') && <div key="a"><StatsCard title={stats[0].name} value={stats[0].stat} icon={stats[0].icon} /></div>}
+            {widgets.includes('b') && <div key="b"><StatsCard title={stats[1].name} value={stats[1].stat} icon={stats[1].icon} /></div>}
+            {widgets.includes('c') && <div key="c"><StatsCard title={stats[2].name} value={stats[2].stat} icon={stats[2].icon} /></div>}
+            {widgets.includes('d') && <div key="d"><StatsCard title={stats[3].name} value={stats[3].stat} icon={stats[3].icon} /></div>}
+            {widgets.includes('e') && <div key="e"><LowStockWidget /></div>}
+            {widgets.includes('f') && <div key="f"><InventoryTrendsWidget /></div>}
+            {widgets.includes('g') && <div key="g"><RecentSalesWidget /></div>}
+            {widgets.includes('h') && <div key="h"><TopCustomersWidget /></div>}
+        </ResponsiveGridLayout>
+        <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+            <DialogTitle>Customize Dashboard</DialogTitle>
+            <DialogContent>
+                <FormGroup>
+                    {allWidgets.map(widget => (
+                        <FormControlLabel
+                            key={widget.id}
+                            control={<Checkbox checked={widgets.includes(widget.id)} onChange={handleWidgetChange} name={widget.id} />}
+                            label={widget.name}
+                        />
+                    ))}
+                </FormGroup>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => setIsModalOpen(false)}>Close</Button>
+            </DialogActions>
+        </Dialog>
     </div>
   );
 };

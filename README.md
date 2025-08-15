@@ -29,6 +29,11 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
     *   **Full Customer CRM:** Add, edit, and manage a complete database of your customers.
     *   **Sales Order Processing:** Create, track, and manage orders from customers, from pending to completed.
     *   **Automated Stock Deduction:** Stock levels are automatically adjusted when a sales order is marked as completed.
+*   **✨ Customizable Dashboard:**
+    *   **Drag & Drop:** Easily rearrange widgets on the dashboard to fit your workflow.
+    *   **Resizable Widgets:** Resize widgets to give more importance to the data that matters most to you.
+    *   **Widget Selection:** Add or remove widgets from a predefined list to create a personalized dashboard.
+    *   **Layout Persistence:** Your customized dashboard layout is saved locally, so it's there for you when you come back.
 *   **📝 Advanced Reporting Suite:**
     *   **Stock by Expiry Date:** A new report to identify items nearing their expiry date.
     *   **Sales History:** Track sales trends over time.
@@ -61,6 +66,7 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
 *   **axios**: A promise-based HTTP client for making requests to the mock API.
 *   **Recharts**: A composable charting library built on React components.
 *   **`react-zxing`**: A React hook for barcode scanning using the ZXing library.
+*   **`react-grid-layout`**: A draggable and resizable grid layout with responsive breakpoints.
 *   **JSON Server**: To create a fake REST API for prototyping and development.
 
 ## 📦 Project Structure

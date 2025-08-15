@@ -1,13 +1,26 @@
 import React from 'react';
+import { Button as MuiButton } from '@mui/material';
 
-const Button = ({ children, onClick, className = '' }) => {
+const Button = ({ children, onClick, variant = 'contained', color = 'primary', sx = {}, ...props }) => {
   return (
-    <button
+    <MuiButton
       onClick={onClick}
-      className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${className}`}
+      variant={variant}
+      color={color}
+      sx={{
+        textTransform: 'none',
+        fontWeight: 'bold',
+        padding: '10px 20px',
+        boxShadow: 'none',
+        '&:hover': {
+          boxShadow: 'none',
+        },
+        ...sx
+      }}
+      {...props}
     >
       {children}
-    </button>
+    </MuiButton>
   );
 };
 

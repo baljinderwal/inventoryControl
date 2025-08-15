@@ -1,5 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import { useApi } from '../../utils/ApiModeContext';
 
 import StatsCard from '../../components/ui/StatsCard';
@@ -25,10 +26,31 @@ const chartData = [
   { name: 'Jun', Sales: 2390, Stock: 3800 },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: 'spring',
+      stiffness: 100,
+    },
+  },
+};
+
 const DashboardPage = () => {
   const { mode, services } = useApi();
 
-  // Fetch stock levels which include product data
   const { data: products, isLoading, error } = useQuery({
     queryKey: ['stock', mode],
     queryFn: services.stock.getStockLevels,
@@ -38,25 +60,29 @@ const DashboardPage = () => {
 
   const stats = [
     { name: 'Total Products', stat: products?.length || 0, icon: <InventoryIcon /> },
-    { name: 'Total Orders', stat: '2,310', icon: <ShoppingCartIcon /> }, // This is still hardcoded
+    { name: 'Total Orders', stat: '2,310', icon: <ShoppingCartIcon /> },
     { name: 'Low Stock', stat: lowStockProducts.length, icon: <WarningIcon /> },
-    { name: 'Revenue', stat: '$405,091', icon: <AttachMoneyIcon /> }, // This is still hardcoded
+    { name: 'Revenue', stat: '$405,091', icon: <AttachMoneyIcon /> },
   ];
 
   return (
-    <div>
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       <Typography variant="h4" gutterBottom>
         Dashboard
       </Typography>
       <Grid container spacing={3}>
         {stats.map((item) => (
-          <Grid item xs={12} sm={6} md={3} key={item.name}>
+          <Grid item xs={12} sm={6} md={3} key={item.name} component={motion.div} variants={itemVariants}>
             <StatsCard title={item.name} value={item.stat} icon={item.icon} />
           </Grid>
         ))}
 
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, mt: 2 }}>
+        <Grid item xs={12} md={6} component={motion.div} variants={itemVariants}>
+          <Paper sx={{ p: 2, mt: 2, backgroundColor: 'background.paper' }}>
             <Typography variant="h6" gutterBottom>
               Low Stock Alerts
             </Typography>
@@ -81,27 +107,27 @@ const DashboardPage = () => {
           </Paper>
         </Grid>
 
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2, mt: 2 }}>
+        <Grid item xs={12} md={6} component={motion.div} variants={itemVariants}>
+          <Paper sx={{ p: 2, mt: 2, backgroundColor: 'background.paper' }}>
             <Typography variant="h6" gutterBottom>
               Inventory Trends
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip />
+                <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }} />
                 <Legend />
-                <Bar dataKey="Stock" fill="#8884d8" />
-                <Bar dataKey="Sales" fill="#82ca9d" />
+                <Bar dataKey="Stock" fill="#6366f1" />
+                <Bar dataKey="Sales" fill="#ec4899" />
               </BarChart>
             </ResponsiveContainer>
           </Paper>
         </Grid>
 
       </Grid>
-    </div>
+    </motion.div>
   );
 };
 

@@ -5,6 +5,7 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import FeatureCarousel from './FeatureCarousel';
 import FeatureSection from './FeatureSection';
 import ThemeDemo from './ThemeDemo';
@@ -57,6 +58,17 @@ const HomePage = () => {
               Login
             </MotionButton>
           </Box>
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              repeatType: 'loop',
+            }}
+            style={{ position: 'absolute', bottom: 30 }}
+          >
+            <ArrowDownwardIcon />
+          </motion.div>
         </Container>
       </Box>
       <Container maxWidth="lg">

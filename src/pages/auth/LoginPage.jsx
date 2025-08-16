@@ -112,8 +112,8 @@ const LoginPage = () => {
       setLoading(true);
       await login(form.email.value, form.password.value);
       navigate(from, { replace: true });
-    } catch {
-      setSubmitError('Invalid credentials. Please try again.');
+    } catch (error) {
+      setSubmitError(error.message || 'An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }

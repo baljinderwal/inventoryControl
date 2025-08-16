@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import axios from 'axios';
 
 const AuthContext = createContext();
 
@@ -6,48 +7,54 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      setUser({ token });
     }
   }, []);
 
-  const login = async () => {
+  const login = async (email, password) => {
     try {
-      // In a real app, you'd use email and password to authenticate.
-      // Here, we're simulating a successful login for any of the predefined users.
-      // We'll just log in as the admin user for this example.
-      const response = { data: [{ "id": 1, "name": "Admin User", "email": "admin@example.com", "password": "password", "role": "Admin" }] };
+      const response = await axios.post('https://inventorybackend-loop.onrender.com/auth/login', {
+        email,
+        password,
+      });
 
-      if (response.data.length > 0) {
-        const loggedInUser = response.data[0];
-        localStorage.setItem('user', JSON.stringify(loggedInUser));
-        setUser(loggedInUser);
-        return loggedInUser;
+      if (response.data && response.data.token) {
+        const { token } = response.data;
+        localStorage.setItem('authToken', token);
+        const userPayload = { token };
+        setUser(userPayload);
+        return userPayload;
       } else {
-        throw new Error('Invalid credentials');
+        throw new Error('Login failed: No token received.');
       }
     } catch (error) {
-      console.error('Login failed', error);
-      throw error;
+      console.error('Login failed:', error.response ? error.response.data : error.message);
+      if (error.response) {
+        throw new Error(error.response.data.message || 'Invalid credentials');
+      } else if (error.request) {
+        throw new Error('Network error, please try again.');
+      } else {
+        throw new Error('An unexpected error occurred.');
+      }
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user'); // Also remove old key for hygiene
     setUser(null);
   };
 
   const signup = async (name, email, password) => {
-    // In a real app, you would send this to your backend to create a new user
-    // and handle potential errors (e.g., email already exists).
-    // Here, we'll simulate creating a new user and logging them in.
+    // This is out of scope for the current task, but we leave it as is.
     try {
       const newUser = {
-        id: Date.now(), // Simulate a new user ID
+        id: Date.now(),
         name,
         email,
-        role: 'Admin', // Default role for new users
+        role: 'Admin',
       };
 
       localStorage.setItem('user', JSON.stringify(newUser));

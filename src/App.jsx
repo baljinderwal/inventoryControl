@@ -20,15 +20,17 @@ import SalesOrdersPage from './pages/sales/SalesOrdersPage';
 import Layout from './components/layout/Layout';
 import PrivateRoute from './components/PrivateRoute';
 import { SidebarProvider } from './utils/SidebarContext';
+import HomePage from './pages/home/HomePage';
 
 function App() {
   return (
     <SidebarProvider>
       <Routes>
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route element={<Layout />}>
           <Route element={<PrivateRoute roles={['Admin', 'Manager', 'Staff']} />}>
-            <Route path="/" element={<DashboardPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/stock" element={<StockPage />} />
             <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />

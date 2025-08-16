@@ -11,7 +11,7 @@ const PrivateRoute = ({ roles }) => {
   }
 
   if (roles && !roles.includes(user.role)) {
-    return <Navigate to="/" state={{ from: location }} replace />;
+    return <Navigate to="/dashboard" state={{ from: location }} replace />;
   }
 
   return <Outlet />;

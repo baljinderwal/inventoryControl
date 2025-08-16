@@ -20,7 +20,7 @@ import {
   Google,
   VpnKey,
 } from '@mui/icons-material';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion as Motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
 const LoginPage = () => {
   const [form, setForm] = useState({
@@ -37,7 +37,7 @@ const LoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || '/';
+  const from = location.state?.from?.pathname || '/dashboard';
 
   const validateEmail = (email) => {
     if (!email) return "Email is required.";
@@ -148,14 +148,14 @@ const LoginPage = () => {
           p: 4,
         }}
       >
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
+        <Motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
           <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 2 }}>
             MyBrand
           </Typography>
           <Typography variant="h6" sx={{ maxWidth: 400, textAlign: 'center' }}>
             Your productivity starts here — secure, fast, and beautifully simple.
           </Typography>
-        </motion.div>
+        </Motion.div>
       </Box>
 
       {/* Right Side: Login Form */}
@@ -169,7 +169,7 @@ const LoginPage = () => {
         }}
       >
         <Container component="main" maxWidth="xs">
-          <motion.div
+          <Motion.div
             variants={formVariants}
             initial={shouldReduceMotion ? 'visible' : 'hidden'}
             animate={animateShake ? 'shake' : 'visible'}
@@ -193,7 +193,7 @@ const LoginPage = () => {
 
               <AnimatePresence>
                 {submitError && (
-                  <motion.div
+                  <Motion.div
                     initial={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
@@ -211,7 +211,7 @@ const LoginPage = () => {
                     >
                       {submitError}
                     </Typography>
-                  </motion.div>
+                  </Motion.div>
                 )}
               </AnimatePresence>
 
@@ -236,9 +236,9 @@ const LoginPage = () => {
                       <InputAdornment position="end">
                         <AnimatePresence>
                           {form.email.touched && form.email.valid && (
-                            <motion.div initial={shouldReduceMotion ? {} : { scale: 0 }} animate={{ scale: 1 }} exit={shouldReduceMotion ? {} : { scale: 0 }}>
+                            <Motion.div initial={shouldReduceMotion ? {} : { scale: 0 }} animate={{ scale: 1 }} exit={shouldReduceMotion ? {} : { scale: 0 }}>
                               <CheckCircleOutline color="success" />
-                            </motion.div>
+                            </Motion.div>
                           )}
                         </AnimatePresence>
                       </InputAdornment>
@@ -287,7 +287,7 @@ const LoginPage = () => {
                   </Button>
                 </Box>
 
-                <motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
+                <Motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
                   <Button
                     type="submit"
                     fullWidth
@@ -306,7 +306,7 @@ const LoginPage = () => {
                   >
                     {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Sign In'}
                   </Button>
-                </motion.div>
+                </Motion.div>
 
                 <Divider sx={{ my: 2 }}>
                   <Typography variant="body2" color="text.secondary">
@@ -314,7 +314,7 @@ const LoginPage = () => {
                   </Typography>
                 </Divider>
 
-                <motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
+                <Motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
                   <Button
                     fullWidth
                     variant="outlined"
@@ -332,8 +332,8 @@ const LoginPage = () => {
                   >
                     Sign in with Google
                   </Button>
-                </motion.div>
-                <motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
+                </Motion.div>
+                <Motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
                   <Button
                     fullWidth
                     variant="outlined"
@@ -351,7 +351,7 @@ const LoginPage = () => {
                   >
                     Sign in with a passkey
                   </Button>
-                </motion.div>
+                </Motion.div>
 
                 <Typography variant="body2" align="center" sx={{ mt: 3 }}>
                   Don't have an account?{' '}
@@ -361,7 +361,7 @@ const LoginPage = () => {
                 </Typography>
               </Box>
             </Paper>
-          </motion.div>
+          </Motion.div>
         </Container>
       </Box>
     </Box>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Paper, Typography, IconButton, Switch, Divider } from '@mui/material';
-import { WbSunny, Brightness_2, Menu, ArrowBack } from '@mui/icons-material';
+import { WbSunny, Brightness2, Menu, ArrowBack } from '@mui/icons-material';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 
 const ThemingDemo = () => {
@@ -61,7 +61,7 @@ const ThemingDemo = () => {
                 checked={isDarkMode}
                 onChange={() => setIsDarkMode(!isDarkMode)}
                 icon={<WbSunny />}
-                checkedIcon={<Brightness_2 />}
+                checkedIcon={<Brightness2 />}
                 aria-label="Toggle dark mode"
               />
             </Box>

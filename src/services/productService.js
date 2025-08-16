@@ -15,8 +15,19 @@ const local = {
     return products.find(p => p.id === id);
   },
   addProduct: async (productData) => {
-    console.warn('Read-only mode: addProduct disabled.', productData);
-    return Promise.resolve(productData);
+    console.log('Adding product to local db.json', productData);
+    // This mimics the remote API behavior for local development with json-server
+    const response = await fetch('/products', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(productData),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to add product to local db.json');
+    }
+    return await response.json();
   },
   updateProduct: async (id, product) => {
     console.warn('Read-only mode: updateProduct disabled.', id, product);

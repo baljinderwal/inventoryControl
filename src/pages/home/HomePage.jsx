@@ -22,14 +22,16 @@ import './HomePage.css';
 const MotionButton = motion(Button);
 
 const colorOptions = [
-  { name: 'Light Gray', value: '#fafafa' },
-  { name: 'Light Blue', value: '#e6f7ff' },
-  { name: 'Light Green', value: '#f6ffed' },
-  { name: 'Light Yellow', value: '#fffbe6' },
-  { name: 'Light Purple', value: '#f9f0ff' },
-  { name: 'White', value: '#ffffff' },
-  { name: 'Dark Slate Blue', value: '#2c3e50' },
-  { name: 'Dark Blue', value: '#34495e' },
+  { name: 'Light Gray', value: '#fafafa', isDark: false },
+  { name: 'White', value: '#ffffff', isDark: false },
+  { name: 'Vibrant Red', value: '#FF4136', isDark: true },
+  { name: 'Vibrant Orange', value: '#FF851B', isDark: true },
+  { name: 'Vibrant Green', value: '#2ECC40', isDark: true },
+  { name: 'Vibrant Blue', value: '#0074D9', isDark: true },
+  { name: 'Wisteria', value: '#8E44AD', isDark: true },
+  { name: 'Amethyst', value: '#9B59B6', isDark: true },
+  { name: 'Thistle', value: '#D2B4DE', isDark: false },
+  { name: 'Dark Slate Blue', value: '#2c3e50', isDark: true },
 ];
 
 const HomePage = () => {
@@ -38,6 +40,11 @@ const HomePage = () => {
   const handleColorChange = (event) => {
     setHeroBackground(event.target.value);
   };
+
+  const selectedColor = colorOptions.find(
+    (color) => color.value === heroBackground
+  );
+  const textColor = selectedColor && selectedColor.isDark ? '#fff' : '#000';
 
   return (
     <motion.div
@@ -52,21 +59,12 @@ const HomePage = () => {
               value={heroBackground}
               onChange={handleColorChange}
               sx={{
-                color:
-                  heroBackground === '#2c3e50' || heroBackground === '#34495e'
-                    ? '#fff'
-                    : '#000',
+                color: textColor,
                 '.MuiOutlinedInput-notchedOutline': {
-                  borderColor:
-                    heroBackground === '#2c3e50' || heroBackground === '#34495e'
-                      ? '#fff'
-                      : '#000',
+                  borderColor: textColor,
                 },
                 '.MuiSvgIcon-root': {
-                  color:
-                    heroBackground === '#2c3e50' || heroBackground === '#34495e'
-                      ? '#fff'
-                      : '#000',
+                  color: textColor,
                 },
               }}
             >

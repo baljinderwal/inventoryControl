@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import { Box, Typography, IconButton, Paper } from '@mui/material';
 import { AnimatePresence, motion as Motion } from 'framer-motion';
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
@@ -26,7 +26,7 @@ const features = [
   },
 ];
 
-const FeaturesCarousel = () => {
+const FeaturesCarousel = forwardRef((props, ref) => {
   const [index, setIndex] = useState(0);
 
   const handleNext = () => {
@@ -38,7 +38,7 @@ const FeaturesCarousel = () => {
   };
 
   return (
-    <Box sx={{ py: 10, bgcolor: 'background.default' }}>
+    <Box sx={{ py: 10, bgcolor: 'background.default' }} ref={ref}>
       <Typography variant="h4" component="h2" textAlign="center" fontWeight="bold" mb={5}>
         Key Features
       </Typography>
@@ -98,6 +98,6 @@ const FeaturesCarousel = () => {
       </Box>
     </Box>
   );
-};
+});
 
 export default FeaturesCarousel;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Button from '@mui/material/Button';
@@ -6,6 +6,8 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import TypewriterComponent from './Typewriter';
 import FeatureCarousel from './FeatureCarousel';
 import FeatureSection from './FeatureSection';
@@ -38,16 +40,63 @@ const Background = () => {
   );
 };
 
+const colorOptions = [
+  { name: 'Light Gray', value: '#fafafa' },
+  { name: 'Light Blue', value: '#e6f7ff' },
+  { name: 'Light Green', value: '#f6ffed' },
+  { name: 'Light Yellow', value: '#fffbe6' },
+  { name: 'Light Purple', value: '#f9f0ff' },
+  { name: 'White', value: '#ffffff' },
+  { name: 'Dark Slate Blue', value: '#2c3e50' },
+  { name: 'Dark Blue', value: '#34495e' },
+];
+
 const HomePage = () => {
+  const [heroBackground, setHeroBackground] = useState(colorOptions[0].value);
+
+  const handleColorChange = (event) => {
+    setHeroBackground(event.target.value);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <Box className="hero-section">
+      <Box className="hero-section" sx={{ backgroundColor: heroBackground }}>
         <Background />
         <Container maxWidth="md" sx={{ position: 'relative' }}>
+          <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
+            <Select
+              value={heroBackground}
+              onChange={handleColorChange}
+              sx={{
+                color:
+                  heroBackground === '#2c3e50' || heroBackground === '#34495e'
+                    ? '#fff'
+                    : '#000',
+                '.MuiOutlinedInput-notchedOutline': {
+                  borderColor:
+                    heroBackground === '#2c3e50' || heroBackground === '#34495e'
+                      ? '#fff'
+                      : '#000',
+                },
+                '.MuiSvgIcon-root': {
+                  color:
+                    heroBackground === '#2c3e50' || heroBackground === '#34495e'
+                      ? '#fff'
+                      : '#000',
+                },
+              }}
+            >
+              {colorOptions.map((color) => (
+                <MenuItem key={color.name} value={color.value}>
+                  {color.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </Box>
           <Typography variant="h2" component="h1" gutterBottom>
             Modern Inventory Management Made Simple.
           </Typography>

@@ -2,9 +2,56 @@
 
 A modern, responsive web application for managing inventory, suppliers, orders, and more. Built with React, Vite, and Material-UI, this project provides a comprehensive solution for small to medium-sized businesses to track their assets and operations efficiently.
 
+## 🚀 Getting Started
+
+### Prerequisites
+
+Make sure you have the following installed on your machine:
+
+*   [Node.js](https://nodejs.org/en) (v18 or higher recommended)
+*   [npm](https://www.npmjs.com/) (usually comes with Node.js)
+
+### Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-username/inventory-frontend.git
+    cd inventory-frontend
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+### Running the Application
+
+This project requires two terminals to be running simultaneously: one for the mock backend API and one for the frontend development server.
+
+1.  **Start the mock API server:**
+    In your first terminal, run the following command to start the `json-server`:
+    ```bash
+    npm run server
+    ```
+    This will start a mock API server on `http://localhost:3001`.
+
+2.  **Start the frontend development server:**
+    In your second terminal, run the following command:
+    ```bash
+    npm run dev
+    ```
+    This will start the Vite development server, and you can view the application by navigating to `http://localhost:5173` (or the URL provided in the terminal output).
+
+---
+
 ## ✨ Features
 
-  **📊 Interactive Dashboard:** Get a quick overview of your business performance with key metrics and charts.
+*   **🌐 Modern Animated Homepage:** A premium, responsive landing page to attract new users.
+    *   **Hero Section:** With a catchy headline and clear call-to-action buttons.
+    *   **Animated Features:** A feature carousel, individual feature sections with scroll-triggered animations, and a demo of the app's theming capabilities.
+    *   **Engaging Content:** Includes a grid of the tech stack, a placeholder for a demo video, and a testimonials section.
+    *   **Smooth Navigation:** A subtle, animated "scroll down" indicator on the hero section guides users to the content below.
+*   **📊 Interactive Dashboard:** Get a quick overview of your business performance with key metrics and charts.
     *   **Sales & Revenue Analytics:** View total sales and revenue at a glance.
     *   **Sales Trends:** A dynamic line chart visualizes sales revenue over time.
     *   **Low Stock Alerts:** Immediately see which products are running low on stock.

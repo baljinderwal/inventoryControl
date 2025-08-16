@@ -1,0 +1,14 @@
+.hero-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  background-color: #f8fafc;
+  padding: 2rem;
+}
+
+.dark .hero-section {
+    background-color: #0f172a;
+}

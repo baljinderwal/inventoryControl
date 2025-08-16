@@ -1,30 +1,46 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { userService } from '../services/userService';
 import api from '../services/api';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const checkLoggedIn = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const { data: userProfile } = await api.get('/users/me');
+          setUser(userProfile);
+        } catch (error) {
+          console.error('Failed to fetch user profile', error);
+          // Token might be invalid/expired
+          localStorage.removeItem('token');
+        }
+      }
+      setLoading(false);
+    };
+    checkLoggedIn();
   }, []);
 
   const login = async (email, password) => {
     try {
-      const response = await api.get(`/users?email=${email}&password=${password}`);
+      const response = await api.post('/auth/login', { email, password });
+      const { token } = response.data;
 
-      if (response.data.length > 0) {
-        const loggedInUser = response.data[0];
-        localStorage.setItem('user', JSON.stringify(loggedInUser));
-        setUser(loggedInUser);
-        return loggedInUser;
+      if (token) {
+        localStorage.setItem('token', token);
+        // Set token for subsequent requests
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+        // Fetch user profile
+        const { data: userProfile } = await api.get('/users/me');
+        setUser(userProfile);
+        return userProfile;
       } else {
-        throw new Error('Invalid credentials');
+        throw new Error('Login failed: No token received');
       }
     } catch (error) {
       console.error('Login failed', error);
@@ -34,37 +50,24 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (name, email, password) => {
     try {
-      // 1. Check if user with the same email already exists
-      const existingUsers = await api.get(`/users?email=${email}`);
-      if (existingUsers.data.length > 0) {
-        throw new Error('An account with this email already exists.');
-      }
-
-      // 2. If not, create the new user
-      const newUser = {
-        name,
-        email,
-        password, // In a real app, this should be hashed!
-        role: 'Staff', // Default role for new signups
-      };
-      const createdUser = await userService.api.addUser(newUser);
-      return createdUser;
+      await api.post('/auth/register', { name, email, password });
     } catch (error) {
       console.error('Signup failed', error);
-      // Re-throw the error so the component can catch it
       throw error;
     }
   };
 
   const logout = () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem('token');
     setUser(null);
+    // Remove auth header from subsequent requests
+    delete api.defaults.headers.common['Authorization'];
   };
 
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, signup }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, signup, loading }}>
       {children}
     </AuthContext.Provider>
   );

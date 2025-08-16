@@ -5,12 +5,10 @@
   justify-content: center;
   min-height: 90vh;
   text-align: center;
-  background-color: #fafafa;
   color: #333;
   padding: 2rem;
 }
 
 .dark .hero-section {
-  background-color: #0f172a;
   color: #fff;
 }

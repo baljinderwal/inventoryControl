@@ -110,11 +110,11 @@ const AppWrapper = () => {
       <NotificationProvider>
         <CssBaseline />
         <BrowserRouter>
-          <AuthProvider>
-            <ApiModeProvider>
+          <ApiModeProvider>
+            <AuthProvider>
               <App />
-            </ApiModeProvider>
-          </AuthProvider>
+            </AuthProvider>
+          </ApiModeProvider>
         </BrowserRouter>
       </NotificationProvider>
     </ThemeProvider>

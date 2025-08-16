@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://inventorybackend-loop.onrender.com/', // The port where json-server will run
+  // Use environment variable for API base URL, with a fallback for existing setups.
+  // The VITE_ prefix is required for Vite to expose it to the client-side code.
+  baseURL: import.meta.env.VITE_API_URL || 'https://inventorybackend-loop.onrender.com/',
 });
 
 // Add a request interceptor to include the token in headers

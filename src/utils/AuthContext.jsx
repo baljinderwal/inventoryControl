@@ -74,21 +74,43 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signup = async (name, email, password) => {
-    // This is out of scope for the current task, but we leave it as is.
     try {
-      const newUser = {
-        id: Date.now(),
+      const response = await axios.post('https://inventorybackend-loop.onrender.com/auth/register', {
         name,
         email,
-        role: 'Admin',
-      };
+        password,
+        role: 'user', // Default role for new signups
+      });
 
-      localStorage.setItem('user', JSON.stringify(newUser));
-      setUser(newUser);
-      return newUser;
+      console.log('API Response:', response);
+
+      if (response.data && response.data.token) {
+        const { token } = response.data;
+        localStorage.setItem('authToken', token);
+        const decodedUser = decodeJwt(token);
+        if (decodedUser) {
+          setUser(decodedUser);
+          return decodedUser;
+        } else {
+          throw new Error('Invalid token received from server.');
+        }
+      } else {
+        // This case handles a successful registration that doesn't return a token.
+        // Based on the user request, we expect a token to log the user in.
+        // If no token, we can't log them in, so we should throw an error.
+        throw new Error('Signup successful, but no token received.');
+      }
     } catch (error) {
-      console.error('Signup failed', error);
-      throw error;
+      console.error('Full signup error:', error);
+      let message = 'An unexpected error occurred.';
+      if (error.response && error.response.data && error.response.data.message) {
+        message = error.response.data.message;
+      } else if (error.request) {
+        message = 'Network error, please try again.';
+      } else if (error.message) {
+        message = error.message;
+      }
+      throw new Error(message);
     }
   };
 

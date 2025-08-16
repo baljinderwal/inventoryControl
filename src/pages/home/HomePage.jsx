@@ -24,22 +24,15 @@ const MotionButton = motion(Button);
 const colorOptions = [
   { name: 'Light Gray', value: '#fafafa', isDark: false },
   { name: 'White', value: '#ffffff', isDark: false },
-  { name: 'Thistle', value: '#D2B4DE', isDark: false },
-  { name: 'Amethyst', value: '#9B59B6', isDark: true },
-  { name: 'Wisteria', value: '#8E44AD', isDark: true },
-  { name: 'Charcoal', value: '#36454F', isDark: true },
-  { name: 'Steel Blue', value: '#4682B4', isDark: true },
-  { name: 'Silver', value: '#C0C0C0', isDark: false },
-  { name: 'Midnight Blue', value: '#191970', isDark: true },
-  { name: 'Gunmetal', value: '#2a3439', isDark: true },
+  { name: 'Thistle', value: '#D2B4DE', isDark: false }
 ];
 
 const HomePage = () => {
-  const [heroBackground, setHeroBackground] = useState(colorOptions[0].value);
+  const [heroBackground] = useState(colorOptions[0].value);
 
-  const handleColorChange = (event) => {
-    setHeroBackground(event.target.value);
-  };
+  // Add your background image URL here
+  const heroBgImage =
+    'url("https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=1200&q=80")';
 
   const selectedColor = colorOptions.find(
     (color) => color.value === heroBackground
@@ -52,29 +45,19 @@ const HomePage = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <Box className="hero-section" sx={{ backgroundColor: heroBackground }}>
+      <Box
+        className="hero-section"
+        sx={{
+          backgroundColor: heroBackground,
+          backgroundImage: heroBgImage,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          position: 'relative',
+        }}
+      >
         <Container maxWidth="md" sx={{ position: 'relative' }}>
-          <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
-            <Select
-              value={heroBackground}
-              onChange={handleColorChange}
-              sx={{
-                color: textColor,
-                '.MuiOutlinedInput-notchedOutline': {
-                  borderColor: textColor,
-                },
-                '.MuiSvgIcon-root': {
-                  color: textColor,
-                },
-              }}
-            >
-              {colorOptions.map((color) => (
-                <MenuItem key={color.name} value={color.value}>
-                  {color.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </Box>
+          {/* Dropdown removed */}
           <Typography variant="h2" component="h1" gutterBottom>
             Modern Inventory Management Made Simple.
           </Typography>

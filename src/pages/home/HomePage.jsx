@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import TypewriterComponent from './Typewriter';
 import FeatureCarousel from './FeatureCarousel';
 import FeatureSection from './FeatureSection';
 import ThemeDemo from './ThemeDemo';
@@ -17,21 +21,52 @@ import './HomePage.css';
 
 const MotionButton = motion(Button);
 
+const colorOptions = [
+  { name: 'Light Gray', value: '#fafafa', isDark: false },
+  { name: 'White', value: '#ffffff', isDark: false },
+  { name: 'Thistle', value: '#D2B4DE', isDark: false }
+];
+
 const HomePage = () => {
+  const [heroBackground] = useState(colorOptions[0].value);
+
+  // Add your background image URL here
+  const heroBgImage =
+    'url("https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=1200&q=80")';
+
+  const selectedColor = colorOptions.find(
+    (color) => color.value === heroBackground
+  );
+  const textColor = selectedColor && selectedColor.isDark ? '#fff' : '#000';
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <Box className="hero-section">
-        <Container maxWidth="md">
+      <Box
+        className="hero-section"
+        sx={{
+          backgroundColor: heroBackground,
+          backgroundImage: heroBgImage,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          position: 'relative',
+        }}
+      >
+        <Container maxWidth="md" sx={{ position: 'relative' }}>
+          {/* Dropdown removed */}
           <Typography variant="h2" component="h1" gutterBottom>
-            Modern Inventory Management
+            Modern Inventory Management Made Simple.
           </Typography>
           <Typography variant="h5" component="p" gutterBottom>
-            Streamline your stock, orders, and suppliers with ease.
+            Manage products, suppliers, orders, and reports—all in one place.
           </Typography>
+          <Box sx={{ mt: 2, minHeight: '2.5em' }}>
+            <TypewriterComponent />
+          </Box>
           <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
             <MotionButton
               component={Link}
@@ -57,6 +92,17 @@ const HomePage = () => {
               Login
             </MotionButton>
           </Box>
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              repeatType: 'loop',
+            }}
+            style={{ position: 'absolute', bottom: 30 }}
+          >
+            <ArrowDownwardIcon />
+          </motion.div>
         </Container>
       </Box>
       <Container maxWidth="lg">

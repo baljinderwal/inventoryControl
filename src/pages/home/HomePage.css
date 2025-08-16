@@ -3,12 +3,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  min-height: 90vh;
   text-align: center;
-  background-color: #f8fafc;
+  color: #333;
   padding: 2rem;
 }
 
 .dark .hero-section {
-    background-color: #0f172a;
+  color: #fff;
 }

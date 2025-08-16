@@ -5,7 +5,9 @@ import PrivateRoute from './components/PrivateRoute';
 import { SidebarProvider } from './utils/SidebarContext';
 import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
+import { useAuth } from './utils/AuthContext';
 
+const HomePage = React.lazy(() => import('./pages/home/HomePage'));
 const LoginPage = React.lazy(() => import('./pages/auth/LoginPage'));
 const SignupPage = React.lazy(() => import('./pages/auth/SignupPage'));
 const DashboardPage = React.lazy(() => import('./pages/dashboard/DashboardPage'));
@@ -26,21 +28,30 @@ const CustomersPage = React.lazy(() => import('./pages/customers/CustomersPage')
 const SalesOrdersPage = React.lazy(() => import('./pages/sales/SalesOrdersPage'));
 
 const LoadingFallback = () => (
-  <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+  <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
     <CircularProgress />
   </Box>
 );
 
 function App() {
+  // This component will handle the root path, redirecting if necessary
+  const Root = () => {
+    const { isAuthenticated } = useAuth();
+    // If the user is authenticated, redirect them to the dashboard.
+    // Otherwise, show the homepage.
+    return isAuthenticated ? <Navigate to="/dashboard" /> : <HomePage />;
+  };
+
   return (
     <SidebarProvider>
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
+          <Route path="/" element={<Root />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route element={<Layout />}>
             <Route element={<PrivateRoute roles={['Admin', 'Manager', 'Staff']} />}>
-              <Route path="/" element={<DashboardPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/products" element={<ProductsPage />} />
               <Route path="/stock" element={<StockPage />} />
               <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />

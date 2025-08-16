@@ -57,52 +57,92 @@ const HomePage = () => {
         }}
       >
         <Container maxWidth="md" sx={{ position: 'relative' }}>
-          {/* Dropdown removed */}
-          <Typography variant="h2" component="h1" gutterBottom>
-            Modern Inventory Management Made Simple.
-          </Typography>
-          <Typography variant="h5" component="p" gutterBottom>
-            Manage products, suppliers, orders, and reports—all in one place.
-          </Typography>
-          <Box sx={{ mt: 2, minHeight: '2.5em' }}>
-            <TypewriterComponent />
-          </Box>
-          <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
-            <MotionButton
-              component={Link}
-              to="/signup"
-              variant="contained"
-              color="primary"
-              size="large"
-              sx={{ mr: 2 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Get Started for Free
-            </MotionButton>
-            <MotionButton
-              component={Link}
-              to="/login"
-              variant="outlined"
-              color="primary"
-              size="large"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Login
-            </MotionButton>
-          </Box>
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              repeatType: 'loop',
+          {/* Add overlay for better text visibility */}
+          <Box
+            sx={{
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(0,0,0,0.45)',
+              zIndex: 1,
+              borderRadius: 2,
             }}
-            style={{ position: 'absolute', bottom: 30 }}
-          >
-            <ArrowDownwardIcon />
-          </motion.div>
+          />
+          <Box sx={{ position: 'relative', zIndex: 2, textAlign: 'center', pt: 8, pb: 4 }}>
+            <Typography
+              variant="h2"
+              component="h1"
+              gutterBottom
+              sx={{
+                color: '#fff',
+                textShadow: '0 2px 8px rgba(0,0,0,0.5)',
+                fontWeight: 700,
+              }}
+            >
+              Modern Inventory Management Made Simple.
+            </Typography>
+            <Typography
+              variant="h5"
+              component="p"
+              gutterBottom
+              sx={{
+                color: '#fff',
+                textShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                fontWeight: 400,
+              }}
+            >
+              Manage products, suppliers, orders, and reports—all in one place.
+            </Typography>
+            <Box sx={{ mt: 2, minHeight: '2.5em' }}>
+              <TypewriterComponent />
+            </Box>
+            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+              <MotionButton
+                component={Link}
+                to="/signup"
+                variant="contained"
+                color="primary"
+                size="large"
+                sx={{ mr: 2 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Get Started for Free
+              </MotionButton>
+              <MotionButton
+                component={Link}
+                to="/login"
+                variant="outlined"
+                color="primary"
+                size="large"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Login
+              </MotionButton>
+            </Box>
+            {/* Arrow moved below buttons and styled for visibility */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+              <motion.div
+                animate={{ y: [0, 10, 0] }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  repeatType: 'loop',
+                }}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  background: 'rgba(255,255,255,0.7)',
+                  borderRadius: '50%',
+                  width: 48,
+                  height: 48,
+                }}
+              >
+                <ArrowDownwardIcon sx={{ color: '#1976d2', fontSize: 32 }} />
+              </motion.div>
+            </Box>
+          </Box>
         </Container>
       </Box>
       <Container maxWidth="lg">

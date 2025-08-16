@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
@@ -20,25 +20,6 @@ import Stats from './Stats';
 import './HomePage.css';
 
 const MotionButton = motion(Button);
-
-const Background = () => {
-  const { scrollYProgress } = useScroll();
-  const y = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
-  return (
-    <motion.div
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        y,
-        background: 'url(https://www.transparenttextures.com/patterns/cubes.png)',
-        opacity: 0.1,
-      }}
-    />
-  );
-};
 
 const colorOptions = [
   { name: 'Light Gray', value: '#fafafa' },
@@ -65,7 +46,6 @@ const HomePage = () => {
       transition={{ duration: 0.5 }}
     >
       <Box className="hero-section" sx={{ backgroundColor: heroBackground }}>
-        <Background />
         <Container maxWidth="md" sx={{ position: 'relative' }}>
           <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
             <Select

@@ -68,6 +68,16 @@ A modern, responsive web application for managing inventory, suppliers, orders, 
     *   Enhanced accessibility, including support for reduced motion preferences and Caps Lock detection.
     *   Progressive authentication options with UI for "Sign in with Google" and "Sign in with a passkey".
 
+- **✨ World-Class Signup Page:** A sleek, professional, and user-friendly signup page designed to make account creation effortless and secure.
+    *   **Clean, Minimalist Layout:** A mobile-first design that adapts beautifully to desktop, featuring a branding illustration alongside the form.
+    *   **Comprehensive Form:** Includes fields for Full Name, Email, and Password.
+    *   **Advanced Password Input:**
+        *   **Password Strength Indicator:** A real-time visual bar that provides feedback on password complexity.
+        *   **Show/Hide Toggle:** Allows users to verify their password entry.
+    *   **Social Logins:** One-click signup options with Google, GitHub, and Apple to accelerate the process.
+    *   **Trust and Transparency:** Includes links to Terms of Service/Privacy Policy and a security reassurance message to build user trust.
+    *   **Seamless Integration:** The new page is available at the `/signup` route and is linked from the login page for easy discovery.
+
 ---
 
 ## 🚀 Technologies Used

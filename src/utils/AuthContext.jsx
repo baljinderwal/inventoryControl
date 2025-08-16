@@ -38,10 +38,31 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const signup = async (name, email, password) => {
+    // In a real app, you would send this to your backend to create a new user
+    // and handle potential errors (e.g., email already exists).
+    // Here, we'll simulate creating a new user and logging them in.
+    try {
+      const newUser = {
+        id: Date.now(), // Simulate a new user ID
+        name,
+        email,
+        role: 'Staff', // Default role for new users
+      };
+
+      localStorage.setItem('user', JSON.stringify(newUser));
+      setUser(newUser);
+      return newUser;
+    } catch (error) {
+      console.error('Signup failed', error);
+      throw error;
+    }
+  };
+
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, signup }}>
       {children}
     </AuthContext.Provider>
   );

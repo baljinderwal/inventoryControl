@@ -24,14 +24,14 @@ const MotionButton = motion(Button);
 const colorOptions = [
   { name: 'Light Gray', value: '#fafafa', isDark: false },
   { name: 'White', value: '#ffffff', isDark: false },
-  { name: 'Vibrant Red', value: '#FF4136', isDark: true },
-  { name: 'Vibrant Orange', value: '#FF851B', isDark: true },
-  { name: 'Vibrant Green', value: '#2ECC40', isDark: true },
-  { name: 'Vibrant Blue', value: '#0074D9', isDark: true },
-  { name: 'Wisteria', value: '#8E44AD', isDark: true },
-  { name: 'Amethyst', value: '#9B59B6', isDark: true },
   { name: 'Thistle', value: '#D2B4DE', isDark: false },
-  { name: 'Dark Slate Blue', value: '#2c3e50', isDark: true },
+  { name: 'Amethyst', value: '#9B59B6', isDark: true },
+  { name: 'Wisteria', value: '#8E44AD', isDark: true },
+  { name: 'Charcoal', value: '#36454F', isDark: true },
+  { name: 'Steel Blue', value: '#4682B4', isDark: true },
+  { name: 'Silver', value: '#C0C0C0', isDark: false },
+  { name: 'Midnight Blue', value: '#191970', isDark: true },
+  { name: 'Gunmetal', value: '#2a3439', isDark: true },
 ];
 
 const HomePage = () => {

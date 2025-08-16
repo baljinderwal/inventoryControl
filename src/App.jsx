@@ -34,15 +34,18 @@ const LoadingFallback = () => (
   </Box>
 );
 
-function App() {
-  // This component will handle the root path, redirecting if necessary
-  const Root = () => {
-    const { isAuthenticated } = useAuth();
-    // If the user is authenticated, redirect them to the dashboard.
-    // Otherwise, show the homepage.
-    return isAuthenticated ? <Navigate to="/dashboard" /> : <HomePage />;
-  };
+// This component will handle the root path, redirecting if necessary
+const Root = () => {
+  const { isAuthenticated, loading } = useAuth();
 
+  if (loading) {
+    return <LoadingFallback />;
+  }
+
+  return isAuthenticated ? <Navigate to="/dashboard" /> : <HomePage />;
+};
+
+function App() {
   return (
     <SidebarProvider>
       <Suspense fallback={<LoadingFallback />}>

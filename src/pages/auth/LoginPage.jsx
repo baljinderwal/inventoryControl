@@ -155,7 +155,7 @@ const LoginPage = () => {
           <Typography variant="h6" sx={{ maxWidth: 400, textAlign: 'center' }}>
             Your productivity starts here — secure, fast, and beautifully simple.
           </Typography>
-        </motion.div>
+        </Motion.div>
       </Box>
 
       {/* Right Side: Login Form */}
@@ -211,7 +211,7 @@ const LoginPage = () => {
                     >
                       {submitError}
                     </Typography>
-                  </motion.div>
+                  </Motion.div>
                 )}
               </AnimatePresence>
 
@@ -361,7 +361,7 @@ const LoginPage = () => {
                 </Typography>
               </Box>
             </Paper>
-          </motion.div>
+          </Motion.div>
         </Container>
       </Box>
     </Box>

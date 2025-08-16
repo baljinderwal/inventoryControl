@@ -7,7 +7,6 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import TypewriterComponent from './Typewriter';
-import AnimatedDashboard from './AnimatedDashboard';
 import FeatureCarousel from './FeatureCarousel';
 import FeatureSection from './FeatureSection';
 import ThemeDemo from './ThemeDemo';
@@ -82,9 +81,6 @@ const HomePage = () => {
             >
               Login
             </MotionButton>
-          </Box>
-          <Box sx={{ my: 4 }}>
-            <AnimatedDashboard />
           </Box>
           <motion.div
             animate={{ y: [0, 10, 0] }}

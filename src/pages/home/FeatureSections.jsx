@@ -7,19 +7,19 @@ const features = [
   {
     title: 'Comprehensive Dashboard',
     description: 'Gain valuable insights with our all-in-one dashboard. Track sales, monitor stock levels, and identify trends to make informed decisions.',
-    image: 'https://via.placeholder.com/500x300.png/FE6B8B/FFFFFF?text=Dashboard',
+    image: 'https://picsum.photos/seed/dashboard/800/600',
     align: 'left',
   },
   {
     title: 'Effortless Product Management',
     description: 'Organize your products with categories, variations, and custom fields. Keep your entire catalog up-to-date with bulk import/export.',
-    image: 'https://via.placeholder.com/500x300.png/FF8E53/FFFFFF?text=Products',
+    image: 'https://picsum.photos/seed/products/800/600',
     align: 'right',
   },
   {
     title: 'Simplified Order Processing',
     description: 'From purchase orders to sales, our system simplifies the entire process. Automate orders, manage returns, and keep your customers happy.',
-    image: 'https://via.placeholder.com/500x300.png/FE6B8B/FFFFFF?text=Orders',
+    image: 'https://picsum.photos/seed/suppliers/800/600',
     align: 'left',
   },
 ];

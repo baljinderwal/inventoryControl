@@ -42,7 +42,7 @@ const DemoVideo = () => {
               </IconButton>
             </Box>
             <img
-              src="https://via.placeholder.com/800x450.png/CCCCCC/FFFFFF?text=Product+Demo"
+              src="https://picsum.photos/seed/demo-video/800/450"
               alt="Product Demo"
               style={{ width: '100%', display: 'block' }}
             />

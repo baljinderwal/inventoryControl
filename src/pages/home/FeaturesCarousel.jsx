@@ -7,22 +7,22 @@ const features = [
   {
     title: 'Intuitive Dashboard',
     description: 'Get a comprehensive overview of your inventory at a glance.',
-    image: 'https://via.placeholder.com/600x400.png/FF8E53/FFFFFF?text=Dashboard',
+    image: 'https://picsum.photos/seed/dashboard/800/600',
   },
   {
     title: 'Product Management',
     description: 'Easily add, edit, and track all your products.',
-    image: 'https://via.placeholder.com/600x400.png/FE6B8B/FFFFFF?text=Products',
+    image: 'https://picsum.photos/seed/products/800/600',
   },
   {
     title: 'Order Tracking',
     description: 'Manage purchase and sales orders efficiently.',
-    image: 'https://via.placeholder.com/600x400.png/FF8E53/FFFFFF?text=Orders',
+    image: 'https://picsum.photos/seed/orders/800/600',
   },
   {
     title: 'Supplier Directory',
     description: 'Keep all your supplier information in one place.',
-    image: 'https://via.placeholder.com/600x400.png/FE6B8B/FFFFFF?text=Suppliers',
+    image: 'https://picsum.photos/seed/suppliers/800/600',
   },
 ];
 

@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
         id: Date.now(), // Simulate a new user ID
         name,
         email,
-        role: 'Staff', // Default role for new users
+        role: 'Admin', // Default role for new users
       };
 
       localStorage.setItem('user', JSON.stringify(newUser));

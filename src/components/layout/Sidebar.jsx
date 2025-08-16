@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import {
   Drawer,
   List,
@@ -30,7 +30,7 @@ const drawerWidth = 240;
 const collapsedDrawerWidth = 88;
 
 const navigation = [
-    { name: 'Dashboard', href: '/', icon: AssessmentIcon, roles: ['Admin', 'Manager', 'Staff'] },
+    { name: 'Dashboard', href: '/dashboard', icon: AssessmentIcon, roles: ['Admin', 'Manager', 'Staff'] },
     { name: 'Products', href: '/products', icon: InventoryIcon, roles: ['Admin', 'Manager', 'Staff'] },
     { name: 'Stock', href: '/stock', icon: WarehouseIcon, roles: ['Admin', 'Manager', 'Staff'] },
     { name: 'Suppliers', href: '/suppliers', icon: BusinessIcon, roles: ['Admin', 'Manager'] },
@@ -79,7 +79,7 @@ const Sidebar = () => {
     const isActive = location.pathname === item.href;
 
     return (
-        <motion.div variants={navItemVariants}>
+        <Motion.div variants={navItemVariants}>
             <Tooltip title={isCollapsed ? item.name : ''} placement="right" arrow>
                 <ListItemButton
                 component={NavLink}
@@ -105,9 +105,9 @@ const Sidebar = () => {
                 }}
                 >
                 <ListItemIcon sx={{ minWidth: 0, mr: isCollapsed ? 0 : 3, justifyContent: 'center', transition: 'margin 0.2s', color: 'inherit' }}>
-                    <motion.div whileHover={{ scale: 1.1 }}>
+                    <Motion.div whileHover={{ scale: 1.1 }}>
                     <Icon />
-                    </motion.div>
+                    </Motion.div>
                 </ListItemIcon>
                 <ListItemText
                     primary={item.name}
@@ -121,14 +121,14 @@ const Sidebar = () => {
                 />
                 </ListItemButton>
             </Tooltip>
-        </motion.div>
+        </Motion.div>
     );
   };
 
   const drawerContent = (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <Box sx={{ overflowY: 'auto', overflowX: 'hidden', flexGrow: 1, pt: 2 }}>
-        <motion.div
+        <Motion.div
             component="nav"
             variants={navListVariants}
             initial={hasAnimated ? false : 'closed'}
@@ -139,7 +139,7 @@ const Sidebar = () => {
                 <NavItem key={item.name} item={item} />
             ))}
             </List>
-        </motion.div>
+        </Motion.div>
       </Box>
     </Box>
   );

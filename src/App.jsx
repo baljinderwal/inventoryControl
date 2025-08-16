@@ -31,7 +31,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route element={<Layout />}>
-          <Route element={<PrivateRoute roles={['Admin', 'Manager', 'Staff']} />}>
+          <Route element={<PrivateRoute roles={['Admin', 'Manager', 'Staff', 'user']} />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/stock" element={<StockPage />} />

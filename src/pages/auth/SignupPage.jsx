@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../utils/AuthContext';
-import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
   Button,
   TextField,
@@ -12,32 +12,40 @@ import {
   InputAdornment,
   CircularProgress,
   Divider,
+  Grid,
 } from '@mui/material';
 import {
   Visibility,
   VisibilityOff,
   CheckCircleOutline,
   Google,
-  VpnKey,
+  GitHub,
+  Apple,
+  LockOutlined
 } from '@mui/icons-material';
 import { motion as Motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
-const LoginPage = () => {
+const SignupPage = () => {
   const [form, setForm] = useState({
+    name: { value: '', valid: false, touched: false, error: '' },
     email: { value: '', valid: false, touched: false, error: '' },
     password: { value: '', valid: false, touched: false, error: '' },
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [isCapsLockOn, setIsCapsLockOn] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({ score: 0, text: '', color: 'error' });
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [animateShake, setAnimateShake] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
-  const { login } = useAuth();
+  const { signup } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from?.pathname || '/dashboard';
+
+  const validateName = (name) => {
+    if (!name) return "Full name is required.";
+    if (name.length < 2) return "Name must be at least 2 characters long.";
+    return "";
+  };
 
   const validateEmail = (email) => {
     if (!email) return "Email is required.";
@@ -46,19 +54,73 @@ const LoginPage = () => {
     return "";
   };
 
+  const checkPasswordStrength = (password) => {
+    let score = 0;
+    let text = '';
+    let color = 'error.main';
+
+    const hasNumber = /\d/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    const isLongEnough = password.length >= 8;
+
+    if (isLongEnough) score++;
+    if (hasNumber) score++;
+    if (hasLowerCase && hasUpperCase) score++;
+    if (hasSpecialChar) score++;
+
+    // Bonus for length
+    if (password.length >= 12) score++;
+
+    switch (score) {
+        case 0:
+        case 1:
+            text = 'Weak';
+            color = 'error.main';
+            break;
+        case 2:
+            text = 'Medium';
+            color = 'warning.main';
+            break;
+        case 3:
+            text = 'Strong';
+            color = 'success.main';
+            break;
+        case 4:
+        case 5:
+            text = 'Very Strong';
+            color = 'success.dark';
+            break;
+        default:
+            text = '';
+            color = 'error.main';
+    }
+
+    if (password.length === 0) {
+        return { score: 0, text: '', color: 'error.main' };
+    }
+
+    return { score, text, color };
+  };
+
   const validatePassword = (password) => {
     if (!password) return "Password is required.";
-    if (password.length < 8) return "Password must be at least 8 characters long.";
+    const strength = checkPasswordStrength(password);
+    if (strength.score < 2) return "Password is too weak. Include more character types.";
     return "";
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let error = '';
-    if (name === 'email') {
+    if (name === 'name') {
+      error = validateName(value);
+    } else if (name === 'email') {
       error = validateEmail(value);
     } else if (name === 'password') {
       error = validatePassword(value);
+      setPasswordStrength(checkPasswordStrength(value));
     }
     setForm((prev) => ({
       ...prev,
@@ -74,35 +136,22 @@ const LoginPage = () => {
     }));
   };
 
-  const checkCapsLock = (e) => {
-    if (e.getModifierState) {
-      setIsCapsLockOn(e.getModifierState('CapsLock'));
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener('keydown', checkCapsLock);
-    window.addEventListener('keyup', checkCapsLock);
-    return () => {
-      window.removeEventListener('keydown', checkCapsLock);
-      window.removeEventListener('keyup', checkCapsLock);
-    };
-  }, []);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError('');
 
+    const nameError = validateName(form.name.value);
     const emailError = validateEmail(form.email.value);
     const passwordError = validatePassword(form.password.value);
 
     setForm((prev) => ({
       ...prev,
+      name: { ...prev.name, touched: true, error: nameError },
       email: { ...prev.email, touched: true, error: emailError },
       password: { ...prev.password, touched: true, error: passwordError },
     }));
 
-    if (emailError || passwordError) {
+    if (nameError || emailError || passwordError) {
       setAnimateShake(true);
       setTimeout(() => setAnimateShake(false), 500);
       return;
@@ -110,16 +159,16 @@ const LoginPage = () => {
 
     try {
       setLoading(true);
-      await login(form.email.value, form.password.value);
-      navigate(from, { replace: true });
-    } catch {
-      setSubmitError('Invalid credentials. Please try again.');
+      await signup(form.name.value, form.email.value, form.password.value);
+      navigate('/dashboard');
+    } catch (error) {
+      setSubmitError(error.message || 'Failed to create an account. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const isFormValid = form.email.valid && form.password.valid;
+  const isFormValid = form.name.valid && form.email.valid && form.password.valid;
 
   const formVariants = {
     hidden: { opacity: 0, y: -20 },
@@ -132,12 +181,12 @@ const LoginPage = () => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      {/* Left Side: Hero Image */}
+      {/* Left Side: Illustration */}
       <Box
         sx={{
           flex: 1,
           backgroundImage:
-            'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(https://images.unsplash.com/photo-1507842217343-583bb7270b66)',
+            'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(https://images.unsplash.com/photo-1554333394-339a9559a235)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           display: { xs: 'none', md: 'flex' },
@@ -153,12 +202,12 @@ const LoginPage = () => {
             MyBrand
           </Typography>
           <Typography variant="h6" sx={{ maxWidth: 400, textAlign: 'center' }}>
-            Your productivity starts here — secure, fast, and beautifully simple.
+            Start your journey with us. Create your account to unlock exclusive features.
           </Typography>
         </Motion.div>
       </Box>
 
-      {/* Right Side: Login Form */}
+      {/* Right Side: Signup Form */}
       <Box
         sx={{
           flex: 1,
@@ -185,10 +234,10 @@ const LoginPage = () => {
               }}
             >
               <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>
-                Welcome Back
+                Create your Account
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
-                Sign in to access your dashboard.
+                Let's get you started!
               </Typography>
 
               <AnimatePresence>
@@ -219,19 +268,44 @@ const LoginPage = () => {
                 <TextField
                   margin="normal"
                   fullWidth
+                  id="name"
+                  label="Full Name"
+                  name="name"
+                  autoComplete="name"
+                  autoFocus
+                  value={form.name.value}
+                  onChange={handleInputChange}
+                  onBlur={handleInputBlur}
+                  error={form.name.touched && !!form.name.error}
+                  helperText={form.name.touched && form.name.error}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <AnimatePresence>
+                          {form.name.touched && form.name.valid && (
+                            <Motion.div initial={shouldReduceMotion ? {} : { scale: 0 }} animate={{ scale: 1 }} exit={shouldReduceMotion ? {} : { scale: 0 }}>
+                              <CheckCircleOutline color="success" />
+                            </Motion.div>
+                          )}
+                        </AnimatePresence>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                <TextField
+                  margin="normal"
+                  fullWidth
                   id="email"
                   label="Email Address"
                   name="email"
                   autoComplete="email"
-                  autoFocus
                   value={form.email.value}
                   onChange={handleInputChange}
                   onBlur={handleInputBlur}
                   error={form.email.touched && !!form.email.error}
                   helperText={form.email.touched && form.email.error}
-                  FormHelperTextProps={{ id: 'email-error-text' }}
                   InputProps={{
-                    'aria-describedby': 'email-error-text',
                     endAdornment: (
                       <InputAdornment position="end">
                         <AnimatePresence>
@@ -253,20 +327,13 @@ const LoginPage = () => {
                   label="Password"
                   type={showPassword ? 'text' : 'password'}
                   id="password"
-                  autoComplete="current-password"
+                  autoComplete="new-password"
                   value={form.password.value}
                   onChange={handleInputChange}
                   onBlur={handleInputBlur}
-                  onKeyUp={checkCapsLock}
-                  onKeyDown={checkCapsLock}
                   error={form.password.touched && !!form.password.error}
-                  helperText={
-                    (form.password.touched && form.password.error) ||
-                    (isCapsLockOn ? 'Warning: Caps Lock is on' : '')
-                  }
-                  FormHelperTextProps={{ id: 'password-error-text' }}
+                  helperText={form.password.touched && form.password.error}
                   InputProps={{
-                    'aria-describedby': 'password-error-text',
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
@@ -281,11 +348,34 @@ const LoginPage = () => {
                   }}
                 />
 
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mt: 1 }}>
-                  <Button size="small" sx={{ textTransform: 'none' }}>
-                    Forgot password?
-                  </Button>
-                </Box>
+                {form.password.touched && form.password.value && (
+                  <Box sx={{ mt: 1, width: '100%' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                       <Typography variant="body2" sx={{ color: passwordStrength.color }}>
+                           Strength: {passwordStrength.text}
+                       </Typography>
+                    </Box>
+                    <Box sx={{
+                        width: '100%',
+                        height: '8px',
+                        backgroundColor: 'grey.300',
+                        borderRadius: 1,
+                        overflow: 'hidden'
+                    }}>
+                        <Motion.div
+                           initial={{ width: 0 }}
+                           animate={{ width: `${(passwordStrength.score / 5) * 100}%`}}
+                           transition={{ duration: 0.3 }}
+                        >
+                          <Box sx={{
+                              height: '8px',
+                              backgroundColor: passwordStrength.color,
+                              borderRadius: 1,
+                          }} />
+                        </Motion.div>
+                    </Box>
+                  </Box>
+                )}
 
                 <Motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
                   <Button
@@ -293,18 +383,10 @@ const LoginPage = () => {
                     fullWidth
                     variant="contained"
                     size="large"
-                    sx={{
-                      mt: 2,
-                      mb: 2,
-                      py: 1.5,
-                      fontWeight: 'bold',
-                      '&:disabled': {
-                        background: '#e0e0e0'
-                      }
-                    }}
+                    sx={{ mt: 3, mb: 2, py: 1.5, fontWeight: 'bold' }}
                     disabled={loading || !isFormValid}
                   >
-                    {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Sign In'}
+                    {loading ? <CircularProgress size={24} color="inherit" /> : 'Create Account'}
                   </Button>
                 </Motion.div>
 
@@ -314,49 +396,33 @@ const LoginPage = () => {
                   </Typography>
                 </Divider>
 
-                <Motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    startIcon={<Google />}
-                    sx={{
-                      mb: 1,
-                      textTransform: 'none',
-                      borderColor: '#ddd',
-                      color: 'text.primary',
-                      '&:hover': {
-                        borderColor: '#ccc',
-                        backgroundColor: '#f5f5f5'
-                      }
-                    }}
-                  >
-                    Sign in with Google
-                  </Button>
-                </Motion.div>
-                <Motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
-                  <Button
-                    fullWidth
-                    variant="outlined"
-                    startIcon={<VpnKey />}
-                    sx={{
-                      mb: 1,
-                      textTransform: 'none',
-                      borderColor: '#ddd',
-                      color: 'text.primary',
-                      '&:hover': {
-                        borderColor: '#ccc',
-                        backgroundColor: '#f5f5f5'
-                      }
-                    }}
-                  >
-                    Sign in with a passkey
-                  </Button>
-                </Motion.div>
+                <Grid container spacing={1}>
+                  <Grid item xs={12} sm={4}>
+                    <Button fullWidth variant="outlined" startIcon={<Google />} sx={{ textTransform: 'none', color: 'text.primary', borderColor: '#ddd' }}>Google</Button>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <Button fullWidth variant="outlined" startIcon={<GitHub />} sx={{ textTransform: 'none', color: 'text.primary', borderColor: '#ddd' }}>GitHub</Button>
+                  </Grid>
+                  <Grid item xs={12} sm={4}>
+                    <Button fullWidth variant="outlined" startIcon={<Apple />} sx={{ textTransform: 'none', color: 'text.primary', borderColor: '#ddd' }}>Apple</Button>
+                  </Grid>
+                </Grid>
+
+                <Box sx={{ textAlign: 'center', mt: 3 }}>
+                    <Typography variant="body2" color="text.secondary">
+                        By creating an account, you agree to our<br/>
+                        <RouterLink to="/terms" style={{ color: 'inherit' }}>Terms of Service</RouterLink> & <RouterLink to="/privacy" style={{ color: 'inherit' }}>Privacy Policy</RouterLink>.
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <LockOutlined sx={{ fontSize: '1rem', mr: 0.5 }} />
+                        Your data is secure and encrypted.
+                    </Typography>
+                </Box>
 
                 <Typography variant="body2" align="center" sx={{ mt: 3 }}>
-                  Don't have an account?{' '}
-                  <Button component={RouterLink} to="/signup" size="small" sx={{ textTransform: 'none' }}>
-                    Sign Up
+                  Already have an account?{' '}
+                  <Button component={RouterLink} to="/login" size="small" sx={{ textTransform: 'none' }}>
+                    Sign In
                   </Button>
                 </Typography>
               </Box>
@@ -368,4 +434,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default SignupPage;

@@ -26,6 +26,7 @@ const UsersPage = React.lazy(() => import('./pages/users/UsersPage'));
 const LocationsPage = React.lazy(() => import('./pages/settings/LocationsPage'));
 const CustomersPage = React.lazy(() => import('./pages/customers/CustomersPage'));
 const SalesOrdersPage = React.lazy(() => import('./pages/sales/SalesOrdersPage'));
+const ProfilePage = React.lazy(() => import('./pages/profile/ProfilePage'));
 
 const LoadingFallback = () => (
   <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
@@ -55,6 +56,7 @@ function App() {
               <Route path="/products" element={<ProductsPage />} />
               <Route path="/stock" element={<StockPage />} />
               <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
             </Route>
             <Route element={<PrivateRoute roles={['Admin', 'Manager']} />}>
               <Route path="/suppliers" element={<SuppliersPage />} />

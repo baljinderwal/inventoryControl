@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import {
   Drawer,
   List,
@@ -22,6 +21,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import PersonIcon from '@mui/icons-material/Person';
 
 import { useAuth } from '../../utils/AuthContext';
 import { useSidebar } from '../../utils/SidebarContext';
@@ -31,6 +31,7 @@ const collapsedDrawerWidth = 88;
 
 const navigation = [
     { name: 'Dashboard', href: '/', icon: AssessmentIcon, roles: ['Admin', 'Manager', 'Staff'] },
+    { name: 'Profile', href: '/profile', icon: PersonIcon, roles: ['Admin', 'Manager', 'Staff'] },
     { name: 'Products', href: '/products', icon: InventoryIcon, roles: ['Admin', 'Manager', 'Staff'] },
     { name: 'Stock', href: '/stock', icon: WarehouseIcon, roles: ['Admin', 'Manager', 'Staff'] },
     { name: 'Suppliers', href: '/suppliers', icon: BusinessIcon, roles: ['Admin', 'Manager'] },

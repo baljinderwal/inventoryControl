@@ -1,6 +1,25 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 
+// Function to decode JWT token
+const decodeJwt = (token) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    console.error('Invalid token');
+    return null;
+  }
+};
+
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -9,7 +28,10 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
-      setUser({ token });
+      const decodedUser = decodeJwt(token);
+      if (decodedUser) {
+        setUser(decodedUser);
+      }
     }
   }, []);
 
@@ -23,9 +45,13 @@ export const AuthProvider = ({ children }) => {
       if (response.data && response.data.token) {
         const { token } = response.data;
         localStorage.setItem('authToken', token);
-        const userPayload = { token };
-        setUser(userPayload);
-        return userPayload;
+        const decodedUser = decodeJwt(token);
+        if (decodedUser) {
+          setUser(decodedUser);
+          return decodedUser;
+        } else {
+          throw new Error('Invalid token received from server.');
+        }
       } else {
         throw new Error('Login failed: No token received.');
       }
@@ -36,7 +62,7 @@ export const AuthProvider = ({ children }) => {
       } else if (error.request) {
         throw new Error('Network error, please try again.');
       } else {
-        throw new Error('An unexpected error occurred.');
+        throw new Error(error.message || 'An unexpected error occurred.');
       }
     }
   };

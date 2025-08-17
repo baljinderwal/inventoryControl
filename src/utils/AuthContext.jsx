@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }) => {
       } else if (error.request) {
         throw new Error('Network error, please try again.');
       } else {
-        throw new Error(error.message || 'An unexpected error occurred.');
+        throw new Error('An unexpected error occurred.');
       }
     }
   };
@@ -73,44 +73,26 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const signup = async (name, email, password) => {
+  const signup = async (name, email, password, role) => {
+    console.log('Attempting to sign up with:', { name, email, password, role });
     try {
-      const response = await axios.post('https://inventorybackend-loop.onrender.com/auth/register', {
+      await axios.post('https://inventorybackend-loop.onrender.com/auth/register', {
         name,
         email,
         password,
-        role: 'user', // Default role for new signups
+        role,
       });
-
-      console.log('API Response:', response);
-
-      if (response.data && response.data.token) {
-        const { token } = response.data;
-        localStorage.setItem('authToken', token);
-        const decodedUser = decodeJwt(token);
-        if (decodedUser) {
-          setUser(decodedUser);
-          return decodedUser;
-        } else {
-          throw new Error('Invalid token received from server.');
-        }
-      } else {
-        // This case handles a successful registration that doesn't return a token.
-        // Based on the user request, we expect a token to log the user in.
-        // If no token, we can't log them in, so we should throw an error.
-        throw new Error('Signup successful, but no token received.');
-      }
+      // Signup successful, do not expect a token.
+      // The calling component will now call login().
     } catch (error) {
-      console.error('Full signup error:', error);
-      let message = 'An unexpected error occurred.';
-      if (error.response && error.response.data && error.response.data.message) {
-        message = error.response.data.message;
+      console.error('Signup failed:', error.response ? error.response.data : error.message);
+      if (error.response && error.response.data) {
+        throw new Error(error.response.data.message || 'An unknown error occurred during signup.');
       } else if (error.request) {
-        message = 'Network error, please try again.';
-      } else if (error.message) {
-        message = error.message;
+        throw new Error('Network error, please try again.');
+      } else {
+        throw new Error(error.message || 'An unexpected error occurred.');
       }
-      throw new Error(message);
     }
   };
 

@@ -13,6 +13,10 @@ import {
   CircularProgress,
   Divider,
   Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
   Visibility,
@@ -30,6 +34,7 @@ const SignupPage = () => {
     name: { value: '', valid: false, touched: false, error: '' },
     email: { value: '', valid: false, touched: false, error: '' },
     password: { value: '', valid: false, touched: false, error: '' },
+    role: { value: '', valid: true, touched: false, error: '' },
   });
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState({ score: 0, text: '', color: 'error' });
@@ -38,7 +43,7 @@ const SignupPage = () => {
   const [animateShake, setAnimateShake] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
-  const { signup } = useAuth();
+  const { signup, login } = useAuth();
   const navigate = useNavigate();
 
   const validateName = (name) => {
@@ -110,6 +115,11 @@ const SignupPage = () => {
     if (strength.score < 2) return "Password is too weak. Include more character types.";
     return "";
   };
+  
+  const validateRole = (role) => {
+    if (!role) return "Role is required.";
+    return "";
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -121,6 +131,8 @@ const SignupPage = () => {
     } else if (name === 'password') {
       error = validatePassword(value);
       setPasswordStrength(checkPasswordStrength(value));
+    } else if (name === 'role') {
+        error = validateRole(value);
     }
     setForm((prev) => ({
       ...prev,
@@ -143,15 +155,17 @@ const SignupPage = () => {
     const nameError = validateName(form.name.value);
     const emailError = validateEmail(form.email.value);
     const passwordError = validatePassword(form.password.value);
+    const roleError = validateRole(form.role.value);
 
     setForm((prev) => ({
       ...prev,
       name: { ...prev.name, touched: true, error: nameError },
       email: { ...prev.email, touched: true, error: emailError },
       password: { ...prev.password, touched: true, error: passwordError },
+      role: { ...prev.role, touched: true, error: roleError },
     }));
 
-    if (nameError || emailError || passwordError) {
+    if (nameError || emailError || passwordError || roleError) {
       setAnimateShake(true);
       setTimeout(() => setAnimateShake(false), 500);
       return;
@@ -159,7 +173,9 @@ const SignupPage = () => {
 
     try {
       setLoading(true);
-      await signup(form.name.value, form.email.value, form.password.value);
+      await signup(form.name.value, form.email.value, form.password.value, form.role.value);
+      // After successful signup, log the user in
+      await login(form.email.value, form.password.value);
       navigate('/dashboard');
     } catch (error) {
       if (error.message && error.message.toLowerCase().includes('user already exists')) {
@@ -172,7 +188,7 @@ const SignupPage = () => {
     }
   };
 
-  const isFormValid = form.name.valid && form.email.valid && form.password.valid;
+  const isFormValid = form.name.valid && form.email.valid && form.password.valid && form.role.valid;
 
   const formVariants = {
     hidden: { opacity: 0, y: -20 },
@@ -244,23 +260,29 @@ const SignupPage = () => {
                 Let's get you started!
               </Typography>
 
-              {submitError && (
-                <Typography
-                  color="error"
-                  variant="body2"
-                  sx={{
-                    textAlign: 'center',
-                    background: 'rgba(211, 47, 47, 0.1)',
-                    p: 1,
-                    borderRadius: 1,
-                    width: '100%',
-                    marginBottom: '16px'
-                  }}
-                  data-testid="submit-error"
-                >
-                  {submitError}
-                </Typography>
-              )}
+              <AnimatePresence>
+                {submitError && (
+                  <Motion.div
+                    initial={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
+                    style={{ width: '100%', marginBottom: '16px' }}
+                  >
+                    <Typography
+                      color="error"
+                      variant="body2"
+                      sx={{
+                        textAlign: 'center',
+                        background: 'rgba(211, 47, 47, 0.1)',
+                        p: 1,
+                        borderRadius: 1,
+                      }}
+                    >
+                      {submitError}
+                    </Typography>
+                  </Motion.div>
+                )}
+              </AnimatePresence>
 
               <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
                 <TextField
@@ -345,6 +367,25 @@ const SignupPage = () => {
                     ),
                   }}
                 />
+
+                <FormControl fullWidth margin="normal">
+                  <InputLabel id="role-select-label">Role</InputLabel>
+                  <Select
+                    labelId="role-select-label"
+                    id="role"
+                    name="role"
+                    value={form.role.value}
+                    label="Role"
+                    onChange={handleInputChange}
+                    onBlur={handleInputBlur}
+                    error={form.role.touched && !!form.role.error}
+                  >
+                    <MenuItem value="user">User</MenuItem>
+                    <MenuItem value="Admin">Admin</MenuItem>
+                    <MenuItem value="Manager">Manager</MenuItem>
+                    <MenuItem value="Staff">Staff</MenuItem>
+                  </Select>
+                </FormControl>
 
                 {form.password.touched && form.password.value && (
                   <Box sx={{ mt: 1, width: '100%' }}>

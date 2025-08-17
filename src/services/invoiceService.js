@@ -1,17 +1,16 @@
 import api from './api';
-import localDb from '../../public/db.json';
 
 const local = {
   getInvoices: async () => {
-    return localDb.invoices;
+    const response = await fetch('/db.json');
+    const data = await response.json();
+    return data.invoices || [];
   },
   createInvoice: async (invoice) => {
-    // This is a mock implementation for local mode.
-    // In a real app, you would persist this change.
-    console.log('Creating invoice in local mode:', invoice);
-    const newInvoice = { ...invoice, id: Date.now() };
-    localDb.invoices.push(newInvoice);
-    return newInvoice;
+    // Local mode is mostly for reading. We'll simulate a successful creation
+    // without actually modifying the static db.json file.
+    console.warn('Read-only mode: createInvoice simulated.', invoice);
+    return Promise.resolve({ ...invoice, id: `temp-${Date.now()}` });
   },
 };
 

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useMemo, useEffect } from 'react';
+import React, { createContext, useState, useContext, useMemo } from 'react';
 import { productService } from '../services/productService';
 import { stockService } from '../services/stockService';
 import { reportService } from '../services/reportService';

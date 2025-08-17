@@ -221,7 +221,7 @@ const POSPage = () => {
                     renderInput={(params) => <TextField {...params} label="Search Product" variant="outlined" />}
                     loading={isLoadingStock}
                     renderOption={(props, option) => (
-                        <li {...props}>
+                        <li {...props} key={option.id}>
                           <Grid container justifyContent="space-between">
                             <Grid item>{option.name}</Grid>
                             <Grid item><Typography color="text.secondary">Stock: {option.stock}</Typography></Grid>

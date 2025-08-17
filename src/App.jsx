@@ -18,6 +18,7 @@ import UsersPage from './pages/users/UsersPage';
 import LocationsPage from './pages/settings/LocationsPage';
 import CustomersPage from './pages/customers/CustomersPage';
 import SalesOrdersPage from './pages/sales/SalesOrdersPage';
+import POSPage from './pages/pos/POSPage';
 import BillingPage from './pages/billing/BillingPage';
 import Layout from './components/layout/Layout';
 import PrivateRoute from './components/PrivateRoute';
@@ -41,6 +42,7 @@ function App() {
           <Route element={<PrivateRoute roles={['Admin', 'Manager']} />}>
             <Route path="/suppliers" element={<SuppliersPage />} />
             <Route path="/customers" element={<CustomersPage />} />
+            <Route path="/pos" element={<POSPage />} />
             <Route path="/sales-orders" element={<SalesOrdersPage />} />
             <Route path="/billing" element={<BillingPage />} />
             <Route path="/reports" element={<ReportsLayout />}>

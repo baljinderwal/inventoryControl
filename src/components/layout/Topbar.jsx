@@ -12,6 +12,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import ApiModeToggle from '../ui/ApiModeToggle';
 import ThemeSwitcher from '../ui/ThemeSwitcher';
+import NotificationBell from '../ui/NotificationBell';
 import Box from '@mui/material/Box';
 
 const Topbar = () => {
@@ -57,6 +58,7 @@ const Topbar = () => {
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <ApiModeToggle />
           <ThemeSwitcher />
+          <NotificationBell />
           <IconButton
             size="large"
             aria-label="account of current user"

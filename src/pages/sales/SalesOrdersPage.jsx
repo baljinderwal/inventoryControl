@@ -124,7 +124,7 @@ const SalesOrdersPage = () => {
       />
 
       <AppDialog
-        isOpen={isDetailsOpen}
+        open={isDetailsOpen}
         onClose={() => setIsDetailsOpen(false)}
         title={`Details for SO #${soToView?.id}`}
       >

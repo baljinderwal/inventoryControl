@@ -104,7 +104,7 @@ const CustomersPage = () => {
       <MuiTable headers={tableHeaders} data={tableData} />
 
       <AppDialog
-        isOpen={isFormOpen}
+        open={isFormOpen}
         onClose={handleCloseForm}
         title={customerToEdit ? 'Edit Customer' : 'Add New Customer'}
       >

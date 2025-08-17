@@ -15,8 +15,14 @@ const local = {
     return products.find(p => p.id === id);
   },
   addProduct: async (productData) => {
-    console.warn('Read-only mode: addProduct disabled.', productData);
-    return Promise.resolve(productData);
+    console.log('Adding product in local mode (no persistence)', productData);
+    // In local/demo mode, we simulate adding by creating a temporary ID.
+    const newProduct = {
+      ...productData,
+      id: `temp-${Date.now()}`, // Create a temporary unique ID
+      createdAt: new Date().toISOString(),
+    };
+    return Promise.resolve(newProduct);
   },
   updateProduct: async (id, product) => {
     console.warn('Read-only mode: updateProduct disabled.', id, product);

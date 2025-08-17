@@ -162,7 +162,11 @@ const SignupPage = () => {
       await signup(form.name.value, form.email.value, form.password.value);
       navigate('/dashboard');
     } catch (error) {
-      setSubmitError(error.message || 'Failed to create an account. Please try again.');
+      if (error.message && error.message.toLowerCase().includes('user already exists')) {
+        navigate('/login', { state: { message: 'Account already exists. Please log in.' } });
+      } else {
+        setSubmitError(error.message || 'Failed to create an account. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -240,29 +244,23 @@ const SignupPage = () => {
                 Let's get you started!
               </Typography>
 
-              <AnimatePresence>
-                {submitError && (
-                  <Motion.div
-                    initial={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
-                    style={{ width: '100%', marginBottom: '16px' }}
-                  >
-                    <Typography
-                      color="error"
-                      variant="body2"
-                      sx={{
-                        textAlign: 'center',
-                        background: 'rgba(211, 47, 47, 0.1)',
-                        p: 1,
-                        borderRadius: 1,
-                      }}
-                    >
-                      {submitError}
-                    </Typography>
-                  </Motion.div>
-                )}
-              </AnimatePresence>
+              {submitError && (
+                <Typography
+                  color="error"
+                  variant="body2"
+                  sx={{
+                    textAlign: 'center',
+                    background: 'rgba(211, 47, 47, 0.1)',
+                    p: 1,
+                    borderRadius: 1,
+                    width: '100%',
+                    marginBottom: '16px'
+                  }}
+                  data-testid="submit-error"
+                >
+                  {submitError}
+                </Typography>
+              )}
 
               <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
                 <TextField

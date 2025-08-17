@@ -76,6 +76,10 @@ This project requires two terminals to be running simultaneously: one for the mo
     *   **Full Customer CRM:** Add, edit, and manage a complete database of your customers.
     *   **Sales Order Processing:** Create, track, and manage orders from customers, from pending to completed.
     *   **Automated Stock Deduction:** Stock levels are automatically adjusted when a sales order is marked as completed.
+*   **💵 Billing & Invoicing:**
+    *   **Generate Invoices:** Create professional invoices directly from completed Sales Orders with a single click.
+    *   **Centralized Billing Page:** A dedicated page to view and manage all customer invoices.
+    *   **Printable PDFs:** Download a clean, printable PDF for any invoice, perfect for record-keeping or sending to customers.
 *   **📝 Advanced Reporting Suite:**
     *   **Stock by Expiry Date:** A new report to identify items nearing their expiry date.
     *   **Sales History:** Track sales trends over time.

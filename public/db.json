@@ -72,31 +72,5 @@
       ],
       "total": 91.00
     }
-  ],
-  "invoices": [
-    {
-      "id": 1001,
-      "salesOrderId": 1,
-      "customerId": 1,
-      "customerName": "John Smith",
-      "invoiceDate": "2025-08-15T10:00:00Z",
-      "dueDate": "2025-09-14T10:00:00Z",
-      "status": "Paid",
-      "items": [
-        {
-          "productId": 1,
-          "productName": "Wireless Mouse",
-          "quantity": 1,
-          "price": 25.99
-        },
-        {
-          "productId": 2,
-          "productName": "Mechanical Keyboard",
-          "quantity": 1,
-          "price": 120
-        }
-      ],
-      "total": 145.99
-    }
   ]
 }

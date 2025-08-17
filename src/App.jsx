@@ -18,6 +18,7 @@ import UsersPage from './pages/users/UsersPage';
 import LocationsPage from './pages/settings/LocationsPage';
 import CustomersPage from './pages/customers/CustomersPage';
 import SalesOrdersPage from './pages/sales/SalesOrdersPage';
+import BillingPage from './pages/billing/BillingPage';
 import Layout from './components/layout/Layout';
 import PrivateRoute from './components/PrivateRoute';
 import { SidebarProvider } from './utils/SidebarContext';
@@ -41,6 +42,7 @@ function App() {
             <Route path="/suppliers" element={<SuppliersPage />} />
             <Route path="/customers" element={<CustomersPage />} />
             <Route path="/sales-orders" element={<SalesOrdersPage />} />
+            <Route path="/billing" element={<BillingPage />} />
             <Route path="/reports" element={<ReportsLayout />}>
               <Route index element={<Navigate to="profitability" replace />} />
               <Route path="profitability" element={<ProfitabilityPage />} />

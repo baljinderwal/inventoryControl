@@ -22,6 +22,7 @@ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
 import ReceiptIcon from '@mui/icons-material/Receipt';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 
 import { useAuth } from '../../utils/AuthContext';
 import { useSidebar } from '../../utils/SidebarContext';
@@ -37,6 +38,7 @@ const navigation = [
     { name: 'Customers', href: '/customers', icon: PeopleIcon, roles: ['Admin', 'Manager'] },
     { name: 'Purchase Orders', href: '/purchase-orders', icon: ShoppingCartIcon, roles: ['Admin', 'Manager', 'Staff'] },
     { name: 'Sales Orders', href: '/sales-orders', icon: ReceiptIcon, roles: ['Admin', 'Manager'] },
+    { name: 'Billing', href: '/billing', icon: AccountBalanceWalletIcon, roles: ['Admin', 'Manager'] },
     { name: 'Reports', href: '/reports', icon: SummarizeIcon, roles: ['Admin', 'Manager'] },
     { name: 'Users', href: '/users', icon: PeopleIcon, roles: ['Admin'] },
     { name: 'Locations', href: '/settings/locations', icon: SettingsIcon, roles: ['Admin', 'Manager'] },

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useMemo, useEffect } from 'react';
+import React, { createContext, useState, useContext, useMemo } from 'react';
 import { productService } from '../services/productService';
 import { stockService } from '../services/stockService';
 import { reportService } from '../services/reportService';
@@ -7,6 +7,7 @@ import { supplierService } from '../services/supplierService';
 import { userService } from '../services/userService';
 import { customerService } from '../services/customerService';
 import { salesOrderService } from '../services/salesOrderService';
+import invoiceService from '../services/invoiceService';
 
 const ApiModeContext = createContext();
 
@@ -39,6 +40,7 @@ export const ApiModeProvider = ({ children }) => {
       users: userService[serviceMode],
       customers: customerService[serviceMode],
       salesOrders: salesOrderService[serviceMode],
+      invoices: invoiceService[serviceMode],
     };
   }, [mode]);
 

@@ -16,7 +16,7 @@ import {
   Chip,
   Stack
 } from '@mui/material';
-import { Edit, Delete, Visibility } from '@mui/icons-material';
+import { Edit, Delete, Visibility, Description } from '@mui/icons-material';
 
 const SalesOrdersPage = () => {
   const queryClient = useQueryClient();
@@ -79,6 +79,31 @@ const SalesOrdersPage = () => {
     setIsDetailsOpen(true);
   };
 
+  const generateInvoiceMutation = useMutation({
+    mutationFn: services.invoices.createInvoice,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['invoices'] });
+      showNotification(`Invoice #${data.id} created successfully!`, 'success');
+    },
+    onError: (err) => {
+      showNotification(`Error creating invoice: ${err.message}`, 'error');
+    },
+  });
+
+  const handleGenerateInvoiceClick = (so) => {
+    const newInvoice = {
+      salesOrderId: so.id,
+      customerId: so.customerId,
+      customerName: so.customerName,
+      invoiceDate: new Date().toISOString(),
+      dueDate: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString(), // Due in 30 days
+      status: 'Draft',
+      items: so.items,
+      total: so.total,
+    };
+    generateInvoiceMutation.mutate(newInvoice);
+  };
+
   const tableHeaders = ['SO ID', 'Customer', 'Date', 'Status', 'Total', 'Actions'];
 
   const tableData = salesOrders.map((so) => ({
@@ -90,6 +115,11 @@ const SalesOrdersPage = () => {
     actions: (
       <Stack direction="row" spacing={1}>
         <IconButton onClick={() => handleViewDetails(so)} size="small"><Visibility /></IconButton>
+        {so.status === 'Completed' && (
+          <IconButton onClick={() => handleGenerateInvoiceClick(so)} size="small" title="Generate Invoice">
+            <Description />
+          </IconButton>
+        )}
         <IconButton onClick={() => handleEditClick(so)} size="small"><Edit /></IconButton>
         <IconButton onClick={() => handleDeleteClick(so)} size="small"><Delete /></IconButton>
       </Stack>

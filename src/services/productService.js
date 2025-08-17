@@ -45,7 +45,7 @@ const remote = {
     const { stock, batchNumber, expiryDate, locationId, ...productDetails } = productData;
 
     // 1. Create the product
-    const productResponse = await api.post('/orders', productDetails);
+    const productResponse = await api.post('/products', productDetails);
     const newProduct = productResponse.data;
 
     // 2. If initial stock is provided, create the stock entry

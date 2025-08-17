@@ -125,7 +125,7 @@ const SuppliersPage = () => {
       <MuiTable headers={tableHeaders} data={tableData || []} />
 
       <AppDialog
-        isOpen={isFormOpen}
+        open={isFormOpen}
         onClose={handleCloseForm}
         title={supplierToEdit ? 'Edit Supplier' : 'Add New Supplier'}
       >

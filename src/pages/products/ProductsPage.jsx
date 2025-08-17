@@ -149,7 +149,7 @@ const ProductsPage = () => {
       <MuiTable headers={tableHeaders} data={tableData} />
 
       <AppDialog
-        isOpen={isFormOpen}
+        open={isFormOpen}
         onClose={handleCloseForm}
         title={productToEdit ? 'Edit Product' : 'Add New Product'}
       >

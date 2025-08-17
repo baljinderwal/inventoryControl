@@ -141,7 +141,7 @@ const StockPage = () => {
 
       {selectedProduct && (
         <AppDialog
-          isOpen={isAdjustmentModalOpen}
+          open={isAdjustmentModalOpen}
           onClose={handleCloseAdjustmentModal}
           title={`Adjust Stock for ${selectedProduct.name}`}
         >
@@ -151,7 +151,7 @@ const StockPage = () => {
 
       {selectedProduct && (
         <AppDialog
-          isOpen={isTransferModalOpen}
+          open={isTransferModalOpen}
           onClose={handleCloseTransferModal}
           title={`Transfer Stock for ${selectedProduct.name}`}
         >
@@ -161,7 +161,7 @@ const StockPage = () => {
 
       {selectedProduct && (
         <AppDialog
-          isOpen={isDetailsModalOpen}
+          open={isDetailsModalOpen}
           onClose={handleCloseDetailsModal}
           title={`Stock Details for ${selectedProduct.name}`}
           maxWidth="md"

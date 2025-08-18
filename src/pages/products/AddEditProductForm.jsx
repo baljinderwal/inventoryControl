@@ -77,11 +77,8 @@ const AddEditProductForm = ({
       services.products.addProduct,
     onSuccess: () => {
       showNotification(`Product ${isEditMode ? 'updated' : 'added'} successfully`, 'success');
-      // Always invalidate to ensure the list is fresh, which is simpler and more reliable.
-      // This now works for local mode since we've fixed the service to persist data.
-      queryClient.invalidateQueries({ queryKey: ['stock'] });
-      // Also invalidate the base products query if it's used elsewhere
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      // Invalidate the specific query key used by the ProductsPage to ensure it refetches.
+      queryClient.invalidateQueries({ queryKey: ['stock', mode] });
       onClose();
     },
     onError: (err) => {

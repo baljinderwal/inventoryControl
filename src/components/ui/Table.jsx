@@ -11,7 +11,7 @@ import Box from '@mui/material/Box';
 import { visuallyHidden } from '@mui/utils';
 
 const MuiTable = ({ headers, data, onSort, sortColumn, sortDirection }) => {
-  const createSortHandler = (property) => (event) => {
+  const createSortHandler = (property) => () => {
     onSort(property);
   };
 
@@ -49,13 +49,13 @@ const MuiTable = ({ headers, data, onSort, sortColumn, sortDirection }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((row, rowIndex) => (
+          {data.map((row) => (
             <TableRow
-              key={rowIndex}
+              key={row.id}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               {headers.map(header => (
-                <TableCell key={header.id}>
+                <TableCell key={header.id} align={header.numeric ? 'right' : 'left'}>
                   {row[header.id]}
                 </TableCell>
               ))}

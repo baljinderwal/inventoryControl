@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
 import { Parser } from '@json2csv/plainjs';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 import MuiTable from '../../components/ui/Table';
 import SearchBar from '../../components/ui/SearchBar';
@@ -103,10 +103,19 @@ const ProductsPage = () => {
     setProductToEdit(null);
   }
 
-  const tableHeaders = ['Name', 'SKU', 'Barcode', 'Category', 'Price', 'Stock', 'Actions'];
+  const tableHeaders = ['Image', 'Name', 'SKU', 'Barcode', 'Category', 'Price', 'Stock', 'Actions'];
 
   const tableData = filteredProducts.map(p => ({
-    name: p.name,
+    image: p.imageUrl ? (
+      <img src={p.imageUrl} alt={p.name} style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: '4px' }} />
+    ) : (
+      <Box sx={{ width: 50, height: 50, backgroundColor: '#f0f0f0', borderRadius: '4px' }} />
+    ),
+    name: (
+      <Link to={`/products/${p.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+        {p.name}
+      </Link>
+    ),
     sku: p.sku,
     barcode: p.barcode,
     category: p.category,

@@ -47,15 +47,14 @@ const remote = {
   },
   addProduct: async (productData) => {
     console.log('Adding product via API', productData);
-    // Separate product details from stock details
     const { stock, batchNumber, expiryDate, locationId, ...productDetails } = productData;
 
     // 1. Create the product
     const productResponse = await api.post('/products', productDetails);
     const newProduct = productResponse.data;
 
-    // 2. If initial stock is provided, create the stock entry
-    if (stock > 0 && expiryDate && locationId) { // Ensure all stock details are present
+    // 2. If it's a simple product and initial stock is provided, create the stock entry
+    if (productDetails.type === 'simple' && stock > 0 && expiryDate && locationId) {
       const newStockEntry = {
         productId: newProduct.id,
         quantity: stock,
@@ -68,10 +67,14 @@ const remote = {
       };
       await api.post('/stock', newStockEntry);
     }
+    // No stock entry for bundle products
+
     return newProduct;
   },
   updateProduct: async (id, product) => {
     console.log(`Updating product ${id} via API`, product);
+    // If the product is a bundle, ensure bundleItems is part of the update
+    // The current logic should handle this correctly as `product` contains all fields
     const response = await api.patch(`/products/${id}`, product);
     return response.data;
   },

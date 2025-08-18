@@ -12,6 +12,14 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import { Add, Delete } from '@mui/icons-material';
+import Autocomplete from '@mui/material/Autocomplete';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import Grid from '@mui/material/Grid';
 
 const AddEditProductForm = ({
   onClose,
@@ -36,15 +44,27 @@ const AddEditProductForm = ({
     batchNumber: '',
     expiryDate: '',
     locationId: '',
+    type: 'simple',
+    bundleItems: [],
   });
+  const [selectedBundleItem, setSelectedBundleItem] = useState(null);
+  const [bundleItemQuantity, setBundleItemQuantity] = useState(1);
 
   const isEditMode = Boolean(product);
 
   const { data: locations = [] } = useQuery({
     queryKey: ['locations', mode],
     queryFn: () => a_services.locations.getLocations(),
-    enabled: !isEditMode, // Only fetch locations in add mode
+    enabled: !isEditMode,
   });
+
+  const { data: products = [] } = useQuery({
+    queryKey: ['products', mode],
+    queryFn: () => services.products.getProducts(),
+    enabled: formData.type === 'bundle',
+  });
+
+  const simpleProducts = products.filter(p => p.type === 'simple');
 
   useEffect(() => {
     if (product) {
@@ -61,6 +81,8 @@ const AddEditProductForm = ({
         batchNumber: '',
         expiryDate: '',
         locationId: '',
+        type: product.type || 'simple',
+        bundleItems: product.bundleItems || [],
       });
     }
   }, [product]);
@@ -109,6 +131,40 @@ const AddEditProductForm = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleProductTypeChange = (e) => {
+    const { value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      type: value,
+      bundleItems: value === 'simple' ? [] : prev.bundleItems,
+    }));
+  };
+
+  const handleAddBundleItem = () => {
+    if (!selectedBundleItem || bundleItemQuantity <= 0) {
+      showNotification('Please select a product and enter a valid quantity.', 'warning');
+      return;
+    }
+    const existingItem = formData.bundleItems.find(item => item.productId === selectedBundleItem.id);
+    if (existingItem) {
+      showNotification('Product already in bundle. You can edit the quantity.', 'info');
+      return;
+    }
+    setFormData(prev => ({
+      ...prev,
+      bundleItems: [...prev.bundleItems, { productId: selectedBundleItem.id, quantity: bundleItemQuantity }]
+    }));
+    setSelectedBundleItem(null);
+    setBundleItemQuantity(1);
+  };
+
+  const handleRemoveBundleItem = (productId) => {
+    setFormData(prev => ({
+      ...prev,
+      bundleItems: prev.bundleItems.filter(item => item.productId !== productId)
+    }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const submissionData = {
@@ -116,14 +172,25 @@ const AddEditProductForm = ({
       price: parseFloat(formData.price) || 0,
       costPrice: parseFloat(formData.costPrice) || 0,
       lowStockThreshold: parseInt(formData.lowStockThreshold, 10) || 0,
-      stock: parseInt(formData.stock, 10) || 0,
     };
+
+    if (formData.type === 'simple') {
+      submissionData.stock = parseInt(formData.stock, 10) || 0;
+      delete submissionData.bundleItems;
+    } else {
+      delete submissionData.stock;
+      delete submissionData.batchNumber;
+      delete submissionData.expiryDate;
+      delete submissionData.locationId;
+    }
+
     if (isEditMode) {
       delete submissionData.stock;
       delete submissionData.batchNumber;
       delete submissionData.expiryDate;
       delete submissionData.locationId;
     }
+
     mutation.mutate(submissionData);
   };
 
@@ -138,7 +205,76 @@ const AddEditProductForm = ({
       <TextField margin="dense" id="lowStockThreshold" name="lowStockThreshold" label="Low Stock Threshold" type="number" fullWidth variant="standard" value={formData.lowStockThreshold} onChange={handleChange} required />
       <TextField margin="dense" id="imageUrl" name="imageUrl" label="Image URL" type="text" fullWidth variant="standard" value={formData.imageUrl} onChange={handleChange} />
 
-      {!isEditMode && (
+      <FormControl fullWidth margin="dense" variant="standard">
+        <InputLabel id="product-type-label">Product Type</InputLabel>
+        <Select
+          labelId="product-type-label"
+          id="type"
+          name="type"
+          value={formData.type}
+          onChange={handleProductTypeChange}
+          label="Product Type"
+        >
+          <MenuItem value="simple">Simple</MenuItem>
+          <MenuItem value="bundle">Bundle</MenuItem>
+        </Select>
+      </FormControl>
+
+      {formData.type === 'bundle' && (
+        <Box sx={{ mt: 2, p: 2, border: '1px dashed grey', borderRadius: 1 }}>
+          <Typography variant="h6" gutterBottom>Bundle Items</Typography>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={6}>
+              <Autocomplete
+                options={simpleProducts}
+                getOptionLabel={(option) => option.name}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                value={selectedBundleItem}
+                onChange={(event, newValue) => setSelectedBundleItem(newValue)}
+                renderInput={(params) => <TextField {...params} label="Select Product" variant="standard" />}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <TextField
+                label="Quantity"
+                type="number"
+                variant="standard"
+                value={bundleItemQuantity}
+                onChange={(e) => setBundleItemQuantity(Number(e.target.value))}
+                inputProps={{ min: 1 }}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={2}>
+              <IconButton onClick={handleAddBundleItem} color="primary">
+                <Add />
+              </IconButton>
+            </Grid>
+          </Grid>
+          <List dense>
+            {formData.bundleItems.map(item => {
+                const itemProduct = products.find(p => p.id === item.productId);
+                return (
+                    <ListItem
+                        key={item.productId}
+                        secondaryAction={
+                            <IconButton edge="end" aria-label="delete" onClick={() => handleRemoveBundleItem(item.productId)}>
+                                <Delete />
+                            </IconButton>
+                        }
+                    >
+                        <ListItemText
+                            primary={itemProduct ? itemProduct.name : `Product ID: ${item.productId}`}
+                            secondary={`Quantity: ${item.quantity}`}
+                        />
+                    </ListItem>
+                );
+            })}
+          </List>
+        </Box>
+      )}
+
+      {!isEditMode && formData.type === 'simple' && (
         <>
           <TextField margin="dense" id="stock" name="stock" label="Initial Stock" type="number" fullWidth variant="standard" value={formData.stock} onChange={handleChange} />
           <FormControl fullWidth margin="dense" variant="standard" disabled={!formData.stock || formData.stock <= 0}>

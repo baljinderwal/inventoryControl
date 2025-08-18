@@ -40,14 +40,29 @@ const POSPage = () => {
     queryFn: () => services.customers.getCustomers(),
   });
 
+  const { data: products, isLoading: isLoadingProducts } = useQuery({
+    queryKey: ['products', mode],
+    queryFn: () => services.products.getProducts(),
+  });
+
   const { data: stock, isLoading: isLoadingStock } = useQuery({
     queryKey: ['stock', mode],
     queryFn: () => services.stock.getStockLevels(),
   });
 
+  const productCatalog = useMemo(() => {
+    if (!products || !stock) return [];
+    return products.map(product => {
+      const stockInfo = stock.find(s => s.productId === product.id);
+      return {
+        ...product,
+        stock: stockInfo ? stockInfo.quantity : 0,
+      };
+    });
+  }, [products, stock]);
+
   const checkoutMutation = useMutation({
     mutationFn: async (saleData) => {
-      // 1. Create Sales Order
       const soData = {
         customerId: saleData.customerId,
         customerName: saleData.customerName,
@@ -58,19 +73,31 @@ const POSPage = () => {
       };
       const newSO = await services.salesOrders.addSalesOrder(soData);
 
-      // 2. Adjust Stock Levels for each item
-      // In a real-world scenario, this would be a single backend transaction
-      await Promise.all(
-        saleData.items.map(item =>
-          services.stock.adjustStockLevel({
-            productId: item.id,
+      const stockAdjustments = [];
+      saleData.items.forEach(item => {
+        const product = productCatalog.find(p => p.id === item.productId);
+        if (product.type === 'bundle') {
+          product.bundleItems.forEach(bundleItem => {
+            stockAdjustments.push({
+              productId: bundleItem.productId,
+              quantity: -bundleItem.quantity * item.quantity,
+              locationId: 1, // Defaulting to Main Warehouse
+            });
+          });
+        } else {
+          stockAdjustments.push({
+            productId: item.productId,
             quantity: -item.quantity,
             locationId: 1, // Defaulting to Main Warehouse
-          })
-        )
+          });
+        }
+      });
+
+      await Promise.all(
+        stockAdjustments.map(adj => services.stock.adjustStockLevel(adj))
       );
 
-      // 3. Create Invoice
+      // Create Invoice
       const invoiceData = {
         salesOrderId: newSO.id,
         customerId: newSO.customerId,
@@ -124,6 +151,21 @@ const POSPage = () => {
       return;
     }
 
+    if (selectedProduct.type === 'bundle') {
+      for (const bundleItem of selectedProduct.bundleItems) {
+        const component = productCatalog.find(p => p.id === bundleItem.productId);
+        if (!component || component.stock < bundleItem.quantity) {
+          showNotification(`Not enough stock for ${component.name} in the bundle.`, 'error');
+          return;
+        }
+      }
+    } else {
+      if (selectedProduct.stock <= 0) {
+        showNotification('This product is out of stock.', 'error');
+        return;
+      }
+    }
+
     const existingItem = cart.find(item => item.id === selectedProduct.id);
     if (existingItem) {
       setCart(cart.map(item => item.id === selectedProduct.id ? { ...item, quantity: item.quantity + 1 } : item));
@@ -145,17 +187,10 @@ const POSPage = () => {
   };
 
   const onBarcodeDetect = (barcode) => {
-    const product = stock.find(p => p.barcode === barcode);
+    const product = productCatalog.find(p => p.barcode === barcode);
     if (product) {
-      // Logic to add to cart directly can be complex if we need to select a product first
-      // For now, let's find it and set it as selected
-      const existingItem = cart.find(item => item.id === product.id);
-      if (existingItem) {
-        setCart(cart.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item));
-      } else {
-        setCart([...cart, { ...product, quantity: 1 }]);
-      }
-      showNotification(`Added ${product.name} to cart.`, 'success');
+      setSelectedProduct(product);
+      handleAddToCart();
     } else {
       showNotification('Product not found for this barcode.', 'error');
     }
@@ -172,7 +207,6 @@ const POSPage = () => {
       customerId: selectedCustomerId === 'walk-in' ? null : selectedCustomerId,
       customerName: customer ? customer.name : 'Walk-in Customer',
       items: cart.map(item => ({
-        id: item.id,
         productId: item.id,
         productName: item.name,
         quantity: item.quantity,
@@ -213,18 +247,25 @@ const POSPage = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
                 <Autocomplete
                     sx={{ flexGrow: 1 }}
-                    options={stock || []}
-                    getOptionLabel={(option) => `${option.name} (In Stock: ${option.stock})`}
+                    options={productCatalog || []}
+                    getOptionLabel={(option) => option.name}
                     isOptionEqualToValue={(option, value) => option.id === value.id}
                     value={selectedProduct}
                     onChange={(event, newValue) => setSelectedProduct(newValue)}
                     renderInput={(params) => <TextField {...params} label="Search Product" variant="outlined" />}
-                    loading={isLoadingStock}
+                    loading={isLoadingProducts || isLoadingStock}
                     renderOption={(props, option) => (
                         <li {...props} key={option.id}>
                           <Grid container justifyContent="space-between">
-                            <Grid item>{option.name}</Grid>
-                            <Grid item><Typography color="text.secondary">Stock: {option.stock}</Typography></Grid>
+                            <Grid item>
+                              {option.name}
+                              {option.type === 'bundle' && <Typography variant="caption" sx={{ ml: 1, color: 'primary.main' }}> (Bundle)</Typography>}
+                            </Grid>
+                            <Grid item>
+                              <Typography color="text.secondary">
+                                {option.type === 'simple' ? `Stock: ${option.stock}` : ''}
+                              </Typography>
+                            </Grid>
                           </Grid>
                         </li>
                       )}

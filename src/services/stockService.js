@@ -11,6 +11,14 @@ const local = {
       stockData = stockData.filter(s => s.locationId === locationId);
     }
     const locations = data.locations || [];
+    const suppliers = data.suppliers || [];
+
+    const supplierMap = new Map();
+    suppliers.forEach(supplier => {
+      supplier.products.forEach(productId => {
+        supplierMap.set(productId, supplier.name);
+      });
+    });
 
     const locationMap = new Map(locations.map(loc => [loc.id, loc]));
     const stockMap = new Map();
@@ -32,6 +40,7 @@ const local = {
         ...product,
         stock: totalStock,
         stockByLocation: stockEntries,
+        supplierName: supplierMap.get(product.id) || 'N/A',
       };
     });
   },
@@ -42,6 +51,32 @@ const local = {
   transferStock: async (transferData) => {
     console.warn('Read-only mode: transferStock disabled.', transferData);
     return Promise.resolve();
+  },
+  getProductWithStock: async (id) => {
+    console.log(`Fetching product ${id} with stock from local db.json`);
+    const response = await fetch('/db.json');
+    const data = await response.json();
+    const product = data.products.find(p => p.id === id);
+    if (!product) return null;
+
+    let stockData = data.stock || [];
+    const locations = data.locations || [];
+    const locationMap = new Map(locations.map(loc => [loc.id, loc]));
+
+    const stockEntries = stockData
+      .filter(s => s.productId === id)
+      .map(s => ({
+        ...s,
+        locationName: locationMap.get(s.locationId)?.name || 'Unknown Location',
+      }));
+
+    const totalStock = stockEntries.reduce((sum, s) => sum + s.quantity, 0);
+
+    return {
+      ...product,
+      stock: totalStock,
+      stockByLocation: stockEntries,
+    };
   }
 };
 
@@ -49,14 +84,23 @@ const remote = {
   getStockLevels: async ({ locationId } = {}) => {
     console.log('Fetching stock levels from API');
     const stockUrl = locationId ? `/stock?locationId=${locationId}` : '/stock';
-    const [productsResponse, stockResponse, locationsResponse] = await Promise.all([
+    const [productsResponse, stockResponse, locationsResponse, suppliersResponse] = await Promise.all([
       api.get('/products'),
       api.get(stockUrl),
       api.get('/locations'),
+      api.get('/suppliers'),
     ]);
     const products = productsResponse.data;
     const stockData = stockResponse.data;
     const locations = locationsResponse.data;
+    const suppliers = suppliersResponse.data;
+
+    const supplierMap = new Map();
+    suppliers.forEach(supplier => {
+      supplier.products.forEach(productId => {
+        supplierMap.set(productId, supplier.name);
+      });
+    });
 
     const locationMap = new Map(locations.map(loc => [loc.id, loc]));
     const stockMap = new Map();
@@ -78,6 +122,7 @@ const remote = {
         ...product,
         stock: totalStock,
         stockByLocation: stockEntries,
+        supplierName: supplierMap.get(product.id) || 'N/A',
       };
     });
   },
@@ -196,6 +241,32 @@ const remote = {
 
     return { fromStock, toStock };
   },
+  getProductWithStock: async (id) => {
+    console.log(`Fetching product ${id} with stock from API`);
+    const [productResponse, stockResponse, locationsResponse] = await Promise.all([
+      api.get(`/products/${id}`),
+      api.get(`/stock?productId=${id}`),
+      api.get('/locations'),
+    ]);
+
+    const product = productResponse.data;
+    const stockData = stockResponse.data;
+    const locations = locationsResponse.data;
+    const locationMap = new Map(locations.map(loc => [loc.id, loc]));
+
+    const stockEntries = stockData.map(s => ({
+      ...s,
+      locationName: locationMap.get(s.locationId)?.name || 'Unknown Location',
+    }));
+
+    const totalStock = stockEntries.reduce((sum, s) => sum + s.quantity, 0);
+
+    return {
+      ...product,
+      stock: totalStock,
+      stockByLocation: stockEntries,
+    };
+  }
 };
 
 export const stockService = { local, api: remote };

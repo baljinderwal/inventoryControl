@@ -159,6 +159,7 @@ const AddEditProductForm = ({
         id="name"
         name="name"
         label="Product Name"
+        inputProps={{ 'data-testid': 'name-input' }}
         type="text"
         fullWidth
         variant="standard"
@@ -186,6 +187,7 @@ const AddEditProductForm = ({
         id="sku"
         name="sku"
         label="SKU"
+        inputProps={{ 'data-testid': 'sku-input' }}
         type="text"
         fullWidth
         variant="standard"
@@ -208,6 +210,7 @@ const AddEditProductForm = ({
         id="barcode"
         name="barcode"
         label="Barcode"
+        inputProps={{ 'data-testid': 'barcode-input' }}
         type="text"
         fullWidth
         variant="standard"
@@ -229,6 +232,7 @@ const AddEditProductForm = ({
         id="category"
         name="category"
         label="Category"
+        inputProps={{ 'data-testid': 'category-input' }}
         type="text"
         fullWidth
         variant="standard"
@@ -246,14 +250,15 @@ const AddEditProductForm = ({
           ),
         }}
       />
-      <TextField margin="dense" id="price" name="price" label="Price" type="number" fullWidth variant="standard" value={formData.price} onChange={handleChange} required />
-      <TextField margin="dense" id="costPrice" name="costPrice" label="Cost Price" type="number" fullWidth variant="standard" value={formData.costPrice} onChange={handleChange} required />
-      <TextField margin="dense" id="lowStockThreshold" name="lowStockThreshold" label="Low Stock Threshold" type="number" fullWidth variant="standard" value={formData.lowStockThreshold} onChange={handleChange} required />
+      <TextField margin="dense" id="price" name="price" label="Price" type="number" fullWidth variant="standard" value={formData.price} onChange={handleChange} required inputProps={{ 'data-testid': 'price-input' }} />
+      <TextField margin="dense" id="costPrice" name="costPrice" label="Cost Price" type="number" fullWidth variant="standard" value={formData.costPrice} onChange={handleChange} required inputProps={{ 'data-testid': 'costPrice-input' }} />
+      <TextField margin="dense" id="lowStockThreshold" name="lowStockThreshold" label="Low Stock Threshold" type="number" fullWidth variant="standard" value={formData.lowStockThreshold} onChange={handleChange} required inputProps={{ 'data-testid': 'lowStockThreshold-input' }} />
       <TextField
         margin="dense"
         id="imageUrl"
         name="imageUrl"
         label="Image URL"
+        inputProps={{ 'data-testid': 'imageUrl-input' }}
         type="text"
         fullWidth
         variant="standard"
@@ -273,7 +278,7 @@ const AddEditProductForm = ({
 
       {!isEditMode && (
         <>
-          <TextField margin="dense" id="stock" name="stock" label="Initial Stock" type="number" fullWidth variant="standard" value={formData.stock} onChange={handleChange} />
+          <TextField margin="dense" id="stock" name="stock" label="Initial Stock" type="number" fullWidth variant="standard" value={formData.stock} onChange={handleChange} inputProps={{ 'data-testid': 'stock-input' }} />
           <FormControl fullWidth margin="dense" variant="standard" disabled={!formData.stock || formData.stock <= 0}>
             <InputLabel id="location-select-label">Location for Initial Stock</InputLabel>
             <Select
@@ -296,6 +301,7 @@ const AddEditProductForm = ({
             id="batchNumber"
             name="batchNumber"
             label="Batch Number"
+            inputProps={{ 'data-testid': 'batchNumber-input' }}
             type="text"
             fullWidth
             variant="standard"

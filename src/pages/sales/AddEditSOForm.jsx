@@ -16,7 +16,8 @@ import {
   Typography,
   CircularProgress,
 } from '@mui/material';
-import { Add, Delete } from '@mui/icons-material';
+import { Add, Delete, PersonAddAlt1 as PersonAddIcon } from '@mui/icons-material';
+import AddEditCustomerForm from '../customers/AddEditCustomerForm';
 
 const AddEditSOForm = ({ open, onClose, so }) => {
   const isEditMode = Boolean(so);
@@ -28,6 +29,7 @@ const AddEditSOForm = ({ open, onClose, so }) => {
   const [customerId, setCustomerId] = useState('');
   const [productsList, setProductsList] = useState([{ productId: '', quantity: 1 }]);
   const [status, setStatus] = useState('Pending');
+  const [isAddCustomerOpen, setAddCustomerOpen] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -145,17 +147,34 @@ const AddEditSOForm = ({ open, onClose, so }) => {
 
   const isLoadingMutation = addSOMutation.isLoading || updateSOMutation.isLoading;
 
-  return (
-    <AppDialog title={isEditMode ? `Edit SO #${so.id}` : "Create New Sales Order"} open={open} onClose={onClose} maxWidth="md">
-      <form onSubmit={handleSubmit}>
-        <FormControl fullWidth margin="normal" required disabled={isEditMode}>
-          <InputLabel>Customer</InputLabel>
-          <Select value={customerId} onChange={(e) => setCustomerId(e.target.value)} label="Customer">
-            {isLoadingCustomers ? <CircularProgress size={24} /> : customers?.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
-          </Select>
-        </FormControl>
+  const handleCustomerDialogClose = (newCustomer) => {
+    setAddCustomerOpen(false);
+    if (newCustomer && newCustomer.id) {
+      // The useQuery for customers will refetch automatically due to query invalidation in AddEditCustomerForm.
+      // We can then set the new customer.
+       queryClient.invalidateQueries({ queryKey: ['customers', mode] }).then(() => {
+        setCustomerId(newCustomer.id);
+      });
+    }
+  };
 
-        <FormControl fullWidth margin="normal" required>
+  return (
+    <>
+      <AppDialog title={isEditMode ? `Edit SO #${so.id}` : "Create New Sales Order"} open={open} onClose={onClose} maxWidth="md">
+        <form onSubmit={handleSubmit}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+            <FormControl fullWidth required disabled={isEditMode}>
+              <InputLabel>Customer</InputLabel>
+              <Select value={customerId} onChange={(e) => setCustomerId(e.target.value)} label="Customer">
+                {isLoadingCustomers ? <CircularProgress size={24} /> : customers?.map(c => <MenuItem key={c.id} value={c.id}>{c.name}</MenuItem>)}
+              </Select>
+            </FormControl>
+            <IconButton onClick={() => setAddCustomerOpen(true)} color="primary" disabled={isEditMode}>
+              <PersonAddIcon />
+            </IconButton>
+          </Box>
+
+          <FormControl fullWidth margin="normal" required>
             <InputLabel>Status</InputLabel>
             <Select value={status} onChange={(e) => setStatus(e.target.value)} label="Status">
                 <MenuItem value="Pending">Pending</MenuItem>
@@ -186,6 +205,10 @@ const AddEditSOForm = ({ open, onClose, so }) => {
         </Box>
       </form>
     </AppDialog>
+    <AppDialog open={isAddCustomerOpen} onClose={() => handleCustomerDialogClose(null)} title="Add New Customer">
+        <AddEditCustomerForm onClose={handleCustomerDialogClose} />
+    </AppDialog>
+    </>
   );
 };
 

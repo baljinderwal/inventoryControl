@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
 import { Parser } from '@json2csv/plainjs';
+import { useNavigate } from 'react-router-dom';
 
 import MuiTable from '../../components/ui/Table';
 import SearchBar from '../../components/ui/SearchBar';
@@ -19,12 +20,14 @@ import IconButton from '@mui/material/IconButton';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import Stack from '@mui/material/Stack';
 
 const ProductsPage = () => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
   const { mode, services } = useApi();
+  const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -129,14 +132,21 @@ const ProductsPage = () => {
     <div>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4">Products</Typography>
-        <Stack direction="row" spacing={2}>
+        <Stack direction="row" spacing={1}>
+          <Button
+            variant="outlined"
+            startIcon={<UploadFileIcon />}
+            onClick={() => navigate('/products/import')}
+          >
+            Import
+          </Button>
           <Button
             variant="outlined"
             startIcon={<DownloadIcon />}
             onClick={handleExport}
             disabled={!filteredProducts || filteredProducts.length === 0}
           >
-            Export as CSV
+            Export
           </Button>
           <Button variant="contained" onClick={handleAddClick}>Add Product</Button>
         </Stack>

@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import { AuthProvider } from './utils/AuthContext';
 import { NotificationProvider } from './utils/NotificationContext';
+import { NotificationCenterProvider } from './utils/NotificationCenterContext';
 import { ApiModeProvider } from './utils/ApiModeContext';
 import { CustomThemeProvider, useThemeContext } from './utils/ThemeContext';
 import './index.css';
@@ -112,7 +113,9 @@ const AppWrapper = () => {
         <BrowserRouter>
           <AuthProvider>
             <ApiModeProvider>
-              <App />
+              <NotificationCenterProvider>
+                <App />
+              </NotificationCenterProvider>
             </ApiModeProvider>
           </AuthProvider>
         </BrowserRouter>

@@ -80,16 +80,9 @@ const StockPage = () => {
     }
   };
 
-  const tableHeaders = [
-    { id: 'name', label: 'Name' },
-    { id: 'sku', label: 'SKU' },
-    { id: 'quantity', label: 'Total Stock' },
-    { id: 'status', label: 'Status' },
-    { id: 'actions', label: 'Actions' },
-  ];
+  const tableHeaders = ['Name', 'SKU', 'Total Stock', 'Status', 'Actions'];
 
   const tableData = stockLevels?.map(p => ({
-    id: p.id,
     name: p.name,
     sku: p.sku,
     quantity: p.stock,

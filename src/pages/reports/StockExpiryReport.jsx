@@ -25,16 +25,9 @@ const StockExpiryReport = () => {
     )
     .sort((a, b) => a.expiryDate - b.expiryDate);
 
-  const tableHeaders = [
-    { id: 'productName', label: 'Product Name' },
-    { id: 'productSku', label: 'SKU' },
-    { id: 'batchNumber', label: 'Batch Number' },
-    { id: 'quantity', label: 'Quantity' },
-    { id: 'expiryDate', label: 'Expiry Date' },
-  ];
+  const tableHeaders = ['Product Name', 'SKU', 'Batch Number', 'Quantity', 'Expiry Date'];
 
   const tableData = reportData.map(item => ({
-    id: `${item.productSku}-${item.batchNumber}`,
     productName: item.productName,
     productSku: item.productSku,
     batchNumber: item.batchNumber,

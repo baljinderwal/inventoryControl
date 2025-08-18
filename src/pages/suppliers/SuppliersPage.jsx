@@ -88,15 +88,9 @@ const SuppliersPage = () => {
     document.body.removeChild(link);
   };
 
-  const tableHeaders = [
-    { id: 'name', label: 'Name' },
-    { id: 'contact', label: 'Contact Person' },
-    { id: 'email', label: 'Email' },
-    { id: 'actions', label: 'Actions' },
-  ];
+  const tableHeaders = ['Name', 'Contact Person', 'Email', 'Actions'];
 
   const tableData = suppliers?.map(s => ({
-    id: s.id,
     name: s.name,
     contact: s.contact,
     email: s.email,

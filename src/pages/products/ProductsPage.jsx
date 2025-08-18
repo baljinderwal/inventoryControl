@@ -29,6 +29,7 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Tooltip from '@mui/material/Tooltip';
+import Chip from '@mui/material/Chip';
 
 const ProductsPage = () => {
   const queryClient = useQueryClient();
@@ -77,15 +78,12 @@ const ProductsPage = () => {
   const filteredProducts = useMemo(() => {
     if (!Array.isArray(products)) return [];
     return products.filter((product) => {
-      // Search query filter
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (product.barcode && product.barcode.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      // Category filter
       const matchesCategory = categoryFilter === 'All' || product.category === categoryFilter;
 
-      // Stock status filter
       let matchesStockStatus = true;
       if (stockStatusFilter !== 'All') {
         if (stockStatusFilter === 'In Stock') {
@@ -97,7 +95,6 @@ const ProductsPage = () => {
         }
       }
 
-      // Supplier filter
       const matchesSupplier = supplierFilter === 'All' || product.supplierName === supplierFilter;
 
       return matchesSearch && matchesCategory && matchesStockStatus && matchesSupplier;
@@ -209,9 +206,12 @@ const ProductsPage = () => {
       <Box sx={{ width: 50, height: 50, backgroundColor: '#f0f0f0', borderRadius: '4px' }} />
     ),
     name: (
-      <Link to={`/products/${p.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-        {p.name}
-      </Link>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Link to={`/products/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', marginRight: '8px' }}>
+          {p.name}
+        </Link>
+        {p.type === 'bundle' && <Chip label="Bundle" size="small" />}
+      </Box>
     ),
     sku: p.sku,
     category: p.category,

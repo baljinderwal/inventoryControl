@@ -30,7 +30,7 @@ const remote = {
     return response.data;
   },
   updateUser: async (id, user) => {
-    const response = await api.patch(`/users/${id}`, user);
+    const response = await api.put(`/users/${id}`, user);
     return response.data;
   },
   deleteUser: async (id) => {

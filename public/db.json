@@ -7,7 +7,24 @@
     { "id": 5, "name": "27\" 4K Monitor", "sku": "M-4K-027", "category": "Monitors", "price": 499.99, "costPrice": 350.00, "lowStockThreshold": 50, "createdAt": "2025-07-22T18:00:00Z", "barcode": "8905678901234", "imageUrl": "https://picsum.photos/seed/5/200" },
     { "id": 6, "name": "Ergonomic Chair", "sku": "EC-001", "category": "Furniture", "price": 299.00, "costPrice": 200.00, "lowStockThreshold": 35, "createdAt": "2024-03-12T12:00:00Z", "barcode": "8906789012345", "imageUrl": "" },
     { "id": 7, "name": "Standing Desk", "sku": "SD-001", "category": "Furniture", "price": 350.00, "costPrice": 250.00, "lowStockThreshold": 20, "createdAt": "2025-06-30T16:45:00Z", "barcode": "8907890123456", "imageUrl": "https://picsum.photos/seed/7/200" },
-    { "id": 8, "name": "Webcam 1080p", "sku": "WC-1080", "category": "Electronics", "price": 65.00, "costPrice": 40.00, "lowStockThreshold": 100, "createdAt": "2025-08-01T08:00:00Z", "barcode": "8908901234567", "imageUrl": "https://picsum.photos/seed/8/200" }
+    { "id": 8, "name": "Webcam 1080p", "sku": "WC-1080", "category": "Electronics", "price": 65.00, "costPrice": 40.00, "lowStockThreshold": 100, "createdAt": "2025-08-01T08:00:00Z", "barcode": "8908901234567", "imageUrl": "https://picsum.photos/seed/8/200" },
+    {
+      "id": 9,
+      "name": "Home Office Starter Kit",
+      "sku": "HOSK-001",
+      "category": "Bundles",
+      "price": 199.99,
+      "costPrice": 135.50,
+      "createdAt": "2025-08-18T10:00:00Z",
+      "barcode": "8909012345678",
+      "imageUrl": "https://picsum.photos/seed/9/200",
+      "type": "bundle",
+      "bundleItems": [
+        { "productId": 1, "quantity": 1 },
+        { "productId": 2, "quantity": 1 },
+        { "productId": 8, "quantity": 1 }
+      ]
+    }
   ],
   "suppliers": [
     { "id": 1, "name": "ElectroSupply", "contact": "John Doe", "email": "john.doe@electrosupply.com", "products": [1, 2, 8] },

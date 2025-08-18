@@ -94,7 +94,7 @@ const remote = {
   },
   updateProduct: async (id, product) => {
     console.log(`Updating product ${id} via API`, product);
-    const response = await api.patch(`/products/${id}`, product);
+    const response = await api.put(`/products/${id}`, product);
     return response.data;
   },
   deleteProduct: async (id) => {

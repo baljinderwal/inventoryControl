@@ -34,7 +34,7 @@ const remote = {
   },
   updateLocation: async (id, locationData) => {
     console.log(`Updating location ${id} via API`, locationData);
-    const response = await api.patch(`/locations/${id}`, locationData);
+    const response = await api.put(`/locations/${id}`, locationData);
     return response.data;
   },
   deleteLocation: async (id) => {

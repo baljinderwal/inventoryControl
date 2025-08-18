@@ -40,7 +40,7 @@ const remote = {
     return response.data;
   },
   updatePO: async (poId, poData) => {
-    const response = await api.patch(`/orders/${poId}`, poData);
+    const response = await api.put(`/orders/${poId}`, poData);
     return response.data;
   },
   deletePO: async (id) => {

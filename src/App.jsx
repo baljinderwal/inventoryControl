@@ -4,7 +4,6 @@ import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import ProductsPage from './pages/products/ProductsPage';
-import ProductDetailPage from './pages/products/ProductDetailPage';
 import ProductImportPage from './pages/products/ProductImportPage';
 import StockPage from './pages/stock/StockPage';
 import SuppliersPage from './pages/suppliers/SuppliersPage';
@@ -38,7 +37,6 @@ function App() {
           <Route element={<PrivateRoute roles={['Admin', 'Manager', 'Staff', 'user']} />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/products" element={<ProductsPage />} />
-            <Route path="/products/:id" element={<ProductDetailPage />} />
             <Route path="/products/import" element={<ProductImportPage />} />
             <Route path="/stock" element={<StockPage />} />
             <Route path="/purchase-orders" element={<PurchaseOrdersPage />} />

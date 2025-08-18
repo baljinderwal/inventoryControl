@@ -12,6 +12,9 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
+import InputAdornment from '@mui/material/InputAdornment';
+import Typography from '@mui/material/Typography';
+import VoiceRecognition from '../../components/ui/VoiceRecognition';
 
 const AddEditProductForm = ({
   onClose,
@@ -22,6 +25,7 @@ const AddEditProductForm = ({
   const { mode, services } = useApi();
   const a_services = { ...services, locations: locationService[mode] };
 
+  const [voiceState, setVoiceState] = useState('idle');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -129,7 +133,33 @@ const AddEditProductForm = ({
 
   return (
     <Box component="form" onSubmit={handleSubmit}>
-      <TextField margin="dense" id="name" name="name" label="Product Name" type="text" fullWidth variant="standard" value={formData.name} onChange={handleChange} required />
+      <TextField
+        margin="dense"
+        id="name"
+        name="name"
+        label="Product Name"
+        type="text"
+        fullWidth
+        variant="standard"
+        value={formData.name}
+        onChange={handleChange}
+        required
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, name: transcript }))}
+                onStateChange={setVoiceState}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      {voiceState === 'listening' && (
+        <Typography variant="caption" color="secondary">
+          Listening... Speak now.
+        </Typography>
+      )}
       <TextField margin="dense" id="sku" name="sku" label="SKU" type="text" fullWidth variant="standard" value={formData.sku} onChange={handleChange} required />
       <TextField margin="dense" id="barcode" name="barcode" label="Barcode" type="text" fullWidth variant="standard" value={formData.barcode} onChange={handleChange} />
       <TextField margin="dense"id="category" name="category" label="Category" type="text" fullWidth variant="standard" value={formData.category} onChange={handleChange} required />

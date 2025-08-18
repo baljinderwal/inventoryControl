@@ -90,52 +90,68 @@ const AddEditSOForm = ({ open, onClose, so }) => {
     }
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!customerId || productsList.some(p => !p.productId || !p.quantity)) {
+      showNotification('Please select a customer and add at least one valid product with quantity.', 'warning');
+      return;
+    }
+
     const customer = customers?.find(c => c.id === customerId);
     const items = productsList.map(item => {
-        const product = products.find(p => p.id === parseInt(item.productId));
-        return {
-            productId: parseInt(item.productId),
-            productName: product?.name || '',
-            quantity: parseInt(item.quantity) || 0,
-            price: product?.price || 0,
-        }
+      const product = products.find(p => p.id === parseInt(item.productId));
+      return {
+        productId: parseInt(item.productId),
+        productName: product?.name || '',
+        quantity: parseInt(item.quantity) || 0,
+        price: product?.price || 0,
+      }
     }).filter(item => item.productId && item.quantity > 0);
+
+    if (items.length === 0) {
+        showNotification('Please add at least one valid product.', 'warning');
+        return;
+    }
 
     const total = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
     const soData = {
       customerId: customerId,
-      customerName: customer.name,
+      customerName: customer?.name || 'Unknown Customer',
       status: status,
       items,
       total,
     };
 
     if (soData.status === 'Completed' && (!isEditMode || (isEditMode && so.status !== 'Completed'))) {
-        // In a real app, this might be a single transaction on the backend
-        // when an order is fulfilled.
-        items.forEach(item => {
-            services.stock.adjustStockLevel({
-                productId: item.productId,
-                quantity: -item.quantity,
-                locationId: 1, // Defaulting to Main Warehouse (ID 1) for now
-                // Note: This simplified logic doesn't specify which batch to pull from.
-                // A real implementation would need FEFO/FIFO logic here.
-            });
-        });
-        // Invalidate stock query to refetch and reflect changes
+      try {
+        await Promise.all(items.map(item => {
+          const product = products.find(p => p.id === item.productId);
+          // Find a location that can fulfill the ordered quantity
+          const stockLocation = product?.stockByLocation?.find(sl => sl.quantity >= item.quantity);
+
+          if (!stockLocation) {
+            throw new Error(`Not enough stock for ${item.productName}. Required: ${item.quantity}, but no single location has this amount.`);
+          }
+
+          return services.stock.adjustStockLevel({
+            productId: item.productId,
+            quantity: -item.quantity,
+            locationId: stockLocation.locationId,
+          });
+        }));
+
+        // If all stock adjustments are successful, invalidate the query to refetch
         queryClient.invalidateQueries({ queryKey: ['stock'] });
+      } catch (error) {
+        showNotification(`Error adjusting stock: ${error.message}`, 'error');
+        return; // Stop the submission process if stock adjustment fails
+      }
     }
 
     if (!isEditMode) {
       soData.createdAt = new Date().toISOString();
-    }
-
-    if (!soData.customerId || soData.items.length === 0) {
-      showNotification('Please select a customer and add at least one valid product.', 'warning');
-      return;
     }
 
     if (isEditMode) {

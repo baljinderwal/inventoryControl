@@ -71,9 +71,16 @@ const CustomersPage = () => {
     setCustomerToEdit(null);
   };
 
-  const tableHeaders = ['Name', 'Email', 'Phone', 'Address', 'Actions'];
+  const tableHeaders = [
+    { id: 'name', label: 'Name' },
+    { id: 'email', label: 'Email' },
+    { id: 'phone', label: 'Phone' },
+    { id: 'address', label: 'Address' },
+    { id: 'actions', label: 'Actions' },
+  ];
 
   const tableData = customers.map((customer) => ({
+    id: customer.id,
     name: customer.name,
     email: customer.email,
     phone: customer.phone,

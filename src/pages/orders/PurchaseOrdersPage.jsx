@@ -126,7 +126,15 @@ const PurchaseOrdersPage = () => {
     document.body.removeChild(link);
   };
 
-  const tableHeaders = ['PO ID', 'Supplier', 'Date', 'Total Value', 'Status', 'Items', 'Actions'];
+  const tableHeaders = [
+    { id: 'id', label: 'PO ID' },
+    { id: 'supplier', label: 'Supplier' },
+    { id: 'date', label: 'Date' },
+    { id: 'totalValue', label: 'Total Value' },
+    { id: 'status', label: 'Status' },
+    { id: 'itemCount', label: 'Items' },
+    { id: 'actions', label: 'Actions' },
+  ];
 
   const tableData = purchaseOrders?.map(po => {
     const totalValue = productsLoaded ? po.products.reduce((acc, item) => {

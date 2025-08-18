@@ -23,9 +23,14 @@ const LocationsPage = () => {
     queryFn: () => services.locations.getLocations(),
   });
 
-  const tableHeaders = ['Name', 'Address', 'Actions'];
+  const tableHeaders = [
+    { id: 'name', label: 'Name' },
+    { id: 'address', label: 'Address' },
+    { id: 'actions', label: 'Actions' },
+  ];
 
   const tableData = locations.map(location => ({
+    id: location.id,
     name: location.name,
     address: location.address,
     actions: (

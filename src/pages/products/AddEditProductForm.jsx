@@ -31,6 +31,7 @@ const AddEditProductForm = ({
     price: '',
     costPrice: '',
     lowStockThreshold: '',
+    imageUrl: '',
     stock: '',
     batchNumber: '',
     expiryDate: '',
@@ -55,6 +56,7 @@ const AddEditProductForm = ({
         price: product.price || '',
         costPrice: product.costPrice || '',
         lowStockThreshold: product.lowStockThreshold || '',
+        imageUrl: product.imageUrl || '',
         stock: '',
         batchNumber: '',
         expiryDate: '',
@@ -134,6 +136,7 @@ const AddEditProductForm = ({
       <TextField margin="dense" id="price" name="price" label="Price" type="number" fullWidth variant="standard" value={formData.price} onChange={handleChange} required />
       <TextField margin="dense" id="costPrice" name="costPrice" label="Cost Price" type="number" fullWidth variant="standard" value={formData.costPrice} onChange={handleChange} required />
       <TextField margin="dense" id="lowStockThreshold" name="lowStockThreshold" label="Low Stock Threshold" type="number" fullWidth variant="standard" value={formData.lowStockThreshold} onChange={handleChange} required />
+      <TextField margin="dense" id="imageUrl" name="imageUrl" label="Image URL" type="text" fullWidth variant="standard" value={formData.imageUrl} onChange={handleChange} />
 
       {!isEditMode && (
         <>

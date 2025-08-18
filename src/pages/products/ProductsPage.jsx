@@ -103,9 +103,14 @@ const ProductsPage = () => {
     setProductToEdit(null);
   }
 
-  const tableHeaders = ['Name', 'SKU', 'Barcode', 'Category', 'Price', 'Stock', 'Actions'];
+  const tableHeaders = ['Image', 'Name', 'SKU', 'Barcode', 'Category', 'Price', 'Stock', 'Actions'];
 
   const tableData = filteredProducts.map(p => ({
+    image: p.imageUrl ? (
+      <img src={p.imageUrl} alt={p.name} style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: '4px' }} />
+    ) : (
+      <Box sx={{ width: 50, height: 50, backgroundColor: '#f0f0f0', borderRadius: '4px' }} />
+    ),
     name: p.name,
     sku: p.sku,
     barcode: p.barcode,

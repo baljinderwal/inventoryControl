@@ -15,14 +15,36 @@ const local = {
     return products.find(p => p.id === id);
   },
   addProduct: async (productData) => {
-    console.log('Adding product in local mode (no persistence)', productData);
-    // In local/demo mode, we simulate adding by creating a temporary ID.
-    const newProduct = {
-      ...productData,
-      id: `temp-${Date.now()}`, // Create a temporary unique ID
-      createdAt: new Date().toISOString(),
-    };
-    return Promise.resolve(newProduct);
+    console.log('Adding product in local mode', productData);
+    const { stock, batchNumber, expiryDate, locationId, ...productDetails } = productData;
+
+    // 1. Create the product
+    const productResponse = await fetch('/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...productDetails, createdAt: new Date().toISOString() }),
+    });
+    const newProduct = await productResponse.json();
+
+    // 2. If initial stock is provided, create the stock entry
+    if (stock > 0 && locationId) {
+      const newStockEntry = {
+        productId: newProduct.id,
+        quantity: stock,
+        locationId: parseInt(locationId),
+        batches: [{
+          batchNumber: batchNumber || `B${newProduct.id}-INIT`,
+          expiryDate: expiryDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(), // Default 1 year expiry
+          quantity: stock
+        }]
+      };
+      await fetch('/stock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newStockEntry)
+      });
+    }
+    return newProduct;
   },
   updateProduct: async (id, product) => {
     console.warn('Read-only mode: updateProduct disabled.', id, product);

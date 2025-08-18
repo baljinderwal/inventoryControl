@@ -75,34 +75,13 @@ const AddEditProductForm = ({
     mutationFn: isEditMode ?
       (updatedProduct) => services.products.updateProduct(product.id, updatedProduct) :
       services.products.addProduct,
-    onSuccess: (data) => {
+    onSuccess: () => {
       showNotification(`Product ${isEditMode ? 'updated' : 'added'} successfully`, 'success');
-
-      if (mode === 'local' && !isEditMode) {
-        // Manually update the products list in the cache
-        queryClient.setQueryData(['stock', 'local'], (oldStock) => {
-          const newProductStock = {
-            ...data,
-            stock: data.stock || 0, // from form
-            // Ensure other fields expected by the table are present
-            stockByLocation: data.locationId ? [{
-                locationId: data.locationId,
-                locationName: locations.find(l => l.id === data.locationId)?.name || 'N/A',
-                quantity: data.stock || 0,
-                batches: [{
-                  batchNumber: data.batchNumber || `temp-batch-${data.id}`,
-                  expiryDate: data.expiryDate || 'N/A',
-                  quantity: data.stock || 0,
-                }]
-            }] : [],
-          };
-          return [...(oldStock || []), newProductStock];
-        });
-      } else {
-        // In API mode or for edits, invalidate queries to refetch from the source
-        queryClient.invalidateQueries({ queryKey: ['products'] });
-        queryClient.invalidateQueries({ queryKey: ['stock'] });
-      }
+      // Always invalidate to ensure the list is fresh, which is simpler and more reliable.
+      // This now works for local mode since we've fixed the service to persist data.
+      queryClient.invalidateQueries({ queryKey: ['stock'] });
+      // Also invalidate the base products query if it's used elsewhere
+      queryClient.invalidateQueries({ queryKey: ['products'] });
       onClose();
     },
     onError: (err) => {

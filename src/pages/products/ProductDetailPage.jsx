@@ -58,6 +58,13 @@ const ProductDetailPage = () => {
     return <Typography>Product not found.</Typography>;
   }
 
+  const allBatches = product.stockByLocation.flatMap(loc =>
+    loc.batches.map(batch => ({
+      ...batch,
+      locationName: loc.locationName,
+    }))
+  );
+
   return (
     <div>
       <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
@@ -102,8 +109,8 @@ const ProductDetailPage = () => {
 
         {/* Right Column: Stock Information */}
         <Grid item xs={12} md={8}>
-          <Typography variant="h6" gutterBottom>Stock Levels</Typography>
-          <TableContainer component={Paper}>
+          <Typography variant="h6" gutterBottom>Stock Levels by Location</Typography>
+          <TableContainer component={Paper} sx={{ mb: 3 }}>
             <Table>
               <TableHead>
                 <TableRow>
@@ -128,6 +135,39 @@ const ProductDetailPage = () => {
                   <TableCell><strong>Total Stock</strong></TableCell>
                   <TableCell align="right"><strong>{product.stock}</strong></TableCell>
                 </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <Typography variant="h6" gutterBottom>Batch Details</Typography>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Location</TableCell>
+                  <TableCell>Batch Number</TableCell>
+                  <TableCell>Expiry Date</TableCell>
+                  <TableCell align="right">Quantity</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {allBatches.length > 0 ? (
+                  allBatches.map((batch, index) => {
+                    const isExpired = new Date(batch.expiryDate) < new Date();
+                    return (
+                      <TableRow key={index} sx={{ backgroundColor: isExpired ? 'rgba(255, 0, 0, 0.1)' : 'inherit' }}>
+                        <TableCell>{batch.locationName}</TableCell>
+                        <TableCell>{batch.batchNumber}</TableCell>
+                        <TableCell>{new Date(batch.expiryDate).toLocaleDateString()}</TableCell>
+                        <TableCell align="right">{batch.quantity}</TableCell>
+                      </TableRow>
+                    );
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4}>No batch information available.</TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </TableContainer>

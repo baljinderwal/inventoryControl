@@ -77,15 +77,12 @@ const ProductsPage = () => {
   const filteredProducts = useMemo(() => {
     if (!Array.isArray(products)) return [];
     return products.filter((product) => {
-      // Search query filter
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (product.barcode && product.barcode.toLowerCase().includes(searchQuery.toLowerCase()));
 
-      // Category filter
       const matchesCategory = categoryFilter === 'All' || product.category === categoryFilter;
 
-      // Stock status filter
       let matchesStockStatus = true;
       if (stockStatusFilter !== 'All') {
         if (stockStatusFilter === 'In Stock') {
@@ -97,7 +94,6 @@ const ProductsPage = () => {
         }
       }
 
-      // Supplier filter
       const matchesSupplier = supplierFilter === 'All' || product.supplierName === supplierFilter;
 
       return matchesSearch && matchesCategory && matchesStockStatus && matchesSupplier;

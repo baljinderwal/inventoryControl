@@ -21,12 +21,14 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import Tooltip from '@mui/material/Tooltip';
 
 const ProductsPage = () => {
   const queryClient = useQueryClient();
@@ -179,6 +181,26 @@ const ProductsPage = () => {
     { id: 'actions', label: 'Actions', isSortable: false },
   ];
 
+  const StockStatusIndicator = ({ product }) => {
+    let color;
+    let statusText;
+    if (product.stock === 0) {
+      color = 'error'; // red
+      statusText = 'Out of Stock';
+    } else if (product.stock > 0 && product.stock <= product.lowStockThreshold) {
+      color = 'warning'; // yellow
+      statusText = 'Low Stock';
+    } else {
+      color = 'success'; // green
+      statusText = 'In Stock';
+    }
+    return (
+      <Tooltip title={statusText}>
+        <FiberManualRecordIcon sx={{ fontSize: 12, mr: 1 }} color={color} />
+      </Tooltip>
+    );
+  };
+
   const tableData = sortedProducts.map(p => ({
     id: p.id, // for key
     image: p.imageUrl ? (
@@ -194,7 +216,12 @@ const ProductsPage = () => {
     sku: p.sku,
     category: p.category,
     price: `$${p.price.toFixed(2)}`,
-    stock: p.stock,
+    stock: (
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <StockStatusIndicator product={p} />
+        {p.stock}
+      </Box>
+    ),
     supplierName: p.supplierName,
     actions: (
       <Box>

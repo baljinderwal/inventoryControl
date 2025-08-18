@@ -27,18 +27,10 @@ const BillingPage = () => {
     queryFn: () => services.invoices.getInvoices(), // This function needs to be created
   });
 
-  const tableHeaders = [
-    { id: 'id', label: 'Invoice ID' },
-    { id: 'customerName', label: 'Customer' },
-    { id: 'invoiceDate', label: 'Invoice Date' },
-    { id: 'dueDate', label: 'Due Date' },
-    { id: 'status', label: 'Status' },
-    { id: 'total', label: 'Total' },
-    { id: 'actions', label: 'Actions' },
-  ];
+  const tableHeaders = ['Invoice ID', 'Customer', 'Invoice Date', 'Due Date', 'Status', 'Total', 'Actions'];
 
   const tableData = invoices.map((invoice) => ({
-    id: invoice.id,
+    id: `#${invoice.id}`,
     customerName: invoice.customerName,
     invoiceDate: new Date(invoice.invoiceDate).toLocaleDateString(),
     dueDate: new Date(invoice.dueDate).toLocaleDateString(),

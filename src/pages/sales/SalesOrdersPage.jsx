@@ -104,14 +104,7 @@ const SalesOrdersPage = () => {
     generateInvoiceMutation.mutate(newInvoice);
   };
 
-  const tableHeaders = [
-    { id: 'id', label: 'SO ID' },
-    { id: 'customerName', label: 'Customer' },
-    { id: 'createdAt', label: 'Date' },
-    { id: 'status', label: 'Status' },
-    { id: 'total', label: 'Total' },
-    { id: 'actions', label: 'Actions' },
-  ];
+  const tableHeaders = ['SO ID', 'Customer', 'Date', 'Status', 'Total', 'Actions'];
 
   const tableData = salesOrders.map((so) => ({
     id: so.id,

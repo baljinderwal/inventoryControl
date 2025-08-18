@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { useApi } from '../../utils/ApiModeContext';
+import { useNotificationCenter } from '../../utils/NotificationCenterContext';
 
 import StatsCard from '../../components/ui/StatsCard';
 import Grid from '@mui/material/Grid';
@@ -50,13 +51,33 @@ const itemVariants = {
 
 const DashboardPage = () => {
   const { mode, services } = useApi();
+  const { addNotification, notifications } = useNotificationCenter();
 
   const { data: products, isLoading, error } = useQuery({
     queryKey: ['stock', mode],
     queryFn: services.stock.getStockLevels,
   });
 
-  const lowStockProducts = products?.filter(p => p.stock <= p.lowStockThreshold) || [];
+  const lowStockProducts = useMemo(() => {
+    return products?.filter(p => p.stock <= p.lowStockThreshold) || [];
+  }, [products]);
+
+  useEffect(() => {
+    if (lowStockProducts.length > 0) {
+      lowStockProducts.forEach(product => {
+        const notificationExists = notifications.some(
+          n => n.type === 'LOW_STOCK' && n.refId === product.id
+        );
+        if (!notificationExists) {
+          addNotification({
+            message: `${product.name} is low on stock! Only ${product.stock} left.`,
+            type: 'LOW_STOCK',
+            refId: product.id
+          });
+        }
+      });
+    }
+  }, [lowStockProducts, addNotification, notifications]);
 
   const stats = [
     { name: 'Total Products', stat: products?.length || 0, icon: <InventoryIcon /> },

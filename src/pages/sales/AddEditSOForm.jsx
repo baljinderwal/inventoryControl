@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
+import { useNotificationCenter } from '../../utils/NotificationCenterContext';
 import AppDialog from '../../components/ui/AppDialog';
 import {
   Button,
@@ -21,6 +22,7 @@ const AddEditSOForm = ({ open, onClose, so }) => {
   const isEditMode = Boolean(so);
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
+  const { addNotification } = useNotificationCenter();
   const { mode, services } = useApi();
 
   const [customerId, setCustomerId] = useState('');
@@ -45,9 +47,16 @@ const AddEditSOForm = ({ open, onClose, so }) => {
   const { data: products, isLoading: isLoadingProducts } = useQuery({ queryKey: ['stock', mode], queryFn: services.stock.getStockLevels });
 
   const mutationOptions = {
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['salesOrders'] });
       showNotification(`Sales Order ${isEditMode ? 'updated' : 'created'} successfully!`, 'success');
+      if (!isEditMode) {
+        addNotification({
+            message: `New Sales Order #${data.id} created for ${data.customerName}.`,
+            type: 'NEW_SO',
+            refId: data.id,
+        });
+      }
       onClose();
     },
     onError: (error) => {

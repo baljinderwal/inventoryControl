@@ -37,10 +37,10 @@ const AddEditCustomerForm = ({ onClose, customer }) => {
     mutationFn: isEditMode
       ? (updatedCustomer) => services.customers.updateCustomer(customer.id, updatedCustomer)
       : services.customers.addCustomer,
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
       showNotification(`Customer ${isEditMode ? 'updated' : 'added'} successfully`, 'success');
-      onClose();
+      onClose(isEditMode ? null : data); // Pass back the new customer data on creation
     },
     onError: (err) => {
       showNotification(`Error: ${err.message}`, 'error');

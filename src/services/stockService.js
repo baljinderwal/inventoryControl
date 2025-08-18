@@ -11,6 +11,14 @@ const local = {
       stockData = stockData.filter(s => s.locationId === locationId);
     }
     const locations = data.locations || [];
+    const suppliers = data.suppliers || [];
+
+    const supplierMap = new Map();
+    suppliers.forEach(supplier => {
+      supplier.products.forEach(productId => {
+        supplierMap.set(productId, supplier.name);
+      });
+    });
 
     const locationMap = new Map(locations.map(loc => [loc.id, loc]));
     const stockMap = new Map();
@@ -32,6 +40,7 @@ const local = {
         ...product,
         stock: totalStock,
         stockByLocation: stockEntries,
+        supplierName: supplierMap.get(product.id) || 'N/A',
       };
     });
   },
@@ -75,14 +84,23 @@ const remote = {
   getStockLevels: async ({ locationId } = {}) => {
     console.log('Fetching stock levels from API');
     const stockUrl = locationId ? `/stock?locationId=${locationId}` : '/stock';
-    const [productsResponse, stockResponse, locationsResponse] = await Promise.all([
+    const [productsResponse, stockResponse, locationsResponse, suppliersResponse] = await Promise.all([
       api.get('/products'),
       api.get(stockUrl),
       api.get('/locations'),
+      api.get('/suppliers'),
     ]);
     const products = productsResponse.data;
     const stockData = stockResponse.data;
     const locations = locationsResponse.data;
+    const suppliers = suppliersResponse.data;
+
+    const supplierMap = new Map();
+    suppliers.forEach(supplier => {
+      supplier.products.forEach(productId => {
+        supplierMap.set(productId, supplier.name);
+      });
+    });
 
     const locationMap = new Map(locations.map(loc => [loc.id, loc]));
     const stockMap = new Map();
@@ -104,6 +122,7 @@ const remote = {
         ...product,
         stock: totalStock,
         stockByLocation: stockEntries,
+        supplierName: supplierMap.get(product.id) || 'N/A',
       };
     });
   },

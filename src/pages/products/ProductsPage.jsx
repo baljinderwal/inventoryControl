@@ -22,6 +22,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import Stack from '@mui/material/Stack';
+import Grid from '@mui/material/Grid';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 
 const ProductsPage = () => {
   const queryClient = useQueryClient();
@@ -30,6 +35,11 @@ const ProductsPage = () => {
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('All');
+  const [stockStatusFilter, setStockStatusFilter] = useState('All');
+  const [supplierFilter, setSupplierFilter] = useState('All');
+  const [sortColumn, setSortColumn] = useState('name');
+  const [sortDirection, setSortDirection] = useState('asc');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -52,14 +62,69 @@ const ProductsPage = () => {
     },
   });
 
+  const { categories, suppliers } = useMemo(() => {
+    if (!Array.isArray(products)) return { categories: [], suppliers: [] };
+    const uniqueCategories = [...new Set(products.map(p => p.category))];
+    const uniqueSuppliers = [...new Set(products.map(p => p.supplierName).filter(Boolean))];
+    return {
+      categories: ['All', ...uniqueCategories],
+      suppliers: ['All', ...uniqueSuppliers],
+    };
+  }, [products]);
+
   const filteredProducts = useMemo(() => {
     if (!Array.isArray(products)) return [];
-    return products.filter((product) =>
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (product.barcode && product.barcode.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-  }, [products, searchQuery]);
+    return products.filter((product) => {
+      // Search query filter
+      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (product.barcode && product.barcode.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      // Category filter
+      const matchesCategory = categoryFilter === 'All' || product.category === categoryFilter;
+
+      // Stock status filter
+      let matchesStockStatus = true;
+      if (stockStatusFilter !== 'All') {
+        if (stockStatusFilter === 'In Stock') {
+          matchesStockStatus = product.stock > product.lowStockThreshold;
+        } else if (stockStatusFilter === 'Low Stock') {
+          matchesStockStatus = product.stock > 0 && product.stock <= product.lowStockThreshold;
+        } else if (stockStatusFilter === 'Out of Stock') {
+          matchesStockStatus = product.stock === 0;
+        }
+      }
+
+      // Supplier filter
+      const matchesSupplier = supplierFilter === 'All' || product.supplierName === supplierFilter;
+
+      return matchesSearch && matchesCategory && matchesStockStatus && matchesSupplier;
+    });
+  }, [products, searchQuery, categoryFilter, stockStatusFilter, supplierFilter]);
+
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedProducts = useMemo(() => {
+    const sorted = [...filteredProducts];
+    if (sortColumn) {
+      sorted.sort((a, b) => {
+        const aValue = a[sortColumn];
+        const bValue = b[sortColumn];
+
+        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    return sorted;
+  }, [filteredProducts, sortColumn, sortDirection]);
 
   const handleExport = () => {
     if (!filteredProducts) return;
@@ -103,9 +168,19 @@ const ProductsPage = () => {
     setProductToEdit(null);
   }
 
-  const tableHeaders = ['Image', 'Name', 'SKU', 'Barcode', 'Category', 'Price', 'Stock', 'Actions'];
+  const tableHeaders = [
+    { id: 'image', label: 'Image', isSortable: false },
+    { id: 'name', label: 'Name', isSortable: true },
+    { id: 'sku', label: 'SKU', isSortable: true },
+    { id: 'category', label: 'Category', isSortable: true },
+    { id: 'price', label: 'Price', isSortable: true },
+    { id: 'stock', label: 'Stock', isSortable: true },
+    { id: 'supplierName', label: 'Supplier', isSortable: true },
+    { id: 'actions', label: 'Actions', isSortable: false },
+  ];
 
-  const tableData = filteredProducts.map(p => ({
+  const tableData = sortedProducts.map(p => ({
+    id: p.id, // for key
     image: p.imageUrl ? (
       <img src={p.imageUrl} alt={p.name} style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: '4px' }} />
     ) : (
@@ -117,10 +192,10 @@ const ProductsPage = () => {
       </Link>
     ),
     sku: p.sku,
-    barcode: p.barcode,
     category: p.category,
     price: `$${p.price.toFixed(2)}`,
     stock: p.stock,
+    supplierName: p.supplierName,
     actions: (
       <Box>
         <IconButton onClick={() => handleEditClick(p)}><EditIcon /></IconButton>
@@ -162,10 +237,62 @@ const ProductsPage = () => {
       </Box>
 
       <Box sx={{ mb: 2 }}>
-        <SearchBar value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={4}>
+            <SearchBar value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          </Grid>
+          <Grid item xs={12} sm={2.5}>
+            <FormControl fullWidth>
+              <InputLabel>Category</InputLabel>
+              <Select
+                value={categoryFilter}
+                label="Category"
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                data-testid="category-filter"
+              >
+                {categories.map(c => <MenuItem key={c} value={c}>{c}</MenuItem>)}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={2.5}>
+            <FormControl fullWidth>
+              <InputLabel>Stock Status</InputLabel>
+              <Select
+                value={stockStatusFilter}
+                label="Stock Status"
+                onChange={(e) => setStockStatusFilter(e.target.value)}
+                data-testid="stock-status-filter"
+              >
+                <MenuItem value="All">All</MenuItem>
+                <MenuItem value="In Stock">In Stock</MenuItem>
+                <MenuItem value="Low Stock">Low Stock</MenuItem>
+                <MenuItem value="Out of Stock">Out of Stock</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} sm={3}>
+             <FormControl fullWidth>
+              <InputLabel>Supplier</InputLabel>
+              <Select
+                value={supplierFilter}
+                label="Supplier"
+                onChange={(e) => setSupplierFilter(e.target.value)}
+                data-testid="supplier-filter"
+              >
+                {suppliers.map(s => <MenuItem key={s} value={s}>{s}</MenuItem>)}
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
       </Box>
 
-      <MuiTable headers={tableHeaders} data={tableData} />
+      <MuiTable
+        headers={tableHeaders}
+        data={tableData}
+        onSort={handleSort}
+        sortColumn={sortColumn}
+        sortDirection={sortDirection}
+      />
 
       <AppDialog
         open={isFormOpen}

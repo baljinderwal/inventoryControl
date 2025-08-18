@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Button from '@mui/material/Button';
 import MicIcon from '@mui/icons-material/Mic';
-import nlp from 'compromise';
 
 const SmartVoiceAdd = ({ onResult }) => {
   const [isListening, setIsListening] = useState(false);
@@ -26,38 +25,31 @@ const SmartVoiceAdd = ({ onResult }) => {
   }, [recognition]);
 
   const parseTranscript = useCallback((transcript) => {
-    const doc = nlp(transcript);
     const data = {};
 
-    const name = doc.match('(product name is|name is|called) *').out('text');
-    if (name) data.name = name;
+    const patterns = [
+        { key: 'name', regex: /\b(?:product name is|name is|called)\s+(.*?)(?=\s*,\s*\b(?:sku|barcode|category|price|cost price|low stock threshold|image url|initial stock|batch number|expiry date)\b|$)/i },
+        { key: 'sku', regex: /\b(?:sku is|sku)\s+(.*?)(?=\s*,\s*\b(?:barcode|category|price|cost price|low stock threshold|image url|initial stock|batch number|expiry date)\b|$)/i },
+        { key: 'barcode', regex: /\b(?:barcode is|barcode)\s+(.*?)(?=\s*,\s*\b(?:category|price|cost price|low stock threshold|image url|initial stock|batch number|expiry date)\b|$)/i },
+        { key: 'category', regex: /\b(?:category is|category)\s+(.*?)(?=\s*,\s*\b(?:price|cost price|low stock threshold|image url|initial stock|batch number|expiry date)\b|$)/i },
+        { key: 'costPrice', regex: /\bcost\s+price\s+is\s+([\d.]+)/i },
+        { key: 'price', regex: /\bprice\s+is\s+([\d.]+)/i },
+        { key: 'lowStockThreshold', regex: /\blow\s+stock\s+threshold\s+is\s+(\d+)/i },
+        { key: 'imageUrl', regex: /\bimage\s+url\s+is\s+(\S+)/i },
+        { key: 'stock', regex: /\b(?:stock is|stock|initial stock is|initial stock)\s+(\d+)/i },
+        { key: 'batchNumber', regex: /\bbatch\s+number\s+is\s+(.*?)(?=\s*,|\s*$)/i },
+    ];
 
-    const sku = doc.match('(sku is|SKU) *').out('text');
-    if (sku) data.sku = sku;
-
-    const barcode = doc.match('(barcode is|barcode) *').out('text');
-    if (barcode) data.barcode = barcode;
-
-    const category = doc.match('(category is|category) *').out('text');
-    if (category) data.category = category;
-
-    const price = doc.match('(price is|price) #Money').out('text');
-    if (price) data.price = price;
-
-    const costPrice = doc.match('(cost price is|cost price) #Money').out('text');
-    if (costPrice) data.costPrice = costPrice;
-
-    const lowStockThreshold = doc.match('(low stock threshold is|low stock threshold) #Value').out('text');
-    if (lowStockThreshold) data.lowStockThreshold = lowStockThreshold;
-
-    const imageUrl = doc.match('(image url is|image url) #Url').out('text');
-    if (imageUrl) data.imageUrl = imageUrl;
-
-    const stock = doc.match('(stock is|stock|initial stock is|initial stock) #Value').out('text');
-    if (stock) data.stock = stock;
-
-    const batchNumber = doc.match('(batch number is|batch number) *').out('text');
-    if (batchNumber) data.batchNumber = batchNumber;
+    patterns.forEach(pattern => {
+        const match = transcript.match(pattern.regex);
+        if (match && match[1]) {
+            let value = match[1].trim();
+            if (value.endsWith(',')) {
+                value = value.slice(0, -1);
+            }
+            data[pattern.key] = value.trim();
+        }
+    });
 
     onResult(data);
   }, [onResult]);
@@ -116,14 +108,16 @@ const SmartVoiceAdd = ({ onResult }) => {
   }
 
   return (
-    <Button
-      variant="contained"
-      color={isListening ? 'secondary' : 'primary'}
-      onClick={handleMicClick}
-      startIcon={<MicIcon />}
-    >
-      {isListening ? 'Stop Listening' : 'Add Product by Voice'}
-    </Button>
+    <>
+      <Button
+        variant="contained"
+        color={isListening ? 'secondary' : 'primary'}
+        onClick={handleMicClick}
+        startIcon={<MicIcon />}
+      >
+        {isListening ? 'Stop Listening' : 'Add Product by Voice'}
+      </Button>
+    </>
   );
 };
 

@@ -15,6 +15,7 @@ import InputLabel from '@mui/material/InputLabel';
 import InputAdornment from '@mui/material/InputAdornment';
 import Typography from '@mui/material/Typography';
 import VoiceRecognition from '../../components/ui/VoiceRecognition';
+import SmartVoiceAdd from '../../components/ui/SmartVoiceAdd';
 
 const AddEditProductForm = ({
   onClose,
@@ -113,6 +114,10 @@ const AddEditProductForm = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleSmartVoiceResult = (data) => {
+    setFormData((prev) => ({ ...prev, ...data }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const submissionData = {
@@ -133,6 +138,7 @@ const AddEditProductForm = ({
 
   return (
     <Box component="form" onSubmit={handleSubmit}>
+      <SmartVoiceAdd onResult={handleSmartVoiceResult} />
       <TextField
         margin="dense"
         id="name"

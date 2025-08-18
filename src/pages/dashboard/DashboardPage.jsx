@@ -101,6 +101,23 @@ const DashboardPage = () => {
     }
   }, [lowStockProducts, addNotification, notifications]);
 
+  useEffect(() => {
+    if (lowStockProducts.length > 0) {
+      lowStockProducts.forEach(product => {
+        const notificationExists = notifications.some(
+          n => n.type === 'LOW_STOCK' && n.refId === product.id
+        );
+        if (!notificationExists) {
+          addNotification({
+            message: `${product.name} is low on stock! Only ${product.stock} left.`,
+            type: 'LOW_STOCK',
+            refId: product.id
+          });
+        }
+      });
+    }
+  }, [lowStockProducts, addNotification, notifications]);
+
   const stats = useMemo(() => [
     { name: 'Total Products', stat: products?.length || 0, icon: <InventoryIcon /> },
     { name: 'Total Orders', stat: '2,310', icon: <ShoppingCartIcon /> },

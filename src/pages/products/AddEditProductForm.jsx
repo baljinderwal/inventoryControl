@@ -27,6 +27,7 @@ const AddEditProductForm = ({
   const a_services = { ...services, locations: locationService[mode] };
 
   const [voiceState, setVoiceState] = useState('idle');
+  const [inputMode, setInputMode] = useState('manual');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -138,7 +139,21 @@ const AddEditProductForm = ({
 
   return (
     <Box component="form" onSubmit={handleSubmit}>
-      <SmartVoiceAdd onResult={handleSmartVoiceResult} />
+      <FormControl fullWidth margin="dense" variant="standard">
+        <InputLabel id="input-mode-select-label">Input Mode</InputLabel>
+        <Select
+          labelId="input-mode-select-label"
+          id="inputMode"
+          value={inputMode}
+          onChange={(e) => setInputMode(e.target.value)}
+          label="Input Mode"
+        >
+          <MenuItem value="manual">Manual Entry</MenuItem>
+          <MenuItem value="voicePerField">Voice per Field</MenuItem>
+          <MenuItem value="smartVoice">Smart Voice Add</MenuItem>
+        </Select>
+      </FormControl>
+      {inputMode === 'smartVoice' && <SmartVoiceAdd onResult={handleSmartVoiceResult} />}
       <TextField
         margin="dense"
         id="name"
@@ -151,7 +166,7 @@ const AddEditProductForm = ({
         onChange={handleChange}
         required
         InputProps={{
-          endAdornment: (
+          endAdornment: inputMode === 'voicePerField' && (
             <InputAdornment position="end">
               <VoiceRecognition
                 onResult={(transcript) => setFormData((prev) => ({ ...prev, name: transcript }))}
@@ -178,7 +193,7 @@ const AddEditProductForm = ({
         onChange={handleChange}
         required
         InputProps={{
-          endAdornment: (
+          endAdornment: inputMode === 'voicePerField' && (
             <InputAdornment position="end">
               <VoiceRecognition
                 onResult={(transcript) => setFormData((prev) => ({ ...prev, sku: transcript }))}
@@ -199,7 +214,7 @@ const AddEditProductForm = ({
         value={formData.barcode}
         onChange={handleChange}
         InputProps={{
-          endAdornment: (
+          endAdornment: inputMode === 'voicePerField' && (
             <InputAdornment position="end">
               <VoiceRecognition
                 onResult={(transcript) => setFormData((prev) => ({ ...prev, barcode: transcript }))}
@@ -221,7 +236,7 @@ const AddEditProductForm = ({
         onChange={handleChange}
         required
         InputProps={{
-          endAdornment: (
+          endAdornment: inputMode === 'voicePerField' && (
             <InputAdornment position="end">
               <VoiceRecognition
                 onResult={(transcript) => setFormData((prev) => ({ ...prev, category: transcript }))}
@@ -245,7 +260,7 @@ const AddEditProductForm = ({
         value={formData.imageUrl}
         onChange={handleChange}
         InputProps={{
-          endAdornment: (
+          endAdornment: inputMode === 'voicePerField' && (
             <InputAdornment position="end">
               <VoiceRecognition
                 onResult={(transcript) => setFormData((prev) => ({ ...prev, imageUrl: transcript }))}
@@ -287,7 +302,7 @@ const AddEditProductForm = ({
             value={formData.batchNumber}
             onChange={handleChange}
             InputProps={{
-              endAdornment: (
+              endAdornment: inputMode === 'voicePerField' && (
                 <InputAdornment position="end">
                   <VoiceRecognition
                     onResult={(transcript) => setFormData((prev) => ({ ...prev, batchNumber: transcript }))}

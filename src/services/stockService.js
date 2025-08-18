@@ -44,9 +44,71 @@ const local = {
       };
     });
   },
-  adjustStockLevel: async (adjustmentData) => {
-    console.warn('Read-only mode: adjustStockLevel disabled.', adjustmentData);
-    return Promise.resolve();
+  adjustStockLevel: async ({ productId, quantity, locationId, batchNumber = 'B-LOCAL', expiryDate = new Date().toISOString() }) => {
+    console.log('Adjusting stock level in local mode', { productId, quantity, locationId });
+    if (!locationId) throw new Error("Location ID is required for stock adjustments.");
+
+    const res = await fetch(`/stock?productId=${productId}&locationId=${locationId}`);
+    const stockEntries = await res.json();
+    let stockEntry = stockEntries[0];
+
+    if (!stockEntry) {
+      if (quantity > 0) {
+        const newStockEntry = {
+          productId,
+          quantity,
+          locationId,
+          batches: [{ batchNumber, expiryDate, quantity }]
+        };
+        const postRes = await fetch('/stock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newStockEntry)
+        });
+        return await postRes.json();
+      } else {
+        console.error("Cannot deduct stock from a product that has no stock entry at this location.");
+        // To prevent silent failures, let's throw an error to be consistent with the remote service
+        throw new Error("Cannot deduct stock from a product that has no stock entry at this location.");
+      }
+    }
+
+    if (quantity > 0) {
+      // Add stock - for simplicity, add to a new or existing batch
+      const existingBatchIndex = stockEntry.batches.findIndex(b => b.batchNumber === batchNumber);
+      if (existingBatchIndex > -1) {
+        stockEntry.batches[existingBatchIndex].quantity += quantity;
+      } else {
+        stockEntry.batches.push({ batchNumber, expiryDate, quantity });
+      }
+    } else {
+      // Remove stock - for simplicity, deduct from batches, oldest first (if expiry is valid) or just first.
+      let quantityToDeduct = Math.abs(quantity);
+
+      // Basic FEFO logic for local dev
+      stockEntry.batches.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+
+      for (const batch of stockEntry.batches) {
+        if (quantityToDeduct === 0) break;
+        const deduction = Math.min(quantityToDeduct, batch.quantity);
+        batch.quantity -= deduction;
+        quantityToDeduct -= deduction;
+      }
+      if (quantityToDeduct > 0) {
+         console.error("Not enough stock to fulfill the request at this location.");
+         throw new Error("Not enough stock to fulfill the request at this location.");
+      }
+      stockEntry.batches = stockEntry.batches.filter(b => b.quantity > 0);
+    }
+
+    stockEntry.quantity = stockEntry.batches.reduce((sum, b) => sum + b.quantity, 0);
+
+    const putRes = await fetch(`/stock/${stockEntry.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(stockEntry)
+    });
+    return await putRes.json();
   },
   transferStock: async (transferData) => {
     console.warn('Read-only mode: transferStock disabled.', transferData);

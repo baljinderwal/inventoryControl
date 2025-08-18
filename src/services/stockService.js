@@ -33,13 +33,27 @@ const local = {
       });
     }
 
+    const productStock = new Map();
+    products.forEach(p => {
+        const stockEntries = stockMap.get(p.id) || [];
+        const totalStock = stockEntries.reduce((sum, s) => sum + s.quantity, 0);
+        productStock.set(p.id, totalStock);
+    });
+
     return products.map(product => {
-      const stockEntries = stockMap.get(product.id) || [];
-      const totalStock = stockEntries.reduce((sum, s) => sum + s.quantity, 0);
+      let finalStock = productStock.get(product.id) || 0;
+      if (product.type === 'bundle' && product.components) {
+        const componentStocks = product.components.map(c => {
+          const componentStock = productStock.get(c.productId) || 0;
+          return Math.floor(componentStock / c.quantity);
+        });
+        finalStock = Math.min(...componentStocks);
+      }
+
       return {
         ...product,
-        stock: totalStock,
-        stockByLocation: stockEntries,
+        stock: finalStock,
+        stockByLocation: stockMap.get(product.id) || [],
         supplierName: supplierMap.get(product.id) || 'N/A',
       };
     });
@@ -56,8 +70,18 @@ const local = {
     console.log(`Fetching product ${id} with stock from local db.json`);
     const response = await fetch('/db.json');
     const data = await response.json();
-    const product = data.products.find(p => p.id === id);
+    const allProducts = data.products || [];
+    const product = allProducts.find(p => p.id === id);
     if (!product) return null;
+
+    if (product.type === 'bundle' && product.components) {
+      const productMap = new Map(allProducts.map(p => [p.id, p]));
+      product.components = product.components.map(c => ({
+        ...c,
+        name: productMap.get(c.productId)?.name || 'Unknown Product',
+        sku: productMap.get(c.productId)?.sku || 'N/A',
+      }));
+    }
 
     let stockData = data.stock || [];
     const locations = data.locations || [];
@@ -115,13 +139,27 @@ const remote = {
       });
     }
 
+    const productStock = new Map();
+    products.forEach(p => {
+        const stockEntries = stockMap.get(p.id) || [];
+        const totalStock = stockEntries.reduce((sum, s) => sum + s.quantity, 0);
+        productStock.set(p.id, totalStock);
+    });
+
     return products.map(product => {
-      const stockEntries = stockMap.get(product.id) || [];
-      const totalStock = stockEntries.reduce((sum, s) => sum + s.quantity, 0);
+      let finalStock = productStock.get(product.id) || 0;
+      if (product.type === 'bundle' && product.components) {
+        const componentStocks = product.components.map(c => {
+          const componentStock = productStock.get(c.productId) || 0;
+          return Math.floor(componentStock / c.quantity);
+        });
+        finalStock = Math.min(...componentStocks);
+      }
+
       return {
         ...product,
-        stock: totalStock,
-        stockByLocation: stockEntries,
+        stock: finalStock,
+        stockByLocation: stockMap.get(product.id) || [],
         supplierName: supplierMap.get(product.id) || 'N/A',
       };
     });
@@ -243,23 +281,53 @@ const remote = {
   },
   getProductWithStock: async (id) => {
     console.log(`Fetching product ${id} with stock from API`);
-    const [productResponse, stockResponse, locationsResponse] = await Promise.all([
+    const [productResponse, stockResponse, locationsResponse, allProductsResponse] = await Promise.all([
       api.get(`/products/${id}`),
       api.get(`/stock?productId=${id}`),
       api.get('/locations'),
+      api.get('/products'), // For component name lookup
     ]);
 
     const product = productResponse.data;
     const stockData = stockResponse.data;
     const locations = locationsResponse.data;
+    const allProducts = allProductsResponse.data;
     const locationMap = new Map(locations.map(loc => [loc.id, loc]));
+
+    if (product.type === 'bundle' && product.components) {
+      const productMap = new Map(allProducts.map(p => [p.id, p]));
+      product.components = product.components.map(c => ({
+        ...c,
+        name: productMap.get(c.productId)?.name || 'Unknown Product',
+        sku: productMap.get(c.productId)?.sku || 'N/A',
+      }));
+    }
 
     const stockEntries = stockData.map(s => ({
       ...s,
       locationName: locationMap.get(s.locationId)?.name || 'Unknown Location',
     }));
 
-    const totalStock = stockEntries.reduce((sum, s) => sum + s.quantity, 0);
+    // Recalculate virtual stock for the single bundle product
+    let totalStock;
+    if (product.type === 'bundle' && product.components) {
+        const allStockResponse = await api.get('/stock');
+        const allStock = allStockResponse.data;
+        const productStock = new Map();
+        allProducts.forEach(p => {
+            const productStockEntries = allStock.filter(s => s.productId === p.id);
+            const total = productStockEntries.reduce((sum, s) => sum + s.quantity, 0);
+            productStock.set(p.id, total);
+        });
+        const componentStocks = product.components.map(c => {
+          const componentStock = productStock.get(c.productId) || 0;
+          return Math.floor(componentStock / c.quantity);
+        });
+        totalStock = Math.min(...componentStocks);
+    } else {
+        totalStock = stockEntries.reduce((sum, s) => sum + s.quantity, 0);
+    }
+
 
     return {
       ...product,

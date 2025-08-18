@@ -107,70 +107,98 @@ const ProductDetailPage = () => {
           </Card>
         </Grid>
 
-        {/* Right Column: Stock Information */}
+        {/* Right Column: Stock / Component Information */}
         <Grid item xs={12} md={8}>
-          <Typography variant="h6" gutterBottom>Stock Levels by Location</Typography>
-          <TableContainer component={Paper} sx={{ mb: 3 }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Location</TableCell>
-                  <TableCell align="right">Quantity</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {product.stockByLocation && product.stockByLocation.length > 0 ? (
-                  product.stockByLocation.map((loc) => (
-                    <TableRow key={loc.locationId}>
-                      <TableCell>{loc.locationName}</TableCell>
-                      <TableCell align="right">{loc.quantity}</TableCell>
+          {product.type === 'bundle' ? (
+            <>
+              <Typography variant="h6" gutterBottom>Bundle Components</Typography>
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Component Name</TableCell>
+                      <TableCell>SKU</TableCell>
+                      <TableCell align="right">Required Quantity</TableCell>
                     </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={2}>No stock information available.</TableCell>
-                  </TableRow>
-                )}
-                <TableRow sx={{ '& td': { borderTop: '2px solid rgba(224, 224, 224, 1)' } }}>
-                  <TableCell><strong>Total Stock</strong></TableCell>
-                  <TableCell align="right"><strong>{product.stock}</strong></TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-          <Typography variant="h6" gutterBottom>Batch Details</Typography>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Location</TableCell>
-                  <TableCell>Batch Number</TableCell>
-                  <TableCell>Expiry Date</TableCell>
-                  <TableCell align="right">Quantity</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {allBatches.length > 0 ? (
-                  allBatches.map((batch, index) => {
-                    const isExpired = new Date(batch.expiryDate) < new Date();
-                    return (
-                      <TableRow key={index} sx={{ backgroundColor: isExpired ? 'rgba(255, 0, 0, 0.1)' : 'inherit' }}>
-                        <TableCell>{batch.locationName}</TableCell>
-                        <TableCell>{batch.batchNumber}</TableCell>
-                        <TableCell>{new Date(batch.expiryDate).toLocaleDateString()}</TableCell>
-                        <TableCell align="right">{batch.quantity}</TableCell>
+                  </TableHead>
+                  <TableBody>
+                    {product.components.map((c, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{c.name}</TableCell>
+                        <TableCell>{c.sku}</TableCell>
+                        <TableCell align="right">{c.quantity}</TableCell>
                       </TableRow>
-                    );
-                  })
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={4}>No batch information available.</TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </>
+          ) : (
+            <>
+              <Typography variant="h6" gutterBottom>Stock Levels by Location</Typography>
+              <TableContainer component={Paper} sx={{ mb: 3 }}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Location</TableCell>
+                      <TableCell align="right">Quantity</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {product.stockByLocation && product.stockByLocation.length > 0 ? (
+                      product.stockByLocation.map((loc) => (
+                        <TableRow key={loc.locationId}>
+                          <TableCell>{loc.locationName}</TableCell>
+                          <TableCell align="right">{loc.quantity}</TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={2}>No stock information available.</TableCell>
+                      </TableRow>
+                    )}
+                    <TableRow sx={{ '& td': { borderTop: '2px solid rgba(224, 224, 224, 1)' } }}>
+                      <TableCell><strong>Total Stock</strong></TableCell>
+                      <TableCell align="right"><strong>{product.stock}</strong></TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              <Typography variant="h6" gutterBottom>Batch Details</Typography>
+              <TableContainer component={Paper}>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Location</TableCell>
+                      <TableCell>Batch Number</TableCell>
+                      <TableCell>Expiry Date</TableCell>
+                      <TableCell align="right">Quantity</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {allBatches.length > 0 ? (
+                      allBatches.map((batch, index) => {
+                        const isExpired = new Date(batch.expiryDate) < new Date();
+                        return (
+                          <TableRow key={index} sx={{ backgroundColor: isExpired ? 'rgba(255, 0, 0, 0.1)' : 'inherit' }}>
+                            <TableCell>{batch.locationName}</TableCell>
+                            <TableCell>{batch.batchNumber}</TableCell>
+                            <TableCell>{new Date(batch.expiryDate).toLocaleDateString()}</TableCell>
+                            <TableCell align="right">{batch.quantity}</TableCell>
+                          </TableRow>
+                        );
+                      })
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={4}>No batch information available.</TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </>
+          )}
         </Grid>
       </Grid>
 

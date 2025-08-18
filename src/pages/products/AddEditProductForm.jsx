@@ -160,13 +160,95 @@ const AddEditProductForm = ({
           Listening... Speak now.
         </Typography>
       )}
-      <TextField margin="dense" id="sku" name="sku" label="SKU" type="text" fullWidth variant="standard" value={formData.sku} onChange={handleChange} required />
-      <TextField margin="dense" id="barcode" name="barcode" label="Barcode" type="text" fullWidth variant="standard" value={formData.barcode} onChange={handleChange} />
-      <TextField margin="dense"id="category" name="category" label="Category" type="text" fullWidth variant="standard" value={formData.category} onChange={handleChange} required />
+      <TextField
+        margin="dense"
+        id="sku"
+        name="sku"
+        label="SKU"
+        type="text"
+        fullWidth
+        variant="standard"
+        value={formData.sku}
+        onChange={handleChange}
+        required
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, sku: transcript }))}
+                onStateChange={setVoiceState}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      <TextField
+        margin="dense"
+        id="barcode"
+        name="barcode"
+        label="Barcode"
+        type="text"
+        fullWidth
+        variant="standard"
+        value={formData.barcode}
+        onChange={handleChange}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, barcode: transcript }))}
+                onStateChange={setVoiceState}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      <TextField
+        margin="dense"
+        id="category"
+        name="category"
+        label="Category"
+        type="text"
+        fullWidth
+        variant="standard"
+        value={formData.category}
+        onChange={handleChange}
+        required
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, category: transcript }))}
+                onStateChange={setVoiceState}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
       <TextField margin="dense" id="price" name="price" label="Price" type="number" fullWidth variant="standard" value={formData.price} onChange={handleChange} required />
       <TextField margin="dense" id="costPrice" name="costPrice" label="Cost Price" type="number" fullWidth variant="standard" value={formData.costPrice} onChange={handleChange} required />
       <TextField margin="dense" id="lowStockThreshold" name="lowStockThreshold" label="Low Stock Threshold" type="number" fullWidth variant="standard" value={formData.lowStockThreshold} onChange={handleChange} required />
-      <TextField margin="dense" id="imageUrl" name="imageUrl" label="Image URL" type="text" fullWidth variant="standard" value={formData.imageUrl} onChange={handleChange} />
+      <TextField
+        margin="dense"
+        id="imageUrl"
+        name="imageUrl"
+        label="Image URL"
+        type="text"
+        fullWidth
+        variant="standard"
+        value={formData.imageUrl}
+        onChange={handleChange}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, imageUrl: transcript }))}
+                onStateChange={setVoiceState}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
 
       {!isEditMode && (
         <>
@@ -188,7 +270,27 @@ const AddEditProductForm = ({
               ))}
             </Select>
           </FormControl>
-          <TextField margin="dense" id="batchNumber" name="batchNumber" label="Batch Number" type="text" fullWidth variant="standard" value={formData.batchNumber} onChange={handleChange} />
+          <TextField
+            margin="dense"
+            id="batchNumber"
+            name="batchNumber"
+            label="Batch Number"
+            type="text"
+            fullWidth
+            variant="standard"
+            value={formData.batchNumber}
+            onChange={handleChange}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <VoiceRecognition
+                    onResult={(transcript) => setFormData((prev) => ({ ...prev, batchNumber: transcript }))}
+                    onStateChange={setVoiceState}
+                  />
+                </InputAdornment>
+              ),
+            }}
+          />
           <TextField margin="dense" id="expiryDate" name="expiryDate" label="Expiry Date" type="date" fullWidth variant="standard" value={formData.expiryDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
         </>
       )}

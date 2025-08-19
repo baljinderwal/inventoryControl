@@ -23,13 +23,10 @@ const local = {
       return { ...item, orderId: o.id, completedAt: new Date(o.createdAt), productName: p?.name, totalSale: p ? item.quantity * p.price : 0 };
     })).sort((a, b) => b.completedAt - a.completedAt);
   },
-  getInventoryAging: async ({ locationId } = {}) => {
+  getInventoryAging: async () => {
     const data = await getLocalData();
     const products = data.products || [];
     let stock = data.stock || [];
-    if (locationId) {
-      stock = stock.filter(s => s.locationId === locationId);
-    }
     if (!products.length) return [];
     const stockMap = new Map(stock.map(s => [s.productId, s.quantity]));
     const today = new Date();
@@ -65,8 +62,8 @@ const remote = {
         return { ...item, orderId: o.id, completedAt: new Date(o.createdAt), productName: p?.name, totalSale: p ? item.quantity * p.price : 0 };
     })).sort((a, b) => b.completedAt - a.completedAt);
   },
-  getInventoryAging: async ({ locationId } = {}) => {
-    const stockUrl = locationId ? `/stock?locationId=${locationId}` : '/stock';
+  getInventoryAging: async () => {
+    const stockUrl = '/stock';
     const [pRes, sRes] = await Promise.all([api.get('/products'), api.get(stockUrl)]);
     const products = pRes.data, stock = sRes.data;
     if (!products.length) return [];

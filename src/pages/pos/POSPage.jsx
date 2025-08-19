@@ -65,7 +65,6 @@ const POSPage = () => {
           services.stock.adjustStockLevel({
             productId: item.id,
             quantity: -item.quantity,
-            locationId: 1, // Defaulting to Main Warehouse
           })
         )
       );

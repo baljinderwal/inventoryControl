@@ -1,7 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
-import { locationService } from '../../services/locationService';
 import { Parser } from '@json2csv/plainjs';
 
 import Paper from '@mui/material/Paper';
@@ -18,17 +17,10 @@ import MenuItem from '@mui/material/MenuItem';
 
 const StockValueReport = () => {
   const { mode, services } = useApi();
-  const a_services = { ...services, locations: locationService[mode] };
-  const [locationId, setLocationId] = useState('');
-
-  const { data: locations = [] } = useQuery({
-    queryKey: ['locations', mode],
-    queryFn: () => a_services.locations.getLocations(),
-  });
 
   const { data: products = [], isLoading, isError, error } = useQuery({
-    queryKey: ['stock', mode, locationId],
-    queryFn: () => services.stock.getStockLevels({ locationId: locationId === 'all' ? null : locationId }),
+    queryKey: ['stock', mode],
+    queryFn: () => services.stock.getStockLevels(),
   });
 
   const stockValueReport = useMemo(() => {
@@ -82,22 +74,6 @@ const StockValueReport = () => {
           Export as CSV
         </Button>
       </Box>
-      <FormControl sx={{ minWidth: 200, mb: 2 }}>
-        <InputLabel id="location-filter-label">Filter by Location</InputLabel>
-        <Select
-          labelId="location-filter-label"
-          value={locationId}
-          onChange={(e) => setLocationId(e.target.value)}
-          label="Filter by Location"
-        >
-          <MenuItem value="all">All Locations</MenuItem>
-          {locations.map((location) => (
-            <MenuItem key={location.id} value={location.id}>
-              {location.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
       <Typography variant="h5" component="p">
         Total Inventory Value:
         <Typography variant="h5" component="span" color="primary" sx={{ ml: 1, fontWeight: 'bold' }}>

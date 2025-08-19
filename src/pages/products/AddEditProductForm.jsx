@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
-import { locationService } from '../../services/locationService';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -24,7 +23,6 @@ const AddEditProductForm = ({
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
   const { mode, services } = useApi();
-  const a_services = { ...services, locations: locationService[mode] };
 
   const [voiceState, setVoiceState] = useState('idle');
   const [inputMode, setInputMode] = useState('manual');
@@ -41,16 +39,9 @@ const AddEditProductForm = ({
     stock: '',
     batchNumber: '',
     expiryDate: '',
-    locationId: '',
   });
 
   const isEditMode = Boolean(product);
-
-  const { data: locations = [] } = useQuery({
-    queryKey: ['locations', mode],
-    queryFn: () => a_services.locations.getLocations(),
-    enabled: !isEditMode, // Only fetch locations in add mode
-  });
 
   useEffect(() => {
     if (product) {
@@ -66,7 +57,6 @@ const AddEditProductForm = ({
         stock: '',
         batchNumber: '',
         expiryDate: '',
-        locationId: '',
       });
     }
   }, [product]);
@@ -108,7 +98,6 @@ const AddEditProductForm = ({
       delete submissionData.stock;
       delete submissionData.batchNumber;
       delete submissionData.expiryDate;
-      delete submissionData.locationId;
     }
     mutation.mutate(submissionData);
   };
@@ -255,23 +244,6 @@ const AddEditProductForm = ({
       {!isEditMode && (
         <>
           <TextField margin="dense" id="stock" name="stock" label="Initial Stock" type="number" fullWidth variant="standard" value={formData.stock} onChange={handleChange} inputProps={{ 'data-testid': 'stock-input' }} />
-          <FormControl fullWidth margin="dense" variant="standard" disabled={!formData.stock || formData.stock <= 0}>
-            <InputLabel id="location-select-label">Location for Initial Stock</InputLabel>
-            <Select
-              labelId="location-select-label"
-              id="locationId"
-              name="locationId"
-              value={formData.locationId}
-              onChange={handleChange}
-              label="Location for Initial Stock"
-            >
-              {locations.map((location) => (
-                <MenuItem key={location.id} value={location.id}>
-                  {location.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
           <TextField
             margin="dense"
             id="batchNumber"

@@ -43,7 +43,6 @@ const navigation = [
     { name: 'Billing', href: '/billing', icon: AccountBalanceWalletIcon, roles: ['Admin', 'Manager'] },
     { name: 'Reports', href: '/reports', icon: SummarizeIcon, roles: ['Admin', 'Manager'] },
     { name: 'Users', href: '/users', icon: PeopleIcon, roles: ['Admin'] },
-    { name: 'Locations', href: '/settings/locations', icon: SettingsIcon, roles: ['Admin', 'Manager'] },
 ];
 
 const navListVariants = {

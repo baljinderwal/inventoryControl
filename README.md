@@ -63,10 +63,6 @@ This project requires two terminals to be running simultaneously: one for the mo
     *   Track products by batch number and expiry date.
     *   Deduct stock using FEFO (First-Expiring, First-Out) logic.
 *   **🌐 Multi-Location Inventory Management:**
-    *   **Manage Locations:** Admins and Managers can add, edit, and delete inventory locations via the "Locations" settings page.
-    *   **Location-Specific Stock:** View stock levels for each product broken down by location on the Stock page.
-    *   **Stock Transfers:** Easily transfer stock between locations using a dedicated transfer form on the Stock page.
-    *   **Filtered Reports:** Reports like Inventory Aging and Stock Value can be filtered by location to provide more granular insights.
 *   **⚡ Barcode Scanning for Efficiency:**
     *   **Accelerated Workflows:** Use a device's camera to scan product barcodes, significantly speeding up data entry.
     *   **Add to POs:** Quickly add items to a Purchase Order by scanning their barcodes.
@@ -85,8 +81,8 @@ This project requires two terminals to be running simultaneously: one for the mo
 *   **📄 CSV Data Export:** Export data from main pages (Products, Orders, Suppliers) and all reports to CSV format for offline analysis.
 *   **👤 User Administration:** Manage users and their roles within the system.
 *   **🔐 Role-Based Access Control (RBAC):**
-    *   **Admin:** Full access to all features, including user management and location settings.
-    *   **Manager:** Access to all features except user management, including location settings.
+    *   **Admin:** Full access to all features, including user management.
+    *   **Manager:** Access to all features except user management.
     *   **Staff:** Access to core features like dashboard, products, stock, and orders.
 *   **🚀 Fast & Modern Tech:** Built with Vite for a lightning-fast development experience and React for a reactive UI.
 
@@ -281,8 +277,6 @@ The application features a login system with three predefined user roles. Use th
     *   `/reports/profitability`
     *   `/settings/locations`
 *   **Admin** can access all pages, including:
-    *   `/users`
-    *   `/settings/locations`
 
 ## 🤖 Mock API and Data Model
 
@@ -292,8 +286,7 @@ The application uses `json-server` to simulate a backend API. The data is stored
     *   **`products`**: `{id, name, sku, barcode, category, price, costPrice, lowStockThreshold}`
     *   **`suppliers`**: `{id, name, contact, email, products: [productId, ... ]}`
     *   **`orders`**: `{id, supplier: {id, name}, createdAt, status, products: [{productId, quantity}], completedAt?}`
-    *   **`stock`**: `{id, productId, quantity, locationId, batches: [{batchNumber, expiryDate, quantity}]}`
-    *   **`locations`**: `{id, name, address}`
+    *   **`stock`**: `{id, productId, quantity, batches: [{batchNumber, expiryDate, quantity}]}`
     *   **`users`**: `{id, name, email, password, role}`
     *   **`sales`**: `{id, date, items: [{productId, productName, quantity, price, total}], totalRevenue}`
     *   **`customers`**: `{id, name, email, phone, address}`

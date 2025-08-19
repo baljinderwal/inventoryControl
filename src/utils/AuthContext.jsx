@@ -105,10 +105,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateProfile = async (formData) => {
+    console.log('Attempting to update profile with:', formData);
+    try {
+      await axios.put('https://inventorybackend-loop.onrender.com/auth/profile', formData);
+    } catch (error) {
+      console.error('Profile update failed:', error.response ? error.response.data : error.message);
+      if (error.response && error.response.data) {
+        throw new Error(error.response.data.message || 'An unknown error occurred during profile update.');
+      } else if (error.request) {
+        throw new Error('Network error, please try again.');
+      } else {
+        throw new Error(error.message || 'An unexpected error occurred.');
+      }
+    }
+  };
+
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, signup, comprehensiveSignup }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, signup, comprehensiveSignup, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

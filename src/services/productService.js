@@ -16,7 +16,7 @@ const local = {
   },
   addProduct: async (productData) => {
     console.log('Adding product in local mode', productData);
-    const { stock, batchNumber, expiryDate, locationId, ...productDetails } = productData;
+    const { stock, batchNumber, expiryDate, ...productDetails } = productData;
 
     // 1. Create the product
     const productResponse = await fetch('/products', {
@@ -27,11 +27,10 @@ const local = {
     const newProduct = await productResponse.json();
 
     // 2. If initial stock is provided, create the stock entry
-    if (stock > 0 && locationId) {
+    if (stock > 0) {
       const newStockEntry = {
         productId: newProduct.id,
         quantity: stock,
-        locationId: parseInt(locationId),
         batches: [{
           batchNumber: batchNumber || `B${newProduct.id}-INIT`,
           expiryDate: expiryDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(), // Default 1 year expiry
@@ -70,18 +69,17 @@ const remote = {
   addProduct: async (productData) => {
     console.log('Adding product via API', productData);
     // Separate product details from stock details
-    const { stock, batchNumber, expiryDate, locationId, ...productDetails } = productData;
+    const { stock, batchNumber, expiryDate, ...productDetails } = productData;
 
     // 1. Create the product
     const productResponse = await api.post('/products', productDetails);
     const newProduct = productResponse.data;
 
     // 2. If initial stock is provided, create the stock entry
-    if (stock > 0 && expiryDate && locationId) { // Ensure all stock details are present
+    if (stock > 0 && expiryDate) { // Ensure all stock details are present
       const newStockEntry = {
         productId: newProduct.id,
         quantity: stock,
-        locationId: locationId,
         batches: [{
           batchNumber: batchNumber || `B${newProduct.id}-INIT`,
           expiryDate: expiryDate,

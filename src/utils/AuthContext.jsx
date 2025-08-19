@@ -73,14 +73,10 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const signup = async (businessName, mobile, category) => {
-    console.log('Attempting to sign up with:', { businessName, mobile, category });
+  const signup = async (signupData) => {
+    console.log('Attempting to sign up with:', signupData);
     try {
-      await axios.post('https://inventorybackend-loop.onrender.com/auth/quick-register', {
-        businessName,
-        mobile,
-        category,
-      });
+      await axios.post('https://inventorybackend-loop.onrender.com/auth/quick-register', signupData);
     } catch (error) {
       console.error('Quick signup failed:', error.response ? error.response.data : error.message);
       if (error.response && error.response.data) {

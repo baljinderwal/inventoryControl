@@ -352,3 +352,5 @@ const SignupPage = () => {
     </Box>
   );
 };
+
+export default SignupPage;

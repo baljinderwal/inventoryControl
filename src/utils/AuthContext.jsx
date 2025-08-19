@@ -13,7 +13,7 @@ const decodeJwt = (token) => {
         .join('')
     );
     return JSON.parse(jsonPayload);
-  } catch (e) {
+  } catch {
     console.error('Invalid token');
     return null;
   }
@@ -73,19 +73,32 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const signup = async (name, email, password, role) => {
-    console.log('Attempting to sign up with:', { name, email, password, role });
+  const signup = async (businessName, mobile, category) => {
+    console.log('Attempting to sign up with:', { businessName, mobile, category });
     try {
-      await axios.post('https://inventorybackend-loop.onrender.com/auth/register', {
-        name,
-        email,
-        password,
-        role,
+      await axios.post('https://inventorybackend-loop.onrender.com/auth/quick-register', {
+        businessName,
+        mobile,
+        category,
       });
-      // Signup successful, do not expect a token.
-      // The calling component will now call login().
     } catch (error) {
-      console.error('Signup failed:', error.response ? error.response.data : error.message);
+      console.error('Quick signup failed:', error.response ? error.response.data : error.message);
+      if (error.response && error.response.data) {
+        throw new Error(error.response.data.message || 'An unknown error occurred during signup.');
+      } else if (error.request) {
+        throw new Error('Network error, please try again.');
+      } else {
+        throw new Error(error.message || 'An unexpected error occurred.');
+      }
+    }
+  };
+
+  const comprehensiveSignup = async (formData) => {
+    console.log('Attempting to comprehensively sign up with:', formData);
+    try {
+      await axios.post('https://inventorybackend-loop.onrender.com/auth/comprehensive-register', formData);
+    } catch (error) {
+      console.error('Comprehensive signup failed:', error.response ? error.response.data : error.message);
       if (error.response && error.response.data) {
         throw new Error(error.response.data.message || 'An unknown error occurred during signup.');
       } else if (error.request) {
@@ -99,7 +112,7 @@ export const AuthProvider = ({ children }) => {
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, signup }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, signup, comprehensiveSignup }}>
       {children}
     </AuthContext.Provider>
   );

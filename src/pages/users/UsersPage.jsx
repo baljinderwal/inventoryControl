@@ -36,7 +36,7 @@ const UsersPage = () => {
 
   const deleteMutation = useMutation({
     mutationFn: services.users.deleteUser,
-    onSuccess: (deletedUserId) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       showNotification('User deleted successfully', 'success');
     },

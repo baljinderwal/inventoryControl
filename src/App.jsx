@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
+import ComprehensiveSignupPage from './pages/auth/comprehensive-signup/ComprehensiveSignupPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import ProductsPage from './pages/products/ProductsPage';
 import ProductDetailPage from './pages/products/ProductDetailPage';
@@ -34,6 +35,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/signup/comprehensive" element={<ComprehensiveSignupPage />} />
         <Route element={<Layout />}>
           <Route element={<PrivateRoute roles={['Admin', 'Manager', 'Staff', 'user']} />}>
             <Route path="/dashboard" element={<DashboardPage />} />

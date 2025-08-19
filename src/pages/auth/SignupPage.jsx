@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../utils/AuthContext';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import {
@@ -31,108 +31,54 @@ import { motion as Motion, AnimatePresence, useReducedMotion } from 'framer-moti
 
 const SignupPage = () => {
   const [form, setForm] = useState({
-    name: { value: '', valid: false, touched: false, error: '' },
-    email: { value: '', valid: false, touched: false, error: '' },
-    password: { value: '', valid: false, touched: false, error: '' },
-    role: { value: '', valid: true, touched: false, error: '' },
+    businessName: { value: '', valid: false, touched: false, error: '' },
+    mobile: { value: '', valid: false, touched: false, error: '' },
+    otp: { value: '', valid: false, touched: false, error: '' },
+    category: { value: '', valid: true, touched: false, error: '' },
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState({ score: 0, text: '', color: 'error' });
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [animateShake, setAnimateShake] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
-  const { signup, login } = useAuth();
+  const { signup } = useAuth();
   const navigate = useNavigate();
 
-  const validateName = (name) => {
-    if (!name) return "Full name is required.";
-    if (name.length < 2) return "Name must be at least 2 characters long.";
+  const validateBusinessName = (name) => {
+    if (!name) return "Business name is required.";
+    if (name.length < 2) return "Business name must be at least 2 characters long.";
     return "";
   };
 
-  const validateEmail = (email) => {
-    if (!email) return "Email is required.";
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) return "Please enter a valid email address.";
+  const validateMobile = (mobile) => {
+    if (!mobile) return "Mobile number is required.";
+    const mobileRegex = /^[0-9]{10}$/;
+    if (!mobileRegex.test(mobile)) return "Please enter a valid 10-digit mobile number.";
     return "";
   };
 
-  const checkPasswordStrength = (password) => {
-    let score = 0;
-    let text = '';
-    let color = 'error.main';
-
-    const hasNumber = /\d/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-    const isLongEnough = password.length >= 8;
-
-    if (isLongEnough) score++;
-    if (hasNumber) score++;
-    if (hasLowerCase && hasUpperCase) score++;
-    if (hasSpecialChar) score++;
-
-    // Bonus for length
-    if (password.length >= 12) score++;
-
-    switch (score) {
-        case 0:
-        case 1:
-            text = 'Weak';
-            color = 'error.main';
-            break;
-        case 2:
-            text = 'Medium';
-            color = 'warning.main';
-            break;
-        case 3:
-            text = 'Strong';
-            color = 'success.main';
-            break;
-        case 4:
-        case 5:
-            text = 'Very Strong';
-            color = 'success.dark';
-            break;
-        default:
-            text = '';
-            color = 'error.main';
-    }
-
-    if (password.length === 0) {
-        return { score: 0, text: '', color: 'error.main' };
-    }
-
-    return { score, text, color };
-  };
-
-  const validatePassword = (password) => {
-    if (!password) return "Password is required.";
-    const strength = checkPasswordStrength(password);
-    if (strength.score < 2) return "Password is too weak. Include more character types.";
+  const validateOtp = (otp) => {
+    if (!otp) return "OTP is required.";
+    if (otp.length !== 6) return "OTP must be 6 digits.";
     return "";
   };
   
-  const validateRole = (role) => {
-    if (!role) return "Role is required.";
+  const validateCategory = (category) => {
+    if (!category) return "Category is required.";
     return "";
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let error = '';
-    if (name === 'name') {
-      error = validateName(value);
-    } else if (name === 'email') {
-      error = validateEmail(value);
-    } else if (name === 'password') {
-      error = validatePassword(value);
-      setPasswordStrength(checkPasswordStrength(value));
-    } else if (name === 'role') {
-        error = validateRole(value);
+    if (name === 'businessName') {
+      error = validateBusinessName(value);
+    } else if (name === 'mobile') {
+      error = validateMobile(value);
+    } else if (name === 'otp') {
+      error = validateOtp(value);
+    } else if (name === 'category') {
+        error = validateCategory(value);
     }
     setForm((prev) => ({
       ...prev,
@@ -148,24 +94,30 @@ const SignupPage = () => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSendOtp = () => {
+    // In a real app, this would trigger a backend call to send an OTP
+    console.log('Sending OTP to', form.mobile.value);
+    alert('OTP sent to your mobile number (not really)!');
+  };
+
+  const handleQuickSubmit = async (e) => {
     e.preventDefault();
     setSubmitError('');
 
-    const nameError = validateName(form.name.value);
-    const emailError = validateEmail(form.email.value);
-    const passwordError = validatePassword(form.password.value);
-    const roleError = validateRole(form.role.value);
+    const businessNameError = validateBusinessName(form.businessName.value);
+    const mobileError = validateMobile(form.mobile.value);
+    const otpError = validateOtp(form.otp.value);
+    const categoryError = validateCategory(form.category.value);
 
     setForm((prev) => ({
       ...prev,
-      name: { ...prev.name, touched: true, error: nameError },
-      email: { ...prev.email, touched: true, error: emailError },
-      password: { ...prev.password, touched: true, error: passwordError },
-      role: { ...prev.role, touched: true, error: roleError },
+      businessName: { ...prev.businessName, touched: true, error: businessNameError },
+      mobile: { ...prev.mobile, touched: true, error: mobileError },
+      otp: { ...prev.otp, touched: true, error: otpError },
+      category: { ...prev.category, touched: true, error: categoryError },
     }));
 
-    if (nameError || emailError || passwordError || roleError) {
+    if (businessNameError || mobileError || otpError || categoryError) {
       setAnimateShake(true);
       setTimeout(() => setAnimateShake(false), 500);
       return;
@@ -173,22 +125,21 @@ const SignupPage = () => {
 
     try {
       setLoading(true);
-      await signup(form.name.value, form.email.value, form.password.value, form.role.value);
-      // After successful signup, log the user in
-      await login(form.email.value, form.password.value);
+      // Assuming signup can handle these fields. This might need adjustment.
+      await signup(form.businessName.value, form.mobile.value, form.category.value);
       navigate('/dashboard');
     } catch (error) {
-      if (error.message && error.message.toLowerCase().includes('user already exists')) {
-        navigate('/login', { state: { message: 'Account already exists. Please log in.' } });
-      } else {
-        setSubmitError(error.message || 'Failed to create an account. Please try again.');
-      }
+      setSubmitError(error.message || 'Failed to create an account. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const isFormValid = form.name.valid && form.email.valid && form.password.valid && form.role.valid;
+  const handleComprehensiveSignup = () => {
+    navigate('/signup/comprehensive');
+  };
+
+  const isFormValid = form.businessName.valid && form.mobile.valid && form.otp.valid && form.category.valid;
 
   const formVariants = {
     hidden: { opacity: 0, y: -20 },
@@ -284,137 +235,83 @@ const SignupPage = () => {
                 )}
               </AnimatePresence>
 
-              <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+              <Box component="form" onSubmit={handleQuickSubmit} sx={{ width: '100%' }}>
                 <TextField
                   margin="normal"
                   fullWidth
-                  id="name"
-                  label="Full Name"
-                  name="name"
-                  autoComplete="name"
+                  id="businessName"
+                  label="Business Name"
+                  name="businessName"
+                  autoComplete="organization"
                   autoFocus
-                  value={form.name.value}
+                  value={form.businessName.value}
                   onChange={handleInputChange}
                   onBlur={handleInputBlur}
-                  error={form.name.touched && !!form.name.error}
-                  helperText={form.name.touched && form.name.error}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <AnimatePresence>
-                          {form.name.touched && form.name.valid && (
-                            <Motion.div initial={shouldReduceMotion ? {} : { scale: 0 }} animate={{ scale: 1 }} exit={shouldReduceMotion ? {} : { scale: 0 }}>
-                              <CheckCircleOutline color="success" />
-                            </Motion.div>
-                          )}
-                        </AnimatePresence>
-                      </InputAdornment>
-                    ),
-                  }}
+                  error={form.businessName.touched && !!form.businessName.error}
+                  helperText={form.businessName.touched && form.businessName.error}
                 />
+
+                <Grid container spacing={2} alignItems="flex-end">
+                  <Grid item xs={8}>
+                    <TextField
+                      margin="normal"
+                      fullWidth
+                      id="mobile"
+                      label="Mobile Number"
+                      name="mobile"
+                      autoComplete="tel"
+                      value={form.mobile.value}
+                      onChange={handleInputChange}
+                      onBlur={handleInputBlur}
+                      error={form.mobile.touched && !!form.mobile.error}
+                      helperText={form.mobile.touched && form.mobile.error}
+                    />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      onClick={handleSendOtp}
+                      disabled={!form.mobile.valid}
+                    >
+                      Send OTP
+                    </Button>
+                  </Grid>
+                </Grid>
 
                 <TextField
                   margin="normal"
                   fullWidth
-                  id="email"
-                  label="Email Address"
-                  name="email"
-                  autoComplete="email"
-                  value={form.email.value}
+                  name="otp"
+                  label="OTP"
+                  type="number"
+                  id="otp"
+                  autoComplete="one-time-code"
+                  value={form.otp.value}
                   onChange={handleInputChange}
                   onBlur={handleInputBlur}
-                  error={form.email.touched && !!form.email.error}
-                  helperText={form.email.touched && form.email.error}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <AnimatePresence>
-                          {form.email.touched && form.email.valid && (
-                            <Motion.div initial={shouldReduceMotion ? {} : { scale: 0 }} animate={{ scale: 1 }} exit={shouldReduceMotion ? {} : { scale: 0 }}>
-                              <CheckCircleOutline color="success" />
-                            </Motion.div>
-                          )}
-                        </AnimatePresence>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-
-                <TextField
-                  margin="normal"
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type={showPassword ? 'text' : 'password'}
-                  id="password"
-                  autoComplete="new-password"
-                  value={form.password.value}
-                  onChange={handleInputChange}
-                  onBlur={handleInputBlur}
-                  error={form.password.touched && !!form.password.error}
-                  helperText={form.password.touched && form.password.error}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={() => setShowPassword((prev) => !prev)}
-                          edge="end"
-                          aria-label="toggle password visibility"
-                        >
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
+                  error={form.otp.touched && !!form.otp.error}
+                  helperText={form.otp.touched && form.otp.error}
                 />
 
                 <FormControl fullWidth margin="normal">
-                  <InputLabel id="role-select-label">Role</InputLabel>
+                  <InputLabel id="category-select-label">Business Category</InputLabel>
                   <Select
-                    labelId="role-select-label"
-                    id="role"
-                    name="role"
-                    value={form.role.value}
-                    label="Role"
+                    labelId="category-select-label"
+                    id="category"
+                    name="category"
+                    value={form.category.value}
+                    label="Business Category"
                     onChange={handleInputChange}
                     onBlur={handleInputBlur}
-                    error={form.role.touched && !!form.role.error}
+                    error={form.category.touched && !!form.category.error}
                   >
-                    <MenuItem value="user">User</MenuItem>
-                    <MenuItem value="Admin">Admin</MenuItem>
-                    <MenuItem value="Manager">Manager</MenuItem>
-                    <MenuItem value="Staff">Staff</MenuItem>
+                    <MenuItem value="retail">Retail</MenuItem>
+                    <MenuItem value="wholesale">Wholesale</MenuItem>
+                    <MenuItem value="service">Service</MenuItem>
+                    <MenuItem value="manufacturing">Manufacturing</MenuItem>
                   </Select>
                 </FormControl>
-
-                {form.password.touched && form.password.value && (
-                  <Box sx={{ mt: 1, width: '100%' }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                       <Typography variant="body2" sx={{ color: passwordStrength.color }}>
-                           Strength: {passwordStrength.text}
-                       </Typography>
-                    </Box>
-                    <Box sx={{
-                        width: '100%',
-                        height: '8px',
-                        backgroundColor: 'grey.300',
-                        borderRadius: 1,
-                        overflow: 'hidden'
-                    }}>
-                        <Motion.div
-                           initial={{ width: 0 }}
-                           animate={{ width: `${(passwordStrength.score / 5) * 100}%`}}
-                           transition={{ duration: 0.3 }}
-                        >
-                          <Box sx={{
-                              height: '8px',
-                              backgroundColor: passwordStrength.color,
-                              borderRadius: 1,
-                          }} />
-                        </Motion.div>
-                    </Box>
-                  </Box>
-                )}
 
                 <Motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
                   <Button
@@ -422,30 +319,24 @@ const SignupPage = () => {
                     fullWidth
                     variant="contained"
                     size="large"
-                    sx={{ mt: 3, mb: 2, py: 1.5, fontWeight: 'bold' }}
+                    sx={{ mt: 3, mb: 1, py: 1.5, fontWeight: 'bold' }}
                     disabled={loading || !isFormValid}
                   >
-                    {loading ? <CircularProgress size={24} color="inherit" /> : 'Create Account'}
+                    {loading ? <CircularProgress size={24} color="inherit" /> : 'Quick Signup'}
                   </Button>
                 </Motion.div>
 
-                <Divider sx={{ my: 2 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    OR
-                  </Typography>
-                </Divider>
-
-                <Grid container spacing={1}>
-                  <Grid item xs={12} sm={4}>
-                    <Button fullWidth variant="outlined" startIcon={<Google />} sx={{ textTransform: 'none', color: 'text.primary', borderColor: '#ddd' }}>Google</Button>
-                  </Grid>
-                  <Grid item xs={12} sm={4}>
-                    <Button fullWidth variant="outlined" startIcon={<GitHub />} sx={{ textTransform: 'none', color: 'text.primary', borderColor: '#ddd' }}>GitHub</Button>
-                  </Grid>
-                  <Grid item xs={12} sm={4}>
-                    <Button fullWidth variant="outlined" startIcon={<Apple />} sx={{ textTransform: 'none', color: 'text.primary', borderColor: '#ddd' }}>Apple</Button>
-                  </Grid>
-                </Grid>
+                <Motion.div whileTap={shouldReduceMotion ? {} : { scale: 0.98 }}>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    size="large"
+                    sx={{ mt: 1, mb: 2, py: 1.5, fontWeight: 'bold' }}
+                    onClick={handleComprehensiveSignup}
+                  >
+                    Comprehensive Signup
+                  </Button>
+                </Motion.div>
 
                 <Box sx={{ textAlign: 'center', mt: 3 }}>
                     <Typography variant="body2" color="text.secondary">

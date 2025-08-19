@@ -115,5 +115,13 @@
       ],
       "total": 145.99
     }
-  ]
+  ],
+  "userProfile": {
+    "id": 1,
+    "name": "Admin User",
+    "email": "admin@example.com",
+    "role": "Admin",
+    "bio": "I am the administrator of this inventory system.",
+    "avatar": "https://i.pravatar.cc/150?u=a042581f4e29026704d"
+  }
 }

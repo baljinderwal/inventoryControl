@@ -26,6 +26,7 @@ import Layout from './components/layout/Layout';
 import PrivateRoute from './components/PrivateRoute';
 import { SidebarProvider } from './utils/SidebarContext';
 import HomePage from './pages/home/HomePage';
+import ProfilePage from './pages/profile/ProfilePage';
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route element={<Layout />}>
           <Route element={<PrivateRoute roles={['Admin', 'Manager', 'Staff', 'user']} />}>
+            <Route path="/profile" element={<ProfilePage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/products/:id" element={<ProductDetailPage />} />

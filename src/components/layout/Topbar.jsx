@@ -35,6 +35,11 @@ const Topbar = () => {
     handleClose();
   };
 
+  const handleProfile = () => {
+    navigate('/profile');
+    handleClose();
+  };
+
   return (
     <AppBar
       position="fixed"
@@ -84,6 +89,7 @@ const Topbar = () => {
             open={Boolean(anchorEl)}
             onClose={handleClose}
           >
+            <MenuItem onClick={handleProfile}>Profile</MenuItem>
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
           </Menu>
         </Box>

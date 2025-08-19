@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
-import { locationService } from '../../services/locationService';
 import { Parser } from '@json2csv/plainjs';
 
 import Paper from '@mui/material/Paper';
@@ -33,17 +32,10 @@ const getAgingColor = (days) => {
 
 const InventoryAgingReport = () => {
   const { mode, services } = useApi();
-  const a_services = { ...services, locations: locationService[mode] };
-  const [locationId, setLocationId] = useState('');
-
-  const { data: locations = [] } = useQuery({
-    queryKey: ['locations', mode],
-    queryFn: () => a_services.locations.getLocations(),
-  });
 
   const { data: agingReport, isLoading, isError, error } = useQuery({
-    queryKey: ['inventoryAging', mode, locationId],
-    queryFn: () => services.reports.getInventoryAging({ locationId: locationId === 'all' ? null : locationId }),
+    queryKey: ['inventoryAging', mode],
+    queryFn: () => services.reports.getInventoryAging(),
   });
 
   const handleExport = () => {
@@ -78,22 +70,6 @@ const InventoryAgingReport = () => {
           Export as CSV
         </Button>
       </Box>
-      <FormControl sx={{ minWidth: 200, mb: 2 }}>
-        <InputLabel id="location-filter-label">Filter by Location</InputLabel>
-        <Select
-          labelId="location-filter-label"
-          value={locationId}
-          onChange={(e) => setLocationId(e.target.value)}
-          label="Filter by Location"
-        >
-          <MenuItem value="all">All Locations</MenuItem>
-          {locations.map((location) => (
-            <MenuItem key={location.id} value={location.id}>
-              {location.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
       <Typography color="text.secondary" sx={{ mb: 2 }}>
         This report shows the age of your current inventory. Products are sorted with the oldest items first.
       </Typography>

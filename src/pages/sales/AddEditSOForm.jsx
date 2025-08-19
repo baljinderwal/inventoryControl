@@ -128,19 +128,12 @@ const AddEditSOForm = ({ open, onClose, so }) => {
       try {
         await Promise.all(items.map(item => {
           const product = products.find(p => p.id === item.productId);
-          // Find a location that has a valid ID and can fulfill the ordered quantity
-          const stockLocation = product?.stockByLocation?.find(
-            sl => sl.locationId && sl.quantity >= item.quantity
-          );
-
-          if (!stockLocation) {
-            throw new Error(`Not enough stock for ${item.productName}. Required: ${item.quantity}, but no single location has this amount.`);
+          if (product.stock < item.quantity) {
+            throw new Error(`Not enough stock for ${item.productName}. Required: ${item.quantity}, Available: ${product.stock}`);
           }
-
           return services.stock.adjustStockLevel({
             productId: item.productId,
             quantity: -item.quantity,
-            locationId: stockLocation.locationId,
           });
         }));
 

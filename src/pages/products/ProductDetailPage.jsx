@@ -102,35 +102,13 @@ const ProductDetailPage = () => {
 
         {/* Right Column: Stock Information */}
         <Grid item xs={12} md={8}>
-          <Typography variant="h6" gutterBottom>Stock Levels</Typography>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Location</TableCell>
-                  <TableCell align="right">Quantity</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {product.stockByLocation && product.stockByLocation.length > 0 ? (
-                  product.stockByLocation.map((loc) => (
-                    <TableRow key={loc.locationId}>
-                      <TableCell>{loc.locationName}</TableCell>
-                      <TableCell align="right">{loc.quantity}</TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={2}>No stock information available.</TableCell>
-                  </TableRow>
-                )}
-                <TableRow sx={{ '& td': { borderTop: '2px solid rgba(224, 224, 224, 1)' } }}>
-                  <TableCell><strong>Total Stock</strong></TableCell>
-                  <TableCell align="right"><strong>{product.stock}</strong></TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <Typography variant="h6" gutterBottom>Stock Level</Typography>
+          <Card>
+            <CardContent>
+              <Typography variant="h2">{product.stock}</Typography>
+              <Typography variant="body2" color="text.secondary">Total units available</Typography>
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
 

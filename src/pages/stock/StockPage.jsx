@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import StockAdjustmentForm from './StockAdjustmentForm';
-import StockTransferForm from './StockTransferForm';
 import AppDialog from '../../components/ui/AppDialog';
 import MuiTable from '../../components/ui/Table';
 import BarcodeScanner from '../../components/ui/BarcodeScanner';
@@ -29,7 +28,6 @@ import { QrCodeScanner } from '@mui/icons-material';
 const StockPage = () => {
   const [isAdjustmentModalOpen, setIsAdjustmentModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const { mode, services } = useApi();
@@ -58,16 +56,6 @@ const StockPage = () => {
   const handleCloseDetailsModal = () => {
     setSelectedProduct(null);
     setIsDetailsModalOpen(false);
-  };
-
-  const handleOpenTransferModal = (product) => {
-    setSelectedProduct(product);
-    setIsTransferModalOpen(true);
-  };
-
-  const handleCloseTransferModal = () => {
-    setSelectedProduct(null);
-    setIsTransferModalOpen(false);
   };
 
   const handleScan = (scannedBarcode) => {
@@ -105,14 +93,10 @@ const StockPage = () => {
         <Button variant="outlined" size="small" onClick={() => handleOpenAdjustmentModal(p)}>
           Adjust Stock
         </Button>
-        <Button variant="outlined" size="small" onClick={() => handleOpenTransferModal(p)}>
-          Transfer Stock
-        </Button>
         <Button
           variant="text"
           size="small"
           onClick={() => handleOpenDetailsModal(p)}
-          disabled={!p.stockByLocation || p.stockByLocation.length === 0}
         >
           View Details
         </Button>
@@ -158,16 +142,6 @@ const StockPage = () => {
 
       {selectedProduct && (
         <AppDialog
-          open={isTransferModalOpen}
-          onClose={handleCloseTransferModal}
-          title={`Transfer Stock for ${selectedProduct.name}`}
-        >
-          <StockTransferForm onClose={handleCloseTransferModal} product={selectedProduct} />
-        </AppDialog>
-      )}
-
-      {selectedProduct && (
-        <AppDialog
           open={isDetailsModalOpen}
           onClose={handleCloseDetailsModal}
           title={`Stock Details for ${selectedProduct.name}`}
@@ -177,23 +151,20 @@ const StockPage = () => {
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>Location</TableCell>
                   <TableCell>Quantity</TableCell>
                   <TableCell>Batch Number</TableCell>
                   <TableCell>Expiry Date</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {selectedProduct.stockByLocation?.flatMap(stockEntry =>
-                  stockEntry.batches.map(batch => (
-                    <TableRow key={`${stockEntry.locationId}-${batch.batchNumber}`}>
-                      <TableCell>{stockEntry.locationName}</TableCell>
+                {selectedProduct.batches?.map(batch => (
+                    <TableRow key={batch.batchNumber}>
                       <TableCell>{batch.quantity}</TableCell>
                       <TableCell>{batch.batchNumber}</TableCell>
                       <TableCell>{new Date(batch.expiryDate).toLocaleDateString()}</TableCell>
                     </TableRow>
                   ))
-                )}
+                }
               </TableBody>
             </Table>
           </DialogContent>

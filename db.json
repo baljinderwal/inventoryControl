@@ -22,24 +22,19 @@
     { "id": 5, "supplier": { "id": 1, "name": "ElectroSupply" }, "createdAt": "2025-08-12T08:30:00Z", "status": "Pending", "products": [{ "productId": 2, "quantity": 15 }, { "productId": 8, "quantity": 25 }] }
   ],
   "stock": [
-    { "id": 1, "productId": 1, "quantity": 150, "locationId": 1, "batches": [{ "batchNumber": "B001", "expiryDate": "2026-11-10T10:00:00Z", "quantity": 150 }] },
-    { "id": 2, "productId": 2, "quantity": 75, "locationId": 1, "batches": [{ "batchNumber": "B002", "expiryDate": "2026-01-15T11:30:00Z", "quantity": 75 }] },
-    { "id": 3, "productId": 3, "quantity": 120, "locationId": 2, "batches": [{ "batchNumber": "B003", "expiryDate": "2026-05-20T14:00:00Z", "quantity": 120 }] },
-    { "id": 4, "productId": 4, "quantity": 0, "locationId": 2, "batches": [] },
-    { "id": 5, "productId": 5, "quantity": 50, "locationId": 1, "batches": [{ "batchNumber": "B005", "expiryDate": "2026-07-22T18:00:00Z", "quantity": 50 }] },
-    { "id": 6, "productId": 6, "quantity": 30, "locationId": 3, "batches": [{ "batchNumber": "B006", "expiryDate": "2025-03-12T12:00:00Z", "quantity": 30 }] },
-    { "id": 7, "productId": 7, "quantity": 40, "locationId": 3, "batches": [{ "batchNumber": "B007", "expiryDate": "2026-06-30T16:45:00Z", "quantity": 40 }] },
-    { "id": 8, "productId": 8, "quantity": 90, "locationId": 1, "batches": [{ "batchNumber": "B008", "expiryDate": "2026-08-01T08:00:00Z", "quantity": 90 }] }
+    { "id": 1, "productId": 1, "quantity": 150, "batches": [{ "batchNumber": "B001", "expiryDate": "2026-11-10T10:00:00Z", "quantity": 150 }] },
+    { "id": 2, "productId": 2, "quantity": 75, "batches": [{ "batchNumber": "B002", "expiryDate": "2026-01-15T11:30:00Z", "quantity": 75 }] },
+    { "id": 3, "productId": 3, "quantity": 120, "batches": [{ "batchNumber": "B003", "expiryDate": "2026-05-20T14:00:00Z", "quantity": 120 }] },
+    { "id": 4, "productId": 4, "quantity": 0, "batches": [] },
+    { "id": 5, "productId": 5, "quantity": 50, "batches": [{ "batchNumber": "B005", "expiryDate": "2026-07-22T18:00:00Z", "quantity": 50 }] },
+    { "id": 6, "productId": 6, "quantity": 30, "batches": [{ "batchNumber": "B006", "expiryDate": "2025-03-12T12:00:00Z", "quantity": 30 }] },
+    { "id": 7, "productId": 7, "quantity": 40, "batches": [{ "batchNumber": "B007", "expiryDate": "2026-06-30T16:45:00Z", "quantity": 40 }] },
+    { "id": 8, "productId": 8, "quantity": 90, "batches": [{ "batchNumber": "B008", "expiryDate": "2026-08-01T08:00:00Z", "quantity": 90 }] }
   ],
   "users": [
     { "id": 1, "name": "Admin User", "email": "admin@example.com", "password": "password", "role": "Admin" },
     { "id": 2, "name": "Manager User", "email": "manager@example.com", "password": "password", "role": "Manager" },
     { "id": 3, "name": "Staff User", "email": "staff@example.com", "password": "password", "role": "Staff" }
-  ],
-  "locations": [
-    { "id": 1, "name": "Main Warehouse", "address": "123 Industrial Park, Cityville" },
-    { "id": 2, "name": "Downtown Store", "address": "456 Main St, Cityville" },
-    { "id": 3, "name": "Eastside Depot", "address": "789 Commercial Ave, Eastville" }
   ],
   "sales": [
     { "id": 1, "date": "2025-08-13T14:30:00Z", "items": [{ "productId": 1, "productName": "Wireless Mouse", "quantity": 2, "price": 25.99, "total": 51.98 }], "totalRevenue": 51.98 }

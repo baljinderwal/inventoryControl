@@ -34,10 +34,7 @@ const SignupPage = () => {
     name: { value: '', valid: false, touched: false, error: '' },
     email: { value: '', valid: false, touched: false, error: '' },
     password: { value: '', valid: false, touched: false, error: '' },
-    role: { value: 'user', valid: true, touched: false, error: '' },
-    businessName: { value: '', valid: false, touched: false, error: '' },
-    mobile: { value: '', valid: false, touched: false, error: '' },
-    category: { value: '', valid: true, touched: false, error: '' },
+    role: { value: 'staff', valid: true, touched: false, error: '' },
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -72,24 +69,6 @@ const SignupPage = () => {
     return "";
   };
 
-  const validateBusinessName = (name) => {
-    if (!name) return "Business name is required.";
-    if (name.length < 2) return "Business name must be at least 2 characters long.";
-    return "";
-  };
-
-  const validateMobile = (mobile) => {
-    if (!mobile) return "Mobile number is required.";
-    const mobileRegex = /^[0-9]{10}$/;
-    if (!mobileRegex.test(mobile)) return "Please enter a valid 10-digit mobile number.";
-    return "";
-  };
-  
-  const validateCategory = (category) => {
-    if (!category) return "Category is required.";
-    return "";
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let error = '';
@@ -101,12 +80,6 @@ const SignupPage = () => {
       error = validatePassword(value);
     } else if (name === 'role') {
       error = validateRole(value);
-    } else if (name === 'businessName') {
-      error = validateBusinessName(value);
-    } else if (name === 'mobile') {
-      error = validateMobile(value);
-    } else if (name === 'category') {
-        error = validateCategory(value);
     }
     setForm((prev) => ({
       ...prev,
@@ -130,9 +103,6 @@ const SignupPage = () => {
     const emailError = validateEmail(form.email.value);
     const passwordError = validatePassword(form.password.value);
     const roleError = validateRole(form.role.value);
-    const businessNameError = validateBusinessName(form.businessName.value);
-    const mobileError = validateMobile(form.mobile.value);
-    const categoryError = validateCategory(form.category.value);
 
     setForm((prev) => ({
       ...prev,
@@ -140,12 +110,9 @@ const SignupPage = () => {
       email: { ...prev.email, touched: true, error: emailError },
       password: { ...prev.password, touched: true, error: passwordError },
       role: { ...prev.role, touched: true, error: roleError },
-      businessName: { ...prev.businessName, touched: true, error: businessNameError },
-      mobile: { ...prev.mobile, touched: true, error: mobileError },
-      category: { ...prev.category, touched: true, error: categoryError },
     }));
 
-    if (nameError || emailError || passwordError || roleError || businessNameError || mobileError || categoryError) {
+    if (nameError || emailError || passwordError || roleError) {
       setAnimateShake(true);
       setTimeout(() => setAnimateShake(false), 500);
       return;
@@ -153,15 +120,7 @@ const SignupPage = () => {
 
     try {
       setLoading(true);
-      await signup({
-        name: form.name.value,
-        email: form.email.value,
-        password: form.password.value,
-        role: form.role.value,
-        businessName: form.businessName.value,
-        mobile: form.mobile.value,
-        category: form.category.value,
-      });
+      await signup(form.name.value, form.email.value, form.password.value, form.role.value);
       navigate('/login');
     } catch (error) {
       setSubmitError(error.message || 'Failed to create an account. Please try again.');
@@ -174,7 +133,7 @@ const SignupPage = () => {
     navigate('/signup/comprehensive');
   };
 
-  const isFormValid = form.name.valid && form.email.valid && form.password.valid && form.role.valid && form.businessName.valid && form.mobile.valid && form.category.valid;
+  const isFormValid = form.name.valid && form.email.valid && form.password.valid && form.role.valid;
 
   const formVariants = {
     hidden: { opacity: 0, y: -20 },
@@ -337,53 +296,9 @@ const SignupPage = () => {
                     onBlur={handleInputBlur}
                     error={form.role.touched && !!form.role.error}
                   >
-                    <MenuItem value="user">User</MenuItem>
+                    <MenuItem value="staff">Staff</MenuItem>
+                    <MenuItem value="manager">Manager</MenuItem>
                     <MenuItem value="admin">Admin</MenuItem>
-                  </Select>
-                </FormControl>
-                <TextField
-                  margin="normal"
-                  fullWidth
-                  id="businessName"
-                  label="Business Name"
-                  name="businessName"
-                  autoComplete="organization"
-                  value={form.businessName.value}
-                  onChange={handleInputChange}
-                  onBlur={handleInputBlur}
-                  error={form.businessName.touched && !!form.businessName.error}
-                  helperText={form.businessName.touched && form.businessName.error}
-                />
-                <TextField
-                  margin="normal"
-                  fullWidth
-                  id="mobile"
-                  label="Mobile Number"
-                  name="mobile"
-                  autoComplete="tel"
-                  value={form.mobile.value}
-                  onChange={handleInputChange}
-                  onBlur={handleInputBlur}
-                  error={form.mobile.touched && !!form.mobile.error}
-                  helperText={form.mobile.touched && form.mobile.error}
-                />
-
-                <FormControl fullWidth margin="normal">
-                  <InputLabel id="category-select-label">Business Category</InputLabel>
-                  <Select
-                    labelId="category-select-label"
-                    id="category"
-                    name="category"
-                    value={form.category.value}
-                    label="Business Category"
-                    onChange={handleInputChange}
-                    onBlur={handleInputBlur}
-                    error={form.category.touched && !!form.category.error}
-                  >
-                    <MenuItem value="retail">Retail</MenuItem>
-                    <MenuItem value="wholesale">Wholesale</MenuItem>
-                    <MenuItem value="service">Service</MenuItem>
-                    <MenuItem value="manufacturing">Manufacturing</MenuItem>
                   </Select>
                 </FormControl>
 
@@ -437,5 +352,3 @@ const SignupPage = () => {
     </Box>
   );
 };
-
-export default SignupPage;

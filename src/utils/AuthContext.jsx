@@ -73,12 +73,17 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  const signup = async (signupData) => {
-    console.log('Attempting to sign up with:', signupData);
+  const signup = async (name, email, password, role) => {
+    console.log('Attempting to sign up with:', { name, email, password, role });
     try {
-      await axios.post('https://inventorybackend-loop.onrender.com/auth/quick-register', signupData);
+      await axios.post('https://inventorybackend-loop.onrender.com/auth/register', {
+        name,
+        email,
+        password,
+        role,
+      });
     } catch (error) {
-      console.error('Quick signup failed:', error.response ? error.response.data : error.message);
+      console.error('Signup failed:', error.response ? error.response.data : error.message);
       if (error.response && error.response.data) {
         throw new Error(error.response.data.message || 'An unknown error occurred during signup.');
       } else if (error.request) {

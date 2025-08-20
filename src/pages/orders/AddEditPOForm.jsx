@@ -78,13 +78,13 @@ const AddEditPOForm = ({ open, onClose, po }) => {
     if (!supplierId) return products || [];
     if (!suppliers || !products) return [];
 
-    const selectedSupplier = suppliers.find(s => s.id === parseInt(supplierId));
+    const selectedSupplier = suppliers.find(s => s.id === supplierId);
     if (!selectedSupplier || !selectedSupplier.products) {
       return [];
     }
 
     const supplierProductIds = new Set(selectedSupplier.products);
-    return products.filter(p => supplierProductIds.has(parseInt(p.id, 10)));
+    return products.filter(p => supplierProductIds.has(p.id));
   }, [supplierId, suppliers, products]);
 
   const handleAddFromSuggestion = (product) => {
@@ -151,8 +151,8 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
     const validProducts = productsList
       .map(item => ({
-        productId: parseInt(item.productId),
-        quantity: parseInt(item.quantity) || 0,
+        productId: (item.productId),
+        quantity: (item.quantity) || 0,
       }))
       .filter(item => item.productId && item.quantity > 0);
 
@@ -161,7 +161,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
       return;
     }
 
-    const supplier = suppliers?.find(s => s.id === parseInt(supplierId));
+    const supplier = suppliers?.find(s => s.id === (supplierId));
     if (!supplier) {
       showNotification('Could not find supplier details. Please refresh and try again.', 'error');
       return;

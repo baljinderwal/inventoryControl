@@ -84,7 +84,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
     }
 
     const supplierProductIds = new Set(selectedSupplier.products);
-    return products.filter(p => supplierProductIds.has(p.id));
+    return products.filter(p => supplierProductIds.has(parseInt(p.id, 10)));
   }, [supplierId, suppliers, products]);
 
   const handleAddFromSuggestion = (product) => {

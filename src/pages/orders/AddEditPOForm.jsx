@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
@@ -38,6 +38,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   const [productsList, setProductsList] = useState([{ productId: '', quantity: 1 }]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
     if (open) { // Reset state when dialog opens
@@ -51,6 +52,20 @@ const AddEditPOForm = ({ open, onClose, po }) => {
     }
   }, [po, isEditMode, open]);
 
+  useEffect(() => {
+    // When supplier changes, reset the products list to prevent invalid combinations.
+    // Use a ref to skip the very first render.
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    // Do not run on initial mount when supplierId is empty in create mode
+    if (supplierId) {
+      setProductsList([{ productId: '', quantity: 1 }]);
+    }
+  }, [supplierId]);
+
   const { data: suppliers, isLoading: isLoadingSuppliers } = useQuery({ queryKey: ['suppliers', mode], queryFn: services.suppliers.getSuppliers });
   const { data: products, isLoading: isLoadingProducts } = useQuery({ queryKey: ['stock', mode], queryFn: services.stock.getStockLevels });
 
@@ -58,6 +73,19 @@ const AddEditPOForm = ({ open, onClose, po }) => {
     if (!products) return [];
     return products.filter(p => p.stock <= p.lowStockThreshold);
   }, [products]);
+
+  const availableProducts = useMemo(() => {
+    if (!supplierId) return products || [];
+    if (!suppliers || !products) return [];
+
+    const selectedSupplier = suppliers.find(s => s.id === parseInt(supplierId));
+    if (!selectedSupplier || !selectedSupplier.products) {
+      return [];
+    }
+
+    const supplierProductIds = new Set(selectedSupplier.products);
+    return products.filter(p => supplierProductIds.has(p.id));
+  }, [supplierId, suppliers, products]);
 
   const handleAddFromSuggestion = (product) => {
     if (productsList.some(p => p.productId === product.id)) {
@@ -196,8 +224,8 @@ const AddEditPOForm = ({ open, onClose, po }) => {
           <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
             <FormControl sx={{ flex: 4 }} required>
               <InputLabel>Product</InputLabel>
-              <Select value={productItem.productId} onChange={(e) => handleProductChange(index, 'productId', e.target.value)} label="Product">
-                {isLoadingProducts ? <CircularProgress size={24} /> : products?.map(p => <MenuItem key={p.id} value={p.id}>{p.name} (In Stock: {p.stock})</MenuItem>)}
+              <Select value={productItem.productId} onChange={(e) => handleProductChange(index, 'productId', e.target.value)} label="Product" disabled={!supplierId}>
+                {isLoadingProducts ? <CircularProgress size={24} /> : availableProducts.map(p => <MenuItem key={p.id} value={p.id}>{p.name} (In Stock: {p.stock})</MenuItem>)}
               </Select>
             </FormControl>
             <TextField label="Quantity" type="number" value={productItem.quantity} onChange={(e) => handleProductChange(index, 'quantity', e.target.value)} required sx={{ flex: 1 }} InputProps={{ inputProps: { min: 1 } }} />

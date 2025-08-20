@@ -76,13 +76,13 @@ const remote = {
     const newProduct = productResponse.data;
 
     // 2. If initial stock is provided, create the stock entry
-    if (stock > 0 && expiryDate) { // Ensure all stock details are present
+    if (stock > 0) { // Ensure all stock details are present
       const newStockEntry = {
         productId: newProduct.id,
         quantity: stock,
         batches: [{
           batchNumber: batchNumber || `B${newProduct.id}-INIT`,
-          expiryDate: expiryDate,
+          expiryDate: expiryDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
           quantity: stock
         }]
       };

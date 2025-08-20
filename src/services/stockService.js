@@ -200,7 +200,7 @@ const remote = {
     }
 
     stockEntry.quantity = stockEntry.batches.reduce((sum, b) => sum + b.quantity, 0);
-    return await api.put(`/stock/${stockEntry.id}`, stockEntry);
+    return await api.put(`/stock/${stockEntry.productId}`, stockEntry);
   },
 
   getProductWithStock: async (id) => {

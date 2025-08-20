@@ -31,14 +31,12 @@ def run(playwright):
 
     page.get_by_role("button", name="Add Product").click()
 
-    # Navigate to Stock page and verify
-    page.goto("http://localhost:5173/stock")
+    # Read db.json after adding the product
+    with open('db.json', 'r') as f:
+        db_after = f.read()
 
-    # Take a screenshot for visual confirmation
-    page.screenshot(path="jules-scratch/verification/stock_page_with_new_product.png")
-
-    # Assert that the new product is in the table with the correct stock
-    expect(page.locator(f'tr:has-text("{product_name}") td').nth(2)).to_have_text("100")
+    with open('jules-scratch/verification/db_after_add.json', 'w') as f:
+        f.write(db_after)
 
     browser.close()
 

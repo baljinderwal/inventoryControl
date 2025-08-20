@@ -1,4 +1,5 @@
 import api from './api';
+import { supplierService } from './supplierService';
 
 const local = {
   getProducts: async () => {
@@ -16,7 +17,7 @@ const local = {
   },
   addProduct: async (productData) => {
     console.log('Adding product in local mode', productData);
-    const { stock, batchNumber, expiryDate, ...productDetails } = productData;
+    const { stock, batchNumber, expiryDate, supplierId, ...productDetails } = productData;
 
     // 1. Create the product
     const productResponse = await fetch('/products', {
@@ -26,7 +27,19 @@ const local = {
     });
     const newProduct = await productResponse.json();
 
-    // 2. If initial stock is provided, create the stock entry
+    // 2. If a supplier is associated, update the supplier's product list
+    if (supplierId) {
+      try {
+        const supplier = await supplierService.local.getSupplier(supplierId);
+        const updatedProducts = supplier.products ? [...supplier.products, newProduct.id] : [newProduct.id];
+        await supplierService.local.updateSupplier(supplierId, { ...supplier, products: updatedProducts });
+      } catch (error) {
+        // Log the error but don't block the product creation from completing
+        console.error(`Failed to associate product with supplier ${supplierId}:`, error);
+      }
+    }
+
+    // 3. If initial stock is provided, create the stock entry
     if (stock > 0) {
       const newStockEntry = {
         productId: newProduct.id,
@@ -68,15 +81,27 @@ const remote = {
   },
   addProduct: async (productData) => {
     console.log('Adding product via API', productData);
-    // Separate product details from stock details
-    const { stock, batchNumber, expiryDate, ...productDetails } = productData;
+    // Separate product details from stock and supplier details
+    const { stock, batchNumber, expiryDate, supplierId, ...productDetails } = productData;
 
     // 1. Create the product
     const productResponse = await api.post('/products', productDetails);
     const newProduct = productResponse.data;
 
-    // 2. If initial stock is provided, create the stock entry
-    if (stock > 0) { // Ensure all stock details are present
+    // 2. If a supplier is associated, update the supplier's product list
+    if (supplierId) {
+      try {
+        const supplier = await supplierService.api.getSupplier(supplierId);
+        const updatedProducts = supplier.products ? [...supplier.products, newProduct.id] : [newProduct.id];
+        await supplierService.api.updateSupplier(supplierId, { ...supplier, products: updatedProducts });
+      } catch (error) {
+        console.error(`Failed to associate product with supplier ${supplierId}:`, error);
+        // Depending on requirements, you might want to notify the user here
+      }
+    }
+
+    // 3. If initial stock is provided, create the stock entry
+    if (stock > 0) {
       const newStockEntry = {
         productId: newProduct.id,
         quantity: stock,

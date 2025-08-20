@@ -27,6 +27,11 @@ const AddEditProductForm = ({
   const [voiceState, setVoiceState] = useState('idle');
   const [inputMode, setInputMode] = useState('manual');
 
+  const { data: suppliers, isLoading: isLoadingSuppliers } = useQuery({
+    queryKey: ['suppliers', mode],
+    queryFn: () => services.suppliers.getSuppliers()
+  });
+
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
@@ -39,6 +44,7 @@ const AddEditProductForm = ({
     stock: '',
     batchNumber: '',
     expiryDate: '',
+    supplierId: '',
   });
 
   const isEditMode = Boolean(product);
@@ -57,6 +63,7 @@ const AddEditProductForm = ({
         stock: '',
         batchNumber: '',
         expiryDate: '',
+        supplierId: '', // Supplier cannot be changed from this form
       });
     }
   }, [product]);
@@ -267,6 +274,28 @@ const AddEditProductForm = ({
             }}
           />
           <TextField margin="dense" id="expiryDate" name="expiryDate" label="Expiry Date" type="date" fullWidth variant="standard" value={formData.expiryDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+
+          <FormControl fullWidth margin="dense" disabled={isLoadingSuppliers}>
+            <InputLabel id="supplier-select-label">Supplier</InputLabel>
+            <Select
+              labelId="supplier-select-label"
+              id="supplierId"
+              name="supplierId"
+              value={formData.supplierId}
+              label="Supplier"
+              onChange={handleChange}
+              data-testid="supplier-select"
+            >
+              <MenuItem value="">
+                <em>None</em>
+              </MenuItem>
+              {suppliers?.map((supplier) => (
+                <MenuItem key={supplier.id} value={supplier.id}>
+                  {supplier.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </>
       )}
 

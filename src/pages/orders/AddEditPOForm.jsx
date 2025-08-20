@@ -120,7 +120,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const supplier = suppliers?.find(s => s.id === supplierId);
+    const supplier = suppliers?.find(s => s.id === parseInt(supplierId));
     const poData = {
       supplierId: supplierId,
       supplier: { id: supplier.id, name: supplier.name }, // embed supplier info

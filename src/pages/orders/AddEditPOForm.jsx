@@ -120,24 +120,34 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const supplier = suppliers?.find(s => s.id === parseInt(supplierId));
-    const poData = {
-      supplierId: supplierId,
-      supplier: { id: supplier.id, name: supplier.name }, // embed supplier info
-      status: 'Pending',
-      products: productsList.map(item => ({
+
+    const validProducts = productsList
+      .map(item => ({
         productId: parseInt(item.productId),
         quantity: parseInt(item.quantity) || 0,
-      })).filter(item => item.productId && item.quantity > 0),
+      }))
+      .filter(item => item.productId && item.quantity > 0);
+
+    if (!supplierId || validProducts.length === 0) {
+      showNotification('Please select a supplier and add at least one valid product.', 'warning');
+      return;
+    }
+
+    const supplier = suppliers?.find(s => s.id === parseInt(supplierId));
+    if (!supplier) {
+      showNotification('Could not find supplier details. Please refresh and try again.', 'error');
+      return;
+    }
+
+    const poData = {
+      supplierId: supplierId,
+      supplier: { id: supplier.id, name: supplier.name },
+      status: 'Pending',
+      products: validProducts,
     };
 
     if (!isEditMode) {
       poData.createdAt = new Date().toISOString();
-    }
-
-    if (!poData.supplierId || poData.products.length === 0) {
-      showNotification('Please select a supplier and add at least one valid product.', 'warning');
-      return;
     }
 
     if (isEditMode) {

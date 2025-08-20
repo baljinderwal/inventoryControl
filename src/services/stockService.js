@@ -11,9 +11,12 @@ const local = {
 
     const supplierMap = new Map();
     suppliers.forEach(supplier => {
-      supplier.products.forEach(productId => {
-        supplierMap.set(productId, supplier.name);
-      });
+      // Defensively check if supplier.products exists and is an array
+      if (supplier.products && Array.isArray(supplier.products)) {
+        supplier.products.forEach(productId => {
+          supplierMap.set(productId, supplier.name);
+        });
+      }
     });
 
     const stockMap = new Map();
@@ -133,9 +136,12 @@ const remote = {
 
     const supplierMap = new Map();
     suppliers.forEach(supplier => {
-      supplier.products.forEach(productId => {
-        supplierMap.set(productId, supplier.name);
-      });
+      // Defensively check if supplier.products exists and is an array
+      if (supplier.products && Array.isArray(supplier.products)) {
+        supplier.products.forEach(productId => {
+          supplierMap.set(productId, supplier.name);
+        });
+      }
     });
 
     const stockMap = new Map();

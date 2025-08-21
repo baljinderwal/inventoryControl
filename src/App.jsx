@@ -6,6 +6,7 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import ProductsPage from './pages/products/ProductsPage';
 import ProductDetailPage from './pages/products/ProductDetailPage';
 import ProductImportPage from './pages/products/ProductImportPage';
+import BarcodeGeneratorPage from './pages/products/BarcodeGeneratorPage';
 import StockPage from './pages/stock/StockPage';
 import SuppliersPage from './pages/suppliers/SuppliersPage';
 import ReportsLayout from './pages/reports/ReportsLayout';
@@ -39,6 +40,7 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/products" element={<ProductsPage />} />
+            <Route path="/products/barcode-generator" element={<BarcodeGeneratorPage />} />
             <Route path="/products/:id" element={<ProductDetailPage />} />
             <Route path="/products/import" element={<ProductImportPage />} />
             <Route path="/stock" element={<StockPage />} />

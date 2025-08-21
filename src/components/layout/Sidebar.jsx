@@ -24,6 +24,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 
 import { useAuth } from '../../utils/AuthContext';
 import { useSidebar } from '../../utils/SidebarContext';
@@ -34,6 +35,7 @@ const collapsedDrawerWidth = 88;
 const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: AssessmentIcon, roles: ['Admin', 'Manager', 'Staff'] },
     { name: 'Products', href: '/products', icon: InventoryIcon, roles: ['Admin', 'Manager', 'Staff'] },
+    { name: 'Barcode Generator', href: '/products/barcode-generator', icon: QrCodeScannerIcon, roles: ['Admin', 'Manager', 'Staff'] },
     { name: 'Stock', href: '/stock', icon: WarehouseIcon, roles: ['Admin', 'Manager', 'Staff'] },
     { name: 'Suppliers', href: '/suppliers', icon: BusinessIcon, roles: ['Admin', 'Manager'] },
     { name: 'Customers', href: '/customers', icon: PeopleIcon, roles: ['Admin', 'Manager'] },

@@ -87,6 +87,12 @@ const AddEditProductForm = ({
     setFormData((prev) => ({ ...prev, barcode: newBarcode }));
   };
 
+  useEffect(() => {
+    if (!isEditMode) {
+      handleGenerateBarcode();
+    }
+  }, [isEditMode]);
+
   const handleSmartVoiceResult = (data) => {
     setFormData((prev) => ({ ...prev, ...data }));
   };

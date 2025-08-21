@@ -15,6 +15,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Typography from '@mui/material/Typography';
 import VoiceRecognition from '../../components/ui/VoiceRecognition';
 import SmartVoiceAdd from '../../components/ui/SmartVoiceAdd';
+import { generateBarcode } from '../../utils/barcodeGenerator';
 
 const AddEditProductForm = ({
   onClose,
@@ -79,6 +80,11 @@ const AddEditProductForm = ({
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleGenerateBarcode = () => {
+    const newBarcode = generateBarcode();
+    setFormData((prev) => ({ ...prev, barcode: newBarcode }));
   };
 
   const handleSmartVoiceResult = (data) => {
@@ -182,12 +188,15 @@ const AddEditProductForm = ({
         value={formData.barcode}
         onChange={handleChange}
         InputProps={{
-          endAdornment: inputMode === 'voicePerField' && (
+          endAdornment: (
             <InputAdornment position="end">
-              <VoiceRecognition
-                onResult={(transcript) => setFormData((prev) => ({ ...prev, barcode: transcript }))}
-                onStateChange={setVoiceState}
-              />
+              {inputMode === 'voicePerField' && (
+                <VoiceRecognition
+                  onResult={(transcript) => setFormData((prev) => ({ ...prev, barcode: transcript }))}
+                  onStateChange={setVoiceState}
+                />
+              )}
+              <Button onClick={handleGenerateBarcode}>Generate</Button>
             </InputAdornment>
           ),
         }}

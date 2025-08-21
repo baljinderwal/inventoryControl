@@ -215,9 +215,77 @@ const AddEditProductForm = ({
           ),
         }}
       />
-      <TextField margin="dense" id="price" name="price" label="Price" type="number" fullWidth variant="standard" value={formData.price} onChange={handleChange} required inputProps={{ 'data-testid': 'price-input' }} />
-      <TextField margin="dense" id="costPrice" name="costPrice" label="Cost Price" type="number" fullWidth variant="standard" value={formData.costPrice} onChange={handleChange} required inputProps={{ 'data-testid': 'costPrice-input' }} />
-      <TextField margin="dense" id="lowStockThreshold" name="lowStockThreshold" label="Low Stock Threshold" type="number" fullWidth variant="standard" value={formData.lowStockThreshold} onChange={handleChange} required inputProps={{ 'data-testid': 'lowStockThreshold-input' }} />
+      <TextField
+        margin="dense"
+        id="price"
+        name="price"
+        label="Price"
+        type="number"
+        fullWidth
+        variant="standard"
+        value={formData.price}
+        onChange={handleChange}
+        required
+        inputProps={{ 'data-testid': 'price-input' }}
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, price: transcript }))}
+                onStateChange={setVoiceState}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      <TextField
+        margin="dense"
+        id="costPrice"
+        name="costPrice"
+        label="Cost Price"
+        type="number"
+        fullWidth
+        variant="standard"
+        value={formData.costPrice}
+        onChange={handleChange}
+        required
+        inputProps={{ 'data-testid': 'costPrice-input' }}
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, costPrice: transcript }))}
+                onStateChange={setVoiceState}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      <TextField
+        margin="dense"
+        id="lowStockThreshold"
+        name="lowStockThreshold"
+        label="Low Stock Threshold"
+        type="number"
+        fullWidth
+        variant="standard"
+        value={formData.lowStockThreshold}
+        onChange={handleChange}
+        required
+        inputProps={{ 'data-testid': 'lowStockThreshold-input' }}
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) =>
+                  setFormData((prev) => ({ ...prev, lowStockThreshold: transcript }))
+                }
+                onStateChange={setVoiceState}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
       <TextField
         margin="dense"
         id="imageUrl"
@@ -243,7 +311,28 @@ const AddEditProductForm = ({
 
       {!isEditMode && (
         <>
-          <TextField margin="dense" id="stock" name="stock" label="Initial Stock" type="number" fullWidth variant="standard" value={formData.stock} onChange={handleChange} inputProps={{ 'data-testid': 'stock-input' }} />
+          <TextField
+            margin="dense"
+            id="stock"
+            name="stock"
+            label="Initial Stock"
+            type="number"
+            fullWidth
+            variant="standard"
+            value={formData.stock}
+            onChange={handleChange}
+            inputProps={{ 'data-testid': 'stock-input' }}
+            InputProps={{
+              endAdornment: inputMode === 'voicePerField' && (
+                <InputAdornment position="end">
+                  <VoiceRecognition
+                    onResult={(transcript) => setFormData((prev) => ({ ...prev, stock: transcript }))}
+                    onStateChange={setVoiceState}
+                  />
+                </InputAdornment>
+              ),
+            }}
+          />
           <TextField
             margin="dense"
             id="batchNumber"
@@ -266,7 +355,30 @@ const AddEditProductForm = ({
               ),
             }}
           />
-          <TextField margin="dense" id="expiryDate" name="expiryDate" label="Expiry Date" type="date" fullWidth variant="standard" value={formData.expiryDate} onChange={handleChange} InputLabelProps={{ shrink: true }} />
+          <TextField
+            margin="dense"
+            id="expiryDate"
+            name="expiryDate"
+            label="Expiry Date"
+            type="date"
+            fullWidth
+            variant="standard"
+            value={formData.expiryDate}
+            onChange={handleChange}
+            InputLabelProps={{ shrink: true }}
+            InputProps={{
+              endAdornment: inputMode === 'voicePerField' && (
+                <InputAdornment position="end">
+                  <VoiceRecognition
+                    onResult={(transcript) =>
+                      setFormData((prev) => ({ ...prev, expiryDate: transcript }))
+                    }
+                    onStateChange={setVoiceState}
+                  />
+                </InputAdornment>
+              ),
+            }}
+          />
         </>
       )}
 

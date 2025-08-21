@@ -100,11 +100,11 @@ const AddEditSOForm = ({ open, onClose, so }) => {
 
     const customer = customers?.find(c => c.id === customerId);
     const items = productsList.map(item => {
-      const product = products.find(p => p.id === parseInt(item.productId));
+      const product = products.find(p => p.id === (item.productId));
       return {
-        productId: parseInt(item.productId),
+        productId: (item.productId),
         productName: product?.name || '',
-        quantity: parseInt(item.quantity) || 0,
+        quantity: (item.quantity) || 0,
         price: product?.price || 0,
       }
     }).filter(item => item.productId && item.quantity > 0);

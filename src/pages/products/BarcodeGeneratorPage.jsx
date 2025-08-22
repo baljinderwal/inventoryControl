@@ -17,6 +17,7 @@ import { useApi } from '../../utils/ApiModeContext';
 const BarcodeGeneratorPage = () => {
   const { mode, services } = useApi();
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [copyCount, setCopyCount] = useState(1);
 
   const { data: products, isLoading, isError, error } = useQuery({
     queryKey: ['products', mode],
@@ -37,17 +38,27 @@ const BarcodeGeneratorPage = () => {
     <Box
       sx={{
         p: 3,
+        '.print-only': {
+          display: 'none',
+        },
         '@media print': {
-          '& .no-print': {
+          '.no-print': {
             display: 'none',
           },
-          '& .printable-area': {
-            margin: '0',
-            padding: '0',
-            boxShadow: 'none',
+          '.print-only': {
+            display: 'block',
           },
-          'body': {
-            margin: '1in', // Example margin
+          'body, html': {
+            visibility: 'hidden',
+          },
+          '.printable-area, .printable-area *': {
+            visibility: 'visible',
+          },
+          '.printable-area': {
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: '100%',
           }
         },
       }}
@@ -80,17 +91,37 @@ const BarcodeGeneratorPage = () => {
       </Paper>
 
       {selectedProduct && (
-        <Box sx={{ mt: 3, textAlign: 'center' }} className="printable-area">
-          <Typography variant="h6">{selectedProduct.name}</Typography>
-          <Barcode value={selectedProduct.barcode} />
+        <Box sx={{ mt: 3, textAlign: 'center' }}>
+          {/* On-screen preview */}
+          <Box className="no-print">
+            <Typography variant="h6">{selectedProduct.name}</Typography>
+            <Barcode value={selectedProduct.barcode} />
+          </Box>
+
+          {/* Print-only area */}
+          <Box className="print-only printable-area">
+            {Array.from({ length: copyCount }).map((_, index) => (
+              <Barcode key={index} value={selectedProduct.barcode} />
+            ))}
+          </Box>
+
           <Button
             variant="contained"
             onClick={handlePrint}
             sx={{ mt: 2 }}
             className="no-print"
           >
-            Print Barcode
+            Print Barcodes
           </Button>
+          <TextField
+            label="Number of Copies"
+            type="number"
+            value={copyCount}
+            onChange={(e) => setCopyCount(Math.max(1, parseInt(e.target.value, 10) || 1))}
+            InputProps={{ inputProps: { min: 1 } }}
+            sx={{ mt: 2, display: 'block' }}
+            className="no-print"
+          />
         </Box>
       )}
     </Box>

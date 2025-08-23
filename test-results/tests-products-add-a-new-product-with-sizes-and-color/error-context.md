@@ -1,0 +1,43 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e5]:
+    - heading "MyBrand" [level=3] [ref=e6]
+    - heading "Your productivity starts here — secure, fast, and beautifully simple." [level=6] [ref=e7]
+  - main [ref=e9]:
+    - generic [ref=e11]:
+      - heading "Welcome Back" [level=1] [ref=e12]
+      - paragraph [ref=e13]: Sign in to access your dashboard.
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]: Email Address
+          - generic [ref=e17]:
+            - textbox "Email Address" [active] [ref=e18]
+            - group:
+              - generic: Email Address
+        - generic [ref=e19]:
+          - generic: Password
+          - generic [ref=e20]:
+            - textbox "Password" [ref=e21]
+            - button "toggle password visibility" [ref=e23] [cursor=pointer]:
+              - img [ref=e24] [cursor=pointer]
+            - group:
+              - generic: Password
+        - button "Forgot password?" [ref=e27] [cursor=pointer]: Forgot password?
+        - generic [ref=e28]:
+          - button "Sign In" [disabled]
+        - separator [ref=e29]:
+          - paragraph [ref=e31]: OR
+        - button "Sign in with Google" [ref=e33] [cursor=pointer]:
+          - img [ref=e35] [cursor=pointer]
+          - text: Sign in with Google
+        - button "Sign in with a passkey" [ref=e38] [cursor=pointer]:
+          - img [ref=e40] [cursor=pointer]
+          - text: Sign in with a passkey
+        - paragraph [ref=e42]:
+          - text: Don't have an account?
+          - link "Sign Up" [ref=e43] [cursor=pointer]:
+            - /url: /signup
+            - text: Sign Up
+```

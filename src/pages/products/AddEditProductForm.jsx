@@ -40,6 +40,8 @@ const AddEditProductForm = ({
     stock: '',
     batchNumber: '',
     expiryDate: '',
+    sizes: '',
+    color: '',
   });
 
   const isEditMode = Boolean(product);
@@ -105,6 +107,7 @@ const AddEditProductForm = ({
       costPrice: parseFloat(formData.costPrice) || 0,
       lowStockThreshold: parseInt(formData.lowStockThreshold, 10) || 0,
       stock: parseInt(formData.stock, 10) || 0,
+      sizes: formData.sizes.split(',').map(s => s.trim()).filter(s => s),
     };
     if (isEditMode) {
       delete submissionData.stock;
@@ -317,6 +320,50 @@ const AddEditProductForm = ({
             <InputAdornment position="end">
               <VoiceRecognition
                 onResult={(transcript) => setFormData((prev) => ({ ...prev, imageUrl: transcript }))}
+                onStateChange={setVoiceState}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      <TextField
+        margin="dense"
+        id="color"
+        name="color"
+        label="Color"
+        inputProps={{ 'data-testid': 'color-input' }}
+        type="text"
+        fullWidth
+        variant="standard"
+        value={formData.color}
+        onChange={handleChange}
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, color: transcript }))}
+                onStateChange={setVoiceState}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      <TextField
+        margin="dense"
+        id="sizes"
+        name="sizes"
+        label="Sizes (comma-separated)"
+        inputProps={{ 'data-testid': 'sizes-input' }}
+        type="text"
+        fullWidth
+        variant="standard"
+        value={formData.sizes}
+        onChange={handleChange}
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, sizes: transcript }))}
                 onStateChange={setVoiceState}
               />
             </InputAdornment>

@@ -26,7 +26,7 @@ const AddEditProductForm = ({
   const { mode, services } = useApi();
 
   const [voiceState, setVoiceState] = useState('idle');
-  const [inputMode, setInputMode] = useState('manual');
+  const [inputMode, setInputMode] = useState('voicePerField');
 
   const [formData, setFormData] = useState({
     name: '',

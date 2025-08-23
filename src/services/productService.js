@@ -16,24 +16,24 @@ const local = {
   },
   addProduct: async (productData) => {
     console.log('Adding product in local mode', productData);
-    const { stock, batchNumber, expiryDate, ...productDetails } = productData;
+    const { stock, batchNumber, expiryDate, sizes, color, ...productDetails } = productData;
 
-    // 1. Create the product
+    // Create product
     const productResponse = await fetch('/products', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...productDetails, createdAt: new Date().toISOString() }),
+      body: JSON.stringify({ ...productDetails, createdAt: new Date().toISOString(), sizes, color }),
     });
     const newProduct = await productResponse.json();
 
-    // 2. If initial stock is provided, create the stock entry
+    // Create stock entry
     if (stock > 0) {
       const newStockEntry = {
         productId: newProduct.id,
         quantity: stock,
         batches: [{
           batchNumber: batchNumber || `B${newProduct.id}-INIT`,
-          expiryDate: expiryDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(), // Default 1 year expiry
+          expiryDate: expiryDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
           quantity: stock
         }]
       };
@@ -43,6 +43,27 @@ const local = {
         body: JSON.stringify(newStockEntry)
       });
     }
+
+    // Add to timeseries for each size
+    if (sizes && sizes.length > 0 && color) {
+      for (const size of sizes) {
+        try {
+          await fetch('https://inventorybackend-loop.onrender.com/timeseries/shoes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              shoe_name: newProduct.name,
+              size: parseInt(size, 10),
+              color: color,
+              timestamp: new Date().toISOString()
+            }),
+          });
+        } catch (e) {
+          console.error('Failed to post timeseries data for size', size, e);
+        }
+      }
+    }
+
     return newProduct;
   },
   updateProduct: async (id, product) => {
@@ -68,15 +89,14 @@ const remote = {
   },
   addProduct: async (productData) => {
     console.log('Adding product via API', productData);
-    // Separate product details from stock details
-    const { stock, batchNumber, expiryDate, ...productDetails } = productData;
+    const { stock, batchNumber, expiryDate, sizes, color, ...productDetails } = productData;
 
-    // 1. Create the product
-    const productResponse = await api.post('/products', productDetails);
+    // Create product
+    const productResponse = await api.post('/products', { ...productDetails, sizes, color });
     const newProduct = productResponse.data;
 
-    // 2. If initial stock is provided, create the stock entry
-    if (stock > 0) { // Ensure all stock details are present
+    // Create stock entry
+    if (stock > 0) {
       const newStockEntry = {
         productId: newProduct.id,
         quantity: stock,
@@ -88,6 +108,29 @@ const remote = {
       };
       await api.post('/stock', newStockEntry);
     }
+
+    // Add to timeseries for each size
+    if (sizes && sizes.length > 0 && color) {
+      for (const size of sizes) {
+        try {
+          // This should be an API call to your own backend, which then calls the timeseries service
+          // For now, calling it directly for demonstration
+          await fetch('https://inventorybackend-loop.onrender.com/timeseries/shoes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              shoe_name: newProduct.name,
+              size: parseInt(size, 10),
+              color: color,
+              timestamp: new Date().toISOString()
+            }),
+          });
+        } catch (e) {
+          console.error('Failed to post timeseries data for size', size, e);
+        }
+      }
+    }
+
     return newProduct;
   },
   updateProduct: async (id, product) => {

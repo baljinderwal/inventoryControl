@@ -34,15 +34,16 @@ async def main():
             await page.get_by_label("Select Product").click()
             await page.get_by_role("option", name="Wireless Mouse").click()
 
-            # 4. Wait for the UI to update and then change number of copies
-            # Use a more specific locator for the TextField's input
-            copies_input = page.locator('div:has(label:has-text("Number of Copies")) >> input')
+            # 4. Change number of copies
+            copies_input = page.get_by_role("spinbutton", name="Number of Copies")
             await expect(copies_input).to_be_visible()
             await copies_input.fill("3")
 
             # 5. Verify on-screen preview is visible
             await expect(page.locator(".no-print .MuiTypography-h6")).to_have_text("Wireless Mouse")
-            await expect(page.locator(".no-print svg")).to_be_visible()
+            # Use a more specific selector for the barcode SVG
+            barcode_svg = page.locator(".no-print").get_by_role("img")
+            await expect(barcode_svg).to_be_visible()
 
             # 6. Take screenshot
             await page.screenshot(path="jules-scratch/verification/verification.png")

@@ -15,6 +15,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Typography from '@mui/material/Typography';
 import VoiceRecognition from '../../components/ui/VoiceRecognition';
 import SmartVoiceAdd from '../../components/ui/SmartVoiceAdd';
+import GuidedVoiceAdd from '../../components/ui/GuidedVoiceAdd';
 import { generateBarcode } from '../../utils/barcodeGenerator';
 
 const AddEditProductForm = ({
@@ -27,6 +28,7 @@ const AddEditProductForm = ({
 
   const [voiceState, setVoiceState] = useState('idle');
   const [inputMode, setInputMode] = useState('voicePerField');
+  const [startGuidedVoice, setStartGuidedVoice] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -95,6 +97,14 @@ const AddEditProductForm = ({
     }
   }, [isEditMode]);
 
+  useEffect(() => {
+    if (inputMode === 'guidedVoice' && !isEditMode) {
+      setStartGuidedVoice(true);
+    } else {
+      setStartGuidedVoice(false);
+    }
+  }, [inputMode, isEditMode]);
+
   const handleSmartVoiceResult = (data) => {
     setFormData((prev) => ({ ...prev, ...data }));
   };
@@ -117,6 +127,24 @@ const AddEditProductForm = ({
     mutation.mutate(submissionData);
   };
 
+  const guidedVoiceFields = [
+    { name: 'name', label: 'Product Name' },
+    { name: 'sku', label: 'SKU' },
+    { name: 'category', label: 'Category' },
+    { name: 'price', label: 'Price' },
+    { name: 'costPrice', label: 'Cost Price' },
+    { name: 'lowStockThreshold', label: 'Low Stock Threshold' },
+    { name: 'stock', label: 'Initial Stock' },
+    { name: 'batchNumber', label: 'Batch Number' },
+    { name: 'expiryDate', label: 'Expiry Date' },
+    { name: 'color', label: 'Color' },
+    { name: 'sizes', label: 'Sizes' },
+  ];
+
+  const handleGuidedVoiceUpdate = (fieldName, value) => {
+    setFormData((prev) => ({ ...prev, [fieldName]: value }));
+  };
+
   return (
     <Box component="form" onSubmit={handleSubmit}>
       <FormControl fullWidth margin="dense" variant="standard">
@@ -131,9 +159,18 @@ const AddEditProductForm = ({
           <MenuItem value="manual">Manual Entry</MenuItem>
           <MenuItem value="voicePerField">Voice per Field</MenuItem>
           <MenuItem value="smartVoice">Smart Voice Add</MenuItem>
+          <MenuItem value="guidedVoice">Guided Voice</MenuItem>
         </Select>
       </FormControl>
       {inputMode === 'smartVoice' && <SmartVoiceAdd onResult={handleSmartVoiceResult} />}
+      {inputMode === 'guidedVoice' && !isEditMode && (
+        <GuidedVoiceAdd
+          fields={guidedVoiceFields}
+          onUpdate={handleGuidedVoiceUpdate}
+          onComplete={() => setStartGuidedVoice(false)}
+          start={startGuidedVoice}
+        />
+      )}
       <TextField
         margin="dense"
         id="name"

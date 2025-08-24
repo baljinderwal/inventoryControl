@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 export const generateInvoicePDF = (invoice, customer) => {
   const doc = new jsPDF();
@@ -37,16 +37,18 @@ export const generateInvoicePDF = (invoice, customer) => {
     tableRows.push(row);
   });
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 60,
     head: [tableColumn],
     body: tableRows,
+    didDrawPage: (data) => {
+      // Grand Total
+      doc.setFontSize(12);
+      doc.text(`Total: $${invoice.total.toFixed(2)}`, 140, data.cursor.y + 10);
+    },
   });
 
-  // Grand Total
-  const finalY = doc.previousAutoTable.finalY;
-  doc.setFontSize(12);
-  doc.text(`Total: $${invoice.total.toFixed(2)}`, 140, finalY + 10);
+  // Grand Total is now handled within the didDrawPage callback of autoTable.
 
   // Footer
   doc.setFontSize(10);

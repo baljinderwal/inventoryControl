@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Button from '@mui/material/Button';
 import MicIcon from '@mui/icons-material/Mic';
 import PauseIcon from '@mui/icons-material/Pause';
@@ -10,6 +10,7 @@ const GuidedVoiceAdd = ({ fields, onUpdate, onComplete, start }) => {
   const [currentFieldIndex, setCurrentFieldIndex] = useState(0);
   const [status, setStatus] = useState('idle'); // idle, speaking, listening, paused
   const [recognition, setRecognition] = useState(null);
+  const resultHandled = useRef(false);
 
   useEffect(() => {
     if (start) {
@@ -59,7 +60,12 @@ const GuidedVoiceAdd = ({ fields, onUpdate, onComplete, start }) => {
   useEffect(() => {
     if (status === 'paused' || status === 'idle' || !recognition) return;
 
-    const handleResult = (event) => {
+    recognition.onstart = () => {
+      resultHandled.current = false;
+    };
+
+    recognition.onresult = (event) => {
+      resultHandled.current = true;
       const transcript = event.results[0][0].transcript;
       const currentField = fields[currentFieldIndex];
       onUpdate(currentField.name, transcript);
@@ -75,24 +81,20 @@ const GuidedVoiceAdd = ({ fields, onUpdate, onComplete, start }) => {
       }
     };
 
-    const handleError = (event) => {
+    recognition.onerror = (event) => {
       console.error('Speech recognition error', event.error);
       setStatus('paused');
     };
 
-    const handleEnd = () => {
-      if (status === 'listening') {
-         // This might be called unexpectedly. If we are still in a listening state, it might mean no speech was detected.
-         // Let's retry the current field.
+    recognition.onend = () => {
+      if (status === 'listening' && !resultHandled.current) {
+         // This is a timeout or no-speech event. Retry the current field.
          processField();
       }
     };
 
-    recognition.onresult = handleResult;
-    recognition.onerror = handleError;
-    recognition.onend = handleEnd;
-
     return () => {
+      recognition.onstart = null;
       recognition.onresult = null;
       recognition.onerror = null;
       recognition.onend = null;

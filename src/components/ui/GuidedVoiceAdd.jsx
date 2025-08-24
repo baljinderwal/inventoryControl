@@ -106,10 +106,11 @@ const GuidedVoiceAdd = ({ fields, onUpdate, onComplete, start }) => {
     if (status === 'speaking' || status === 'listening') {
       processField();
     }
-  }, [currentFieldIndex, status, processField]);
+  }, [currentFieldIndex, processField]);
 
 
   const handleStart = () => {
+    window.speechSynthesis.cancel();
     setCurrentFieldIndex(0);
     processField();
   };

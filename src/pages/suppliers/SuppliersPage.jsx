@@ -102,8 +102,32 @@ const SuppliersPage = () => {
     email: s.email,
     actions: (
       <Box>
-        <IconButton onClick={() => handleEditClick(s)}><EditIcon /></IconButton>
-        <IconButton onClick={() => handleDeleteClick(s)}><DeleteIcon /></IconButton>
+        <IconButton 
+          onClick={() => handleEditClick(s)}
+          sx={{ 
+            borderRadius: 2,
+            transition: 'all 0.2s ease',
+            '&:hover': { 
+              backgroundColor: 'primary.light',
+              transform: 'scale(1.1)' 
+            }
+          }}
+        >
+          <EditIcon />
+        </IconButton>
+        <IconButton 
+          onClick={() => handleDeleteClick(s)}
+          sx={{ 
+            borderRadius: 2,
+            transition: 'all 0.2s ease',
+            '&:hover': { 
+              backgroundColor: 'error.light',
+              transform: 'scale(1.1)' 
+            }
+          }}
+        >
+          <DeleteIcon />
+        </IconButton>
       </Box>
     )
   }));

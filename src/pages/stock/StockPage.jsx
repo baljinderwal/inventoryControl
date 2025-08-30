@@ -86,6 +86,18 @@ const StockPage = () => {
         label={p.stock < p.lowStockThreshold ? 'Low Stock' : 'In Stock'}
         color={p.stock < p.lowStockThreshold ? 'error' : 'success'}
         size="small"
+        sx={{ 
+          fontWeight: 600,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          '&.MuiChip-colorError': {
+            backgroundColor: 'error.main',
+            color: 'error.contrastText'
+          },
+          '&.MuiChip-colorSuccess': {
+            backgroundColor: 'success.main', 
+            color: 'success.contrastText'
+          }
+        }}
       />
     ),
     actions: (

@@ -190,6 +190,10 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   return (
     <AppDialog title={isEditMode ? `Edit PO #${po.id}` : "Create New Purchase Order"} open={open} onClose={onClose} maxWidth="md">
       <form onSubmit={handleSubmit}>
+        <Typography variant="h6" sx={{ mt: 2, mb: 2, fontWeight: 600, color: 'text.primary' }}>
+          Order Details
+        </Typography>
+        
         <FormControl fullWidth margin="normal" required disabled={isEditMode}>
           <InputLabel>Supplier</InputLabel>
           <Select value={supplierId} onChange={(e) => setSupplierId(e.target.value)} label="Supplier">
@@ -219,7 +223,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
           </Box>
         )}
 
-        <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Products</Typography>
+        <Typography variant="h6" sx={{ mt: 3, mb: 2, fontWeight: 600, color: 'text.primary' }}>Products</Typography>
         {productsList.map((productItem, index) => (
           <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
             <FormControl sx={{ flex: 4 }} required>

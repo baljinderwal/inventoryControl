@@ -202,7 +202,7 @@ const AddEditSOForm = ({ open, onClose, so }) => {
                 {isLoadingProducts ? <CircularProgress size={24} /> : products?.map(p => <MenuItem key={p.id} value={p.id}>{p.name} (In Stock: {p.stock})</MenuItem>)}
               </Select>
             </FormControl>
-            <TextField label="Quantity" type="number" value={productItem.quantity} onChange={(e) => handleProductChange(index, 'quantity', e.target.value)} required sx={{ flex: 1 }} InputProps={{ inputProps: { min: 1 } }} />
+            <TextField label="Quantity" type="number" value={productItem.quantity} onChange={(e) => handleProductChange(index, 'quantity', e.target.value)} required sx={{ flex: 1 }} variant="outlined" margin="normal" InputProps={{ inputProps: { min: 1 } }} />
             <IconButton onClick={() => handleRemoveProduct(index)} disabled={productsList.length === 1}><Delete /></IconButton>
           </Box>
         ))}

@@ -87,8 +87,32 @@ const CustomersPage = () => {
     address: customer.address,
     actions: (
       <Box>
-        <IconButton onClick={() => handleEditClick(customer)}><Edit /></IconButton>
-        <IconButton onClick={() => handleDeleteClick(customer)}><Delete /></IconButton>
+        <IconButton 
+          onClick={() => handleEditClick(customer)}
+          sx={{ 
+            borderRadius: 2,
+            transition: 'all 0.2s ease',
+            '&:hover': { 
+              backgroundColor: 'primary.light',
+              transform: 'scale(1.1)' 
+            }
+          }}
+        >
+          <Edit />
+        </IconButton>
+        <IconButton 
+          onClick={() => handleDeleteClick(customer)}
+          sx={{ 
+            borderRadius: 2,
+            transition: 'all 0.2s ease',
+            '&:hover': { 
+              backgroundColor: 'error.light',
+              transform: 'scale(1.1)' 
+            }
+          }}
+        >
+          <Delete />
+        </IconButton>
       </Box>
     ),
   }));

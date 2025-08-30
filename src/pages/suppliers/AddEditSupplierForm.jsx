@@ -91,9 +91,13 @@ const AddEditSupplierForm = ({ onClose, supplier }) => {
 
   return (
     <Box component="form" onSubmit={handleSubmit}>
-      <TextField margin="dense" id="name" name="name" label="Supplier Name" type="text" fullWidth variant="standard" value={formData.name} onChange={handleChange} required />
-      <TextField margin="dense" id="contact" name="contact" label="Contact Person" type="text" fullWidth variant="standard" value={formData.contact} onChange={handleChange} required />
-      <TextField margin="dense" id="email" name="email" label="Email" type="email" fullWidth variant="standard" value={formData.email} onChange={handleChange} required />
+      <Typography variant="h6" sx={{ mt: 2, mb: 2, fontWeight: 600, color: 'text.primary' }}>
+        Supplier Information
+      </Typography>
+      
+      <TextField margin="normal" id="name" name="name" label="Supplier Name" type="text" fullWidth variant="outlined" value={formData.name} onChange={handleChange} required />
+      <TextField margin="normal" id="contact" name="contact" label="Contact Person" type="text" fullWidth variant="outlined" value={formData.contact} onChange={handleChange} required />
+      <TextField margin="normal" id="email" name="email" label="Email" type="email" fullWidth variant="outlined" value={formData.email} onChange={handleChange} required />
 
       <Box sx={{ mt: 2 }}>
         <Typography variant="h6" sx={{ mb: 1 }}>Products</Typography>

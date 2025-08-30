@@ -26,7 +26,7 @@ const AddStockForm = ({ onClose }) => {
 
   const { data: products = [], isLoading: isLoadingProducts, isError, error } = useQuery({
     queryKey: ['products', mode],
-    queryFn: () => services.product.getProducts(),
+    queryFn: () => services.products.getProducts(),
   });
 
   const mutation = useMutation({

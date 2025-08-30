@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import StockAdjustmentForm from './StockAdjustmentForm';
+import AddStockForm from './AddStockForm';
 import AppDialog from '../../components/ui/AppDialog';
 import MuiTable from '../../components/ui/Table';
 import BarcodeScanner from '../../components/ui/BarcodeScanner';
@@ -23,9 +24,10 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 
-import { QrCodeScanner } from '@mui/icons-material';
+import { Add, QrCodeScanner } from '@mui/icons-material';
 
 const StockPage = () => {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAdjustmentModalOpen, setIsAdjustmentModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -37,6 +39,9 @@ const StockPage = () => {
     queryKey: ['stock', mode],
     queryFn: services.stock.getStockLevels,
   });
+
+  const handleOpenAddModal = () => setIsAddModalOpen(true);
+  const handleCloseAddModal = () => setIsAddModalOpen(false);
 
   const handleOpenAdjustmentModal = (product) => {
     setSelectedProduct(product);
@@ -125,15 +130,32 @@ const StockPage = () => {
         <Typography variant="h4" gutterBottom>
           Stock Management
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<QrCodeScanner />}
-          onClick={() => setIsScannerOpen(true)}
-        >
-          Scan to Adjust
-        </Button>
+        <Stack direction="row" spacing={2}>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={handleOpenAddModal}
+          >
+            Add Stock
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<QrCodeScanner />}
+            onClick={() => setIsScannerOpen(true)}
+          >
+            Scan to Adjust
+          </Button>
+        </Stack>
       </Box>
       <MuiTable headers={tableHeaders} data={tableData || []} />
+
+      <AppDialog
+        open={isAddModalOpen}
+        onClose={handleCloseAddModal}
+        title="Add New Stock"
+      >
+        <AddStockForm onClose={handleCloseAddModal} />
+      </AppDialog>
 
       <Dialog open={isScannerOpen} onClose={() => setIsScannerOpen(false)}>
         <DialogTitle>Scan Barcode to Adjust Stock</DialogTitle>
@@ -148,7 +170,11 @@ const StockPage = () => {
           onClose={handleCloseAdjustmentModal}
           title={`Adjust Stock for ${selectedProduct.name}`}
         >
-          <StockAdjustmentForm onClose={handleCloseAdjustmentModal} product={selectedProduct} />
+          <StockAdjustmentForm
+            onClose={handleCloseAdjustmentModal}
+            product={selectedProduct}
+            batches={selectedProduct.batches}
+          />
         </AppDialog>
       )}
 

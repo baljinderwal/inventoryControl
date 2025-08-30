@@ -16,16 +16,16 @@ import Typography from '@mui/material/Typography';
 
 const StockAdjustmentForm = ({
   onClose,
-  product
+  product,
+  batches
 }) => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
   const { mode, services } = useApi();
 
-  const [adjustmentType, setAdjustmentType] = useState('in'); // 'in' or 'out'
+  const [adjustmentType, setAdjustmentType] = useState('out'); // 'in' or 'out'
   const [quantity, setQuantity] = useState(1);
-  const [batchNumber, setBatchNumber] = useState('');
-  const [expiryDate, setExpiryDate] = useState('');
+  const [batchNumber, setBatchNumber] = useState(batches.length > 0 ? batches[0].batchNumber : '');
 
   const mutation = useMutation({
     mutationFn: services.stock.adjustStockLevel,
@@ -41,15 +41,14 @@ const StockAdjustmentForm = ({
 
   const handleSubmit = () => {
     const adjQuantity = adjustmentType === 'in' ? quantity : -quantity;
-    if (adjustmentType === 'in' && (!batchNumber || !expiryDate)) {
-      showNotification('Batch number and expiry date are required for Stock In.', 'error');
+    if (!batchNumber) {
+      showNotification('Please select a batch to adjust.', 'error');
       return;
     }
     mutation.mutate({
       productId: product.id,
       quantity: adjQuantity,
-      batchNumber: adjustmentType === 'in' ? batchNumber : undefined,
-      expiryDate: adjustmentType === 'in' ? expiryDate : undefined,
+      batchNumber,
     });
   };
 
@@ -71,8 +70,25 @@ const StockAdjustmentForm = ({
           onChange={(e) => setAdjustmentType(e.target.value)}
           label="Adjustment Type"
         >
-          <MenuItem value="in">Stock In</MenuItem>
-          <MenuItem value="out">Stock Out</MenuItem>
+          <MenuItem value="out">Stock Out (Remove)</MenuItem>
+          <MenuItem value="in">Stock In (Add)</MenuItem>
+        </Select>
+      </FormControl>
+
+      <FormControl fullWidth margin="normal" variant="outlined">
+        <InputLabel id="batch-select-label">Batch</InputLabel>
+        <Select
+          labelId="batch-select-label"
+          id="batch-select"
+          value={batchNumber}
+          onChange={(e) => setBatchNumber(e.target.value)}
+          label="Batch"
+        >
+          {batches.map((batch) => (
+            <MenuItem key={batch.batchNumber} value={batch.batchNumber}>
+              {`Batch: ${batch.batchNumber} (Current Qty: ${batch.quantity})`}
+            </MenuItem>
+          ))}
         </Select>
       </FormControl>
 
@@ -80,7 +96,7 @@ const StockAdjustmentForm = ({
         autoFocus
         margin="normal"
         id="quantity"
-        label="Quantity"
+        label="Quantity to Adjust"
         type="number"
         fullWidth
         variant="outlined"
@@ -88,34 +104,6 @@ const StockAdjustmentForm = ({
         onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10)))}
         InputProps={{ inputProps: { min: 1 } }}
       />
-
-      {adjustmentType === 'in' && (
-        <>
-          <TextField
-            margin="normal"
-            id="batchNumber"
-            label="Batch Number"
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={batchNumber}
-            onChange={(e) => setBatchNumber(e.target.value)}
-            required
-          />
-          <TextField
-            margin="normal"
-            id="expiryDate"
-            label="Expiry Date"
-            type="date"
-            fullWidth
-            variant="outlined"
-            value={expiryDate}
-            onChange={(e) => setExpiryDate(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-            required
-          />
-        </>
-      )}
 
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>

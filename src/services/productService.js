@@ -2,17 +2,20 @@ import api from './api';
 
 const local = {
   getProducts: async () => {
-    console.log('Fetching products from local db.json');
-    const response = await fetch('/db.json');
-    const data = await response.json();
-    return data.products || [];
+    console.log('Fetching products from local API endpoint');
+    const response = await fetch('/products');
+    if (!response.ok) {
+      throw new Error('Failed to fetch local products');
+    }
+    return await response.json();
   },
   getProduct: async (id) => {
-    console.log(`Fetching product ${id} from local db.json`);
-    const response = await fetch('/db.json');
-    const data = await response.json();
-    const products = data.products || [];
-    return products.find(p => p.id === id);
+    console.log(`Fetching product ${id} from local API endpoint`);
+    const response = await fetch(`/products/${id}`);
+    if (!response.ok) {
+      return null; // Or throw an error, depending on desired behavior for not found
+    }
+    return await response.json();
   },
   addProduct: async (productData) => {
     console.log('Adding product in local mode', productData);

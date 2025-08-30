@@ -110,6 +110,24 @@ const local = {
     });
     return await putRes.json();
   },
+  addStock: async ({ productId, quantity, batchNumber, expiryDate }) => {
+    console.log('Adding new stock batch in local mode', { productId, quantity, batchNumber, expiryDate });
+    const newStockEntry = {
+      productId,
+      quantity,
+      batches: [{ batchNumber, expiryDate, quantity }]
+    };
+    const response = await fetch('/stock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newStockEntry)
+    });
+    if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`Failed to add stock: ${errorBody}`);
+    }
+    return await response.json();
+  },
   getProductWithStock: async (id) => {
     console.log(`Fetching product ${id} with stock from local db.json`);
     const response = await fetch('/db.json');
@@ -215,7 +233,15 @@ const remote = {
     stockEntry.quantity = stockEntry.batches.reduce((sum, b) => sum + b.quantity, 0);
     return await api.put(`/stock/${stockEntry.productId}`, stockEntry);
   },
-
+  addStock: async ({ productId, quantity, batchNumber, expiryDate }) => {
+    console.log('Adding new stock batch via API', { productId, quantity, batchNumber, expiryDate });
+    const newStockEntry = {
+      productId,
+      quantity,
+      batches: [{ batchNumber, expiryDate, quantity }]
+    };
+    return await api.post('/stock', newStockEntry);
+  },
   getProductWithStock: async (id) => {
     console.log(`Fetching product ${id} with stock from API`);
     const [productResponse, stockResponse] = await Promise.all([

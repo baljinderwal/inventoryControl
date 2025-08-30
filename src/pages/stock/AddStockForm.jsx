@@ -30,7 +30,7 @@ const AddStockForm = ({ onClose }) => {
   });
 
   const mutation = useMutation({
-    mutationFn: services.stock.adjustStockLevel,
+    mutationFn: services.stock.addStock,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stock'] });
       showNotification('Stock added successfully', 'success');

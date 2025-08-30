@@ -62,7 +62,7 @@ const StockAdjustmentForm = ({
         Current total stock: {product.stock}
       </Typography>
 
-      <FormControl fullWidth margin="dense" variant="standard">
+      <FormControl fullWidth margin="normal" variant="outlined">
         <InputLabel id="adjustment-type-label">Adjustment Type</InputLabel>
         <Select
           labelId="adjustment-type-label"
@@ -78,12 +78,12 @@ const StockAdjustmentForm = ({
 
       <TextField
         autoFocus
-        margin="dense"
+        margin="normal"
         id="quantity"
         label="Quantity"
         type="number"
         fullWidth
-        variant="standard"
+        variant="outlined"
         value={quantity}
         onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10)))}
         InputProps={{ inputProps: { min: 1 } }}
@@ -92,23 +92,23 @@ const StockAdjustmentForm = ({
       {adjustmentType === 'in' && (
         <>
           <TextField
-            margin="dense"
+            margin="normal"
             id="batchNumber"
             label="Batch Number"
             type="text"
             fullWidth
-            variant="standard"
+            variant="outlined"
             value={batchNumber}
             onChange={(e) => setBatchNumber(e.target.value)}
             required
           />
           <TextField
-            margin="dense"
+            margin="normal"
             id="expiryDate"
             label="Expiry Date"
             type="date"
             fullWidth
-            variant="standard"
+            variant="outlined"
             value={expiryDate}
             onChange={(e) => setExpiryDate(e.target.value)}
             InputLabelProps={{ shrink: true }}

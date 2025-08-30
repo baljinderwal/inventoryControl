@@ -60,7 +60,7 @@ const Topbar = () => {
         <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
           Inventory Control
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <ApiModeToggle />
           <ThemeSwitcher />
           <NotificationBell />
@@ -71,6 +71,14 @@ const Topbar = () => {
             aria-haspopup="true"
             onClick={handleMenu}
             color="inherit"
+            sx={{
+              borderRadius: 2,
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                transform: 'scale(1.05)',
+              }
+            }}
           >
             <AccountCircle />
           </IconButton>

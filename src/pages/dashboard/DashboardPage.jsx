@@ -119,10 +119,34 @@ const DashboardPage = () => {
   }, [lowStockProducts, addNotification, notifications]);
 
   const stats = useMemo(() => [
-    { name: 'Total Products', stat: products?.length || 0, icon: <InventoryIcon /> },
-    { name: 'Total Orders', stat: '2,310', icon: <ShoppingCartIcon /> },
-    { name: 'Low Stock', stat: lowStockProducts.length, icon: <WarningIcon /> },
-    { name: 'Revenue', stat: '$405,091', icon: <AttachMoneyIcon /> },
+    { 
+      name: 'Total Products', 
+      stat: products?.length || 0, 
+      icon: <InventoryIcon />,
+      trend: 'up',
+      trendValue: '+12%'
+    },
+    { 
+      name: 'Total Orders', 
+      stat: '2,310', 
+      icon: <ShoppingCartIcon />,
+      trend: 'up',
+      trendValue: '+8.2%'
+    },
+    { 
+      name: 'Low Stock', 
+      stat: lowStockProducts.length, 
+      icon: <WarningIcon />,
+      trend: lowStockProducts.length > 5 ? 'up' : 'down',
+      trendValue: lowStockProducts.length > 5 ? '+15%' : '-5%'
+    },
+    { 
+      name: 'Revenue', 
+      stat: '$405,091', 
+      icon: <AttachMoneyIcon />,
+      trend: 'up',
+      trendValue: '+23.1%'
+    },
   ], [products, lowStockProducts]);
 
   const [layout, setLayout] = useState([
@@ -136,7 +160,13 @@ const DashboardPage = () => {
         <Grid container spacing={3}>
             {stats.map((item) => (
               <Grid item xs={12} sm={6} md={3} key={item.name}>
-                <StatsCard title={item.name} value={item.stat} icon={item.icon} />
+                <StatsCard 
+                  title={item.name} 
+                  value={item.stat} 
+                  icon={item.icon}
+                  trend={item.trend}
+                  trendValue={item.trendValue}
+                />
               </Grid>
             ))}
         </Grid>

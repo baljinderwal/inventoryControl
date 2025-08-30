@@ -49,10 +49,20 @@ const MuiTable = ({ headers, data, onSort, sortColumn, sortDirection }) => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {data.map((row) => (
+          {data.map((row, index) => (
             <TableRow
               key={row.id}
-              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+              sx={{ 
+                '&:last-child td, &:last-child th': { border: 0 },
+                '&:nth-of-type(even)': {
+                  backgroundColor: 'action.hover',
+                },
+                '&:hover': {
+                  backgroundColor: 'action.selected',
+                  cursor: 'pointer',
+                },
+                transition: 'background-color 0.2s ease'
+              }}
             >
               {headers.map(header => (
                 <TableCell key={header.id} align={header.numeric ? 'right' : 'left'}>

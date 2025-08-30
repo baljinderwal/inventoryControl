@@ -59,10 +59,14 @@ const AddEditCustomerForm = ({ onClose, customer }) => {
 
   return (
     <Box component="form" onSubmit={handleSubmit}>
-      <TextField margin="dense" id="name" name="name" label="Full Name" type="text" fullWidth variant="standard" value={formData.name} onChange={handleChange} required />
-      <TextField margin="dense" id="email" name="email" label="Email Address" type="email" fullWidth variant="standard" value={formData.email} onChange={handleChange} required />
-      <TextField margin="dense" id="phone" name="phone" label="Phone Number" type="text" fullWidth variant="standard" value={formData.phone} onChange={handleChange} />
-      <TextField margin="dense" id="address" name="address" label="Address" type="text" fullWidth variant="standard" value={formData.address} onChange={handleChange} />
+      <Typography variant="h6" sx={{ mt: 2, mb: 2, fontWeight: 600, color: 'text.primary' }}>
+        Customer Information
+      </Typography>
+      
+      <TextField margin="normal" id="name" name="name" label="Full Name" type="text" fullWidth variant="outlined" value={formData.name} onChange={handleChange} required />
+      <TextField margin="normal" id="email" name="email" label="Email Address" type="email" fullWidth variant="outlined" value={formData.email} onChange={handleChange} required />
+      <TextField margin="normal" id="phone" name="phone" label="Phone Number" type="text" fullWidth variant="outlined" value={formData.phone} onChange={handleChange} />
+      <TextField margin="normal" id="address" name="address" label="Address" type="text" fullWidth variant="outlined" value={formData.address} onChange={handleChange} />
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
         <Button type="submit" variant="contained" disabled={mutation.isLoading}>

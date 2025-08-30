@@ -273,7 +273,18 @@ const POSPage = () => {
               variant="contained"
               color="primary"
               size="large"
-              sx={{ mt: 2 }}
+              sx={{ 
+                mt: 2,
+                py: 2,
+                fontSize: '1.1rem',
+                fontWeight: 600,
+                borderRadius: 3,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                '&:hover': {
+                  boxShadow: '0 6px 20px rgba(0,0,0,0.2)',
+                  transform: 'translateY(-1px)'
+                }
+              }}
               onClick={handleFinalizeAndPrint}
               disabled={cart.length === 0 || !selectedCustomerId || checkoutMutation.isLoading}
             >

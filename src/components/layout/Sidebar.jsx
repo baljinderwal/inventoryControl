@@ -97,15 +97,26 @@ const Sidebar = () => {
                     justifyContent: 'initial',
                     color: 'text.secondary',
                     borderLeft: `4px solid transparent`,
+                    borderRadius: 2,
+                    mx: 1,
+                    mb: 0.5,
+                    transition: 'all 0.2s ease',
                     '&:hover': {
                       color: 'primary.main',
                       bgcolor: 'action.hover',
+                      transform: 'translateX(4px)',
                     },
                     ...(isActive && {
-                      color: 'primary.main',
+                      color: 'primary.contrastText',
                       fontWeight: 'fontWeightBold',
-                      bgcolor: theme.palette.action.selected,
-                      borderLeft: `4px solid ${theme.palette.primary.main}`,
+                      bgcolor: 'primary.main',
+                      borderLeft: `4px solid ${theme.palette.primary.dark}`,
+                      '&:hover': {
+                        bgcolor: 'primary.dark',
+                      },
+                      '& .MuiListItemIcon-root': {
+                        color: 'primary.contrastText',
+                      }
                     }),
                 }}
                 >

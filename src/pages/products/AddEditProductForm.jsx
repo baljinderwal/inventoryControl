@@ -147,7 +147,7 @@ const AddEditProductForm = ({
 
   return (
     <Box component="form" onSubmit={handleSubmit}>
-      <FormControl fullWidth margin="dense" variant="standard">
+      <FormControl fullWidth margin="normal" variant="outlined">
         <InputLabel id="input-mode-select-label">Input Mode</InputLabel>
         <Select
           labelId="input-mode-select-label"
@@ -171,15 +171,20 @@ const AddEditProductForm = ({
           start={startGuidedVoice}
         />
       )}
+      
+      <Typography variant="h6" sx={{ mt: 3, mb: 2, fontWeight: 600, color: 'text.primary' }}>
+        Basic Information
+      </Typography>
+      
       <TextField
-        margin="dense"
+        margin="normal"
         id="name"
         name="name"
         label="Product Name"
         inputProps={{ 'data-testid': 'name-input' }}
         type="text"
         fullWidth
-        variant="standard"
+        variant="outlined"
         value={formData.name}
         onChange={handleChange}
         required
@@ -200,14 +205,14 @@ const AddEditProductForm = ({
         </Typography>
       )}
       <TextField
-        margin="dense"
+        margin="normal"
         id="sku"
         name="sku"
         label="SKU"
         inputProps={{ 'data-testid': 'sku-input' }}
         type="text"
         fullWidth
-        variant="standard"
+        variant="outlined"
         value={formData.sku}
         onChange={handleChange}
         required
@@ -223,14 +228,14 @@ const AddEditProductForm = ({
         }}
       />
       <TextField
-        margin="dense"
+        margin="normal"
         id="barcode"
         name="barcode"
         label="Barcode"
         inputProps={{ 'data-testid': 'barcode-input' }}
         type="text"
         fullWidth
-        variant="standard"
+        variant="outlined"
         value={formData.barcode}
         onChange={handleChange}
         InputProps={{
@@ -248,14 +253,14 @@ const AddEditProductForm = ({
         }}
       />
       <TextField
-        margin="dense"
+        margin="normal"
         id="category"
         name="category"
         label="Category"
         inputProps={{ 'data-testid': 'category-input' }}
         type="text"
         fullWidth
-        variant="standard"
+        variant="outlined"
         value={formData.category}
         onChange={handleChange}
         required
@@ -270,14 +275,19 @@ const AddEditProductForm = ({
           ),
         }}
       />
+      
+      <Typography variant="h6" sx={{ mt: 3, mb: 2, fontWeight: 600, color: 'text.primary' }}>
+        Pricing & Inventory
+      </Typography>
+      
       <TextField
-        margin="dense"
+        margin="normal"
         id="price"
         name="price"
         label="Price"
         type="number"
         fullWidth
-        variant="standard"
+        variant="outlined"
         value={formData.price}
         onChange={handleChange}
         required
@@ -294,13 +304,13 @@ const AddEditProductForm = ({
         }}
       />
       <TextField
-        margin="dense"
+        margin="normal"
         id="costPrice"
         name="costPrice"
         label="Cost Price"
         type="number"
         fullWidth
-        variant="standard"
+        variant="outlined"
         value={formData.costPrice}
         onChange={handleChange}
         required
@@ -317,13 +327,13 @@ const AddEditProductForm = ({
         }}
       />
       <TextField
-        margin="dense"
+        margin="normal"
         id="lowStockThreshold"
         name="lowStockThreshold"
         label="Low Stock Threshold"
         type="number"
         fullWidth
-        variant="standard"
+        variant="outlined"
         value={formData.lowStockThreshold}
         onChange={handleChange}
         required
@@ -341,15 +351,20 @@ const AddEditProductForm = ({
           ),
         }}
       />
+      
+      <Typography variant="h6" sx={{ mt: 3, mb: 2, fontWeight: 600, color: 'text.primary' }}>
+        Additional Details
+      </Typography>
+      
       <TextField
-        margin="dense"
+        margin="normal"
         id="imageUrl"
         name="imageUrl"
         label="Image URL"
         inputProps={{ 'data-testid': 'imageUrl-input' }}
         type="text"
         fullWidth
-        variant="standard"
+        variant="outlined"
         value={formData.imageUrl}
         onChange={handleChange}
         InputProps={{
@@ -364,14 +379,14 @@ const AddEditProductForm = ({
         }}
       />
       <TextField
-        margin="dense"
+        margin="normal"
         id="color"
         name="color"
         label="Color"
         inputProps={{ 'data-testid': 'color-input' }}
         type="text"
         fullWidth
-        variant="standard"
+        variant="outlined"
         value={formData.color}
         onChange={handleChange}
         InputProps={{
@@ -386,14 +401,14 @@ const AddEditProductForm = ({
         }}
       />
       <TextField
-        margin="dense"
+        margin="normal"
         id="sizes"
         name="sizes"
         label="Sizes (comma-separated)"
         inputProps={{ 'data-testid': 'sizes-input' }}
         type="text"
         fullWidth
-        variant="standard"
+        variant="outlined"
         value={formData.sizes}
         onChange={handleChange}
         InputProps={{
@@ -410,14 +425,18 @@ const AddEditProductForm = ({
 
       {!isEditMode && (
         <>
+          <Typography variant="h6" sx={{ mt: 3, mb: 2, fontWeight: 600, color: 'text.primary' }}>
+            Stock Information
+          </Typography>
+          
           <TextField
-            margin="dense"
+            margin="normal"
             id="stock"
             name="stock"
             label="Initial Stock"
             type="number"
             fullWidth
-            variant="standard"
+            variant="outlined"
             value={formData.stock}
             onChange={handleChange}
             inputProps={{ 'data-testid': 'stock-input' }}
@@ -433,14 +452,14 @@ const AddEditProductForm = ({
             }}
           />
           <TextField
-            margin="dense"
+            margin="normal"
             id="batchNumber"
             name="batchNumber"
             label="Batch Number"
             inputProps={{ 'data-testid': 'batchNumber-input' }}
             type="text"
             fullWidth
-            variant="standard"
+            variant="outlined"
             value={formData.batchNumber}
             onChange={handleChange}
             InputProps={{
@@ -455,13 +474,13 @@ const AddEditProductForm = ({
             }}
           />
           <TextField
-            margin="dense"
+            margin="normal"
             id="expiryDate"
             name="expiryDate"
             label="Expiry Date"
             type="date"
             fullWidth
-            variant="standard"
+            variant="outlined"
             value={formData.expiryDate}
             onChange={handleChange}
             InputLabelProps={{ shrink: true }}

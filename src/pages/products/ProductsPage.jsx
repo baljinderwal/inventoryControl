@@ -185,18 +185,26 @@ const ProductsPage = () => {
     let color;
     let statusText;
     if (product.stock === 0) {
-      color = 'error'; // red
+      color = 'error';
       statusText = 'Out of Stock';
     } else if (product.stock > 0 && product.stock <= product.lowStockThreshold) {
-      color = 'warning'; // yellow
+      color = 'warning';
       statusText = 'Low Stock';
     } else {
-      color = 'success'; // green
+      color = 'success';
       statusText = 'In Stock';
     }
     return (
       <Tooltip title={statusText}>
-        <FiberManualRecordIcon sx={{ fontSize: 12, mr: 1 }} color={color} />
+        <FiberManualRecordIcon 
+          sx={{ 
+            fontSize: 14, 
+            mr: 1,
+            filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))',
+            transition: 'all 0.2s ease'
+          }} 
+          color={color} 
+        />
       </Tooltip>
     );
   };

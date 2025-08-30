@@ -64,17 +64,27 @@ const BarcodeGeneratorPage = () => {
         },
       }}
     >
-      <Typography variant="h4" gutterBottom className="no-print">
+      <Typography variant="h4" gutterBottom className="no-print" sx={{ fontWeight: 700, color: 'text.primary', textAlign: 'center', mb: 3 }}>
         Barcode Generator
       </Typography>
-      <Paper sx={{ p: 2, maxWidth: 400, margin: '0 auto' }} className="no-print">
-        <FormControl fullWidth sx={{ mb: 2 }}>
+      <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', mb: 3 }} className="no-print">
+        Generate and print barcodes for your products
+      </Typography>
+      <Paper sx={{ 
+        p: 3, 
+        maxWidth: 450, 
+        margin: '0 auto',
+        borderRadius: 3,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+      }} className="no-print">
+        <FormControl fullWidth sx={{ mb: 3 }} variant="outlined">
           <InputLabel id="product-select-label">Select Product</InputLabel>
           <Select
             labelId="product-select-label"
             value={selectedProduct ? selectedProduct.id : ''}
             onChange={handleProductChange}
             disabled={isLoading || isError}
+            label="Select Product"
           >
             <MenuItem value="">
               <em>None</em>
@@ -109,7 +119,19 @@ const BarcodeGeneratorPage = () => {
           <Button
             variant="contained"
             onClick={handlePrint}
-            sx={{ mt: 2 }}
+            sx={{ 
+              mt: 3,
+              py: 1.5,
+              px: 4,
+              fontSize: '1rem',
+              fontWeight: 600,
+              borderRadius: 3,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              '&:hover': {
+                boxShadow: '0 6px 20px rgba(0,0,0,0.2)',
+                transform: 'translateY(-1px)'
+              }
+            }}
             className="no-print"
           >
             Print Barcodes
@@ -117,10 +139,16 @@ const BarcodeGeneratorPage = () => {
           <TextField
             label="Number of Copies"
             type="number"
+            variant="outlined"
             value={copyCount}
             onChange={(e) => setCopyCount(Math.max(1, parseInt(e.target.value, 10) || 1))}
             InputProps={{ inputProps: { min: 1 } }}
-            sx={{ mt: 2, display: 'block' }}
+            sx={{ 
+              mt: 2, 
+              display: 'block',
+              maxWidth: 200,
+              margin: '16px auto 0'
+            }}
             className="no-print"
           />
         </Box>

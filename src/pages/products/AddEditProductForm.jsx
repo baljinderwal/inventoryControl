@@ -26,7 +26,7 @@ const AddEditProductForm = ({
   const { showNotification } = useNotification();
   const { mode, services } = useApi();
 
-  const [voiceState, setVoiceState] = useState('idle');
+  const [listeningField, setListeningField] = useState(null);
   const [inputMode, setInputMode] = useState('voicePerField');
   const [startGuidedVoice, setStartGuidedVoice] = useState(false);
 
@@ -193,14 +193,14 @@ const AddEditProductForm = ({
             <InputAdornment position="end">
               <VoiceRecognition
                 onResult={(transcript) => setFormData((prev) => ({ ...prev, name: transcript }))}
-                onStateChange={setVoiceState}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'name' : null)}
               />
             </InputAdornment>
           ),
         }}
       />
-      {voiceState === 'listening' && (
-        <Typography variant="caption" color="secondary">
+      {listeningField === 'name' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
           Listening... Speak now.
         </Typography>
       )}
@@ -221,12 +221,17 @@ const AddEditProductForm = ({
             <InputAdornment position="end">
               <VoiceRecognition
                 onResult={(transcript) => setFormData((prev) => ({ ...prev, sku: transcript }))}
-                onStateChange={setVoiceState}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'sku' : null)}
               />
             </InputAdornment>
           ),
         }}
       />
+      {listeningField === 'sku' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
       <TextField
         margin="normal"
         id="barcode"
@@ -244,7 +249,7 @@ const AddEditProductForm = ({
               {inputMode === 'voicePerField' && (
                 <VoiceRecognition
                   onResult={(transcript) => setFormData((prev) => ({ ...prev, barcode: transcript }))}
-                  onStateChange={setVoiceState}
+                  onStateChange={(state) => setListeningField(state === 'listening' ? 'barcode' : null)}
                 />
               )}
               <Button onClick={handleGenerateBarcode}>Generate</Button>
@@ -252,6 +257,11 @@ const AddEditProductForm = ({
           ),
         }}
       />
+      {listeningField === 'barcode' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
       <TextField
         margin="normal"
         id="category"
@@ -269,12 +279,17 @@ const AddEditProductForm = ({
             <InputAdornment position="end">
               <VoiceRecognition
                 onResult={(transcript) => setFormData((prev) => ({ ...prev, category: transcript }))}
-                onStateChange={setVoiceState}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'category' : null)}
               />
             </InputAdornment>
           ),
         }}
       />
+      {listeningField === 'category' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
       
       <Typography variant="h6" sx={{ mt: 3, mb: 2, fontWeight: 600, color: 'text.primary' }}>
         Pricing & Inventory
@@ -297,12 +312,17 @@ const AddEditProductForm = ({
             <InputAdornment position="end">
               <VoiceRecognition
                 onResult={(transcript) => setFormData((prev) => ({ ...prev, price: transcript }))}
-                onStateChange={setVoiceState}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'price' : null)}
               />
             </InputAdornment>
           ),
         }}
       />
+      {listeningField === 'price' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
       <TextField
         margin="normal"
         id="costPrice"
@@ -320,12 +340,17 @@ const AddEditProductForm = ({
             <InputAdornment position="end">
               <VoiceRecognition
                 onResult={(transcript) => setFormData((prev) => ({ ...prev, costPrice: transcript }))}
-                onStateChange={setVoiceState}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'costPrice' : null)}
               />
             </InputAdornment>
           ),
         }}
       />
+      {listeningField === 'costPrice' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
       <TextField
         margin="normal"
         id="lowStockThreshold"
@@ -345,12 +370,17 @@ const AddEditProductForm = ({
                 onResult={(transcript) =>
                   setFormData((prev) => ({ ...prev, lowStockThreshold: transcript }))
                 }
-                onStateChange={setVoiceState}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'lowStockThreshold' : null)}
               />
             </InputAdornment>
           ),
         }}
       />
+      {listeningField === 'lowStockThreshold' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
       
       <Typography variant="h6" sx={{ mt: 3, mb: 2, fontWeight: 600, color: 'text.primary' }}>
         Additional Details
@@ -372,12 +402,17 @@ const AddEditProductForm = ({
             <InputAdornment position="end">
               <VoiceRecognition
                 onResult={(transcript) => setFormData((prev) => ({ ...prev, imageUrl: transcript }))}
-                onStateChange={setVoiceState}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'imageUrl' : null)}
               />
             </InputAdornment>
           ),
         }}
       />
+      {listeningField === 'imageUrl' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
       <TextField
         margin="normal"
         id="color"
@@ -394,12 +429,17 @@ const AddEditProductForm = ({
             <InputAdornment position="end">
               <VoiceRecognition
                 onResult={(transcript) => setFormData((prev) => ({ ...prev, color: transcript }))}
-                onStateChange={setVoiceState}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'color' : null)}
               />
             </InputAdornment>
           ),
         }}
       />
+      {listeningField === 'color' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
       <TextField
         margin="normal"
         id="sizes"
@@ -416,12 +456,17 @@ const AddEditProductForm = ({
             <InputAdornment position="end">
               <VoiceRecognition
                 onResult={(transcript) => setFormData((prev) => ({ ...prev, sizes: transcript }))}
-                onStateChange={setVoiceState}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'sizes' : null)}
               />
             </InputAdornment>
           ),
         }}
       />
+      {listeningField === 'sizes' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
 
       {!isEditMode && (
         <>
@@ -445,12 +490,17 @@ const AddEditProductForm = ({
                 <InputAdornment position="end">
                   <VoiceRecognition
                     onResult={(transcript) => setFormData((prev) => ({ ...prev, stock: transcript }))}
-                    onStateChange={setVoiceState}
+                    onStateChange={(state) => setListeningField(state === 'listening' ? 'stock' : null)}
                   />
                 </InputAdornment>
               ),
             }}
           />
+          {listeningField === 'stock' && (
+            <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+              Listening... Speak now.
+            </Typography>
+          )}
           <TextField
             margin="normal"
             id="batchNumber"
@@ -467,12 +517,17 @@ const AddEditProductForm = ({
                 <InputAdornment position="end">
                   <VoiceRecognition
                     onResult={(transcript) => setFormData((prev) => ({ ...prev, batchNumber: transcript }))}
-                    onStateChange={setVoiceState}
+                    onStateChange={(state) => setListeningField(state === 'listening' ? 'batchNumber' : null)}
                   />
                 </InputAdornment>
               ),
             }}
           />
+          {listeningField === 'batchNumber' && (
+            <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+              Listening... Speak now.
+            </Typography>
+          )}
           <TextField
             margin="normal"
             id="expiryDate"
@@ -491,12 +546,17 @@ const AddEditProductForm = ({
                     onResult={(transcript) =>
                       setFormData((prev) => ({ ...prev, expiryDate: transcript }))
                     }
-                    onStateChange={setVoiceState}
+                    onStateChange={(state) => setListeningField(state === 'listening' ? 'expiryDate' : null)}
                   />
                 </InputAdornment>
               ),
             }}
           />
+          {listeningField === 'expiryDate' && (
+            <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+              Listening... Speak now.
+            </Typography>
+          )}
         </>
       )}
 

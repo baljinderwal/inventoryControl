@@ -105,11 +105,16 @@ const ProductImportPage = () => {
 
   return (
     <Container maxWidth="md">
-      <Paper sx={{ p: 4, mt: 4 }}>
-        <Typography variant="h4" gutterBottom>
+      <Paper sx={{ 
+        p: 4, 
+        mt: 4,
+        borderRadius: 3,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)'
+      }}>
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'text.primary', textAlign: 'center' }}>
           Import Products from CSV
         </Typography>
-        <Typography paragraph>
+        <Typography paragraph sx={{ textAlign: 'center', color: 'text.secondary', mb: 3 }}>
           Upload a CSV file to bulk-import products into the system. The file should have the following columns:
         </Typography>
         <List dense>
@@ -122,11 +127,36 @@ const ProductImportPage = () => {
             <ListItem><ListItemText primary="lowStockThreshold: The low stock warning level." /></ListItem>
         </List>
 
-        <Box sx={{ mt: 3, mb: 2, p: 3, border: '1px dashed grey', borderRadius: '4px', textAlign: 'center' }}>
+        <Box sx={{ 
+          mt: 3, 
+          mb: 2, 
+          p: 4, 
+          border: '2px dashed', 
+          borderColor: 'primary.light',
+          borderRadius: 3, 
+          textAlign: 'center',
+          backgroundColor: 'action.hover',
+          transition: 'all 0.2s ease',
+          '&:hover': {
+            borderColor: 'primary.main',
+            backgroundColor: 'primary.light',
+            '& .MuiButton-root': {
+              transform: 'scale(1.02)'
+            }
+          }
+        }}>
           <Button
             variant="contained"
             component="label"
             startIcon={<UploadFileIcon />}
+            sx={{
+              py: 1.5,
+              px: 3,
+              fontSize: '1rem',
+              fontWeight: 600,
+              borderRadius: 2,
+              transition: 'transform 0.2s ease'
+            }}
           >
             Select CSV File
             <input
@@ -149,7 +179,18 @@ const ProductImportPage = () => {
           onClick={handleImport}
           disabled={!csvFile || isProcessing}
           fullWidth
-          sx={{ mt: 2, py: 1.5 }}
+          sx={{ 
+            mt: 3, 
+            py: 2,
+            fontSize: '1.1rem',
+            fontWeight: 600,
+            borderRadius: 3,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            '&:hover': {
+              boxShadow: '0 6px 20px rgba(0,0,0,0.2)',
+              transform: 'translateY(-1px)'
+            }
+          }}
         >
           {isProcessing ? <CircularProgress size={24} /> : 'Start Import'}
         </Button>

@@ -102,6 +102,22 @@ const InventoryAgingReport = () => {
                     }
                     color={getAgingColor(product.ageInDays)}
                     size="small"
+                    sx={{ 
+                      fontWeight: 600,
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                      '&.MuiChip-colorError': {
+                        backgroundColor: 'error.main',
+                        color: 'error.contrastText'
+                      },
+                      '&.MuiChip-colorWarning': {
+                        backgroundColor: 'warning.main',
+                        color: 'warning.contrastText'
+                      },
+                      '&.MuiChip-colorSuccess': {
+                        backgroundColor: 'success.main', 
+                        color: 'success.contrastText'
+                      }
+                    }}
                   />
                 </TableCell>
               </TableRow>

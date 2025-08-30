@@ -22,9 +22,12 @@ const ReportsLayout = () => {
   const tabValue = currentTab ? currentTab.value : false;
 
   return (
-    <Paper sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Reports
+    <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'text.primary', mb: 3 }}>
+        Reports & Analytics
+      </Typography>
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+        Comprehensive insights into your business performance and inventory metrics
       </Typography>
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs
@@ -32,6 +35,28 @@ const ReportsLayout = () => {
           aria-label="reports navigation tabs"
           variant="scrollable"
           scrollButtons="auto"
+          sx={{
+            '& .MuiTab-root': {
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: '0.95rem',
+              minHeight: 48,
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                backgroundColor: 'action.hover',
+                transform: 'translateY(-1px)'
+              },
+              '&.Mui-selected': {
+                color: 'primary.main',
+                fontWeight: 700
+              }
+            },
+            '& .MuiTabs-indicator': {
+              height: 3,
+              borderRadius: '3px 3px 0 0',
+              background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)'
+            }
+          }}
         >
           {reportTabs.map((tab) => (
             <Tab

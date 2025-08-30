@@ -2,16 +2,23 @@ import api from './api';
 
 const local = {
   getStockLevels: async () => {
-    console.log('Fetching stock levels from local db.json');
-    const response = await fetch('/db.json');
-    const data = await response.json();
-    const products = data.products || [];
-    let stockData = data.stock || [];
-    const suppliers = data.suppliers || [];
+    console.log('Fetching stock levels from local API endpoints');
+    const [productsResponse, stockResponse, suppliersResponse] = await Promise.all([
+      fetch('/products'),
+      fetch('/stock'),
+      fetch('/suppliers')
+    ]);
+
+    if (!productsResponse.ok || !stockResponse.ok || !suppliersResponse.ok) {
+      throw new Error('Failed to fetch local data');
+    }
+
+    const products = await productsResponse.json();
+    const stockData = await stockResponse.json();
+    const suppliers = await suppliersResponse.json();
 
     const supplierMap = new Map();
     suppliers.forEach(supplier => {
-      // Defensively check if supplier.products exists and is an array
       if (supplier.products && Array.isArray(supplier.products)) {
         supplier.products.forEach(productId => {
           supplierMap.set(productId, supplier.name);
@@ -20,15 +27,15 @@ const local = {
     });
 
     const stockMap = new Map();
-
-    for (const item of stockData) {
+    stockData.forEach(item => {
       if (!stockMap.has(item.productId)) {
         stockMap.set(item.productId, { quantity: 0, batches: [] });
       }
       const existing = stockMap.get(item.productId);
       existing.quantity += item.quantity;
-      existing.batches.push(...item.batches);
-    }
+      // Ensure batches are properly concatenated
+      existing.batches = existing.batches.concat(item.batches);
+    });
 
     return products.map(product => {
       const stockInfo = stockMap.get(product.id) || { quantity: 0, batches: [] };

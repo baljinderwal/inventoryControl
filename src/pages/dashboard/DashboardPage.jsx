@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { DndContext, closestCenter } from '@dnd-kit/core';
@@ -10,10 +10,11 @@ import { useNotificationCenter } from '../../utils/NotificationCenterContext';
 import StatsCard from '../../components/ui/StatsCard';
 import DashboardWidget from './DashboardWidget';
 import AppDialog from '../../components/ui/AppDialog';
-import { Button, Box, FormGroup, FormControlLabel, Checkbox } from '@mui/material';
+import { Button, Box, FormGroup, FormControlLabel, Checkbox, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import SunburstChart from '../../components/ui/SunburstChart';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import WarningIcon from '@mui/icons-material/Warning';
@@ -61,10 +62,12 @@ const SortableWidget = ({ id, widget, children }) => {
         transition,
     };
 
+    const widgetContent = typeof children === 'function' ? children(widget) : children;
+
     return (
         <Grid item {...widget.gridProps} ref={setNodeRef} style={style} component={motion.div} variants={itemVariants}>
             <DashboardWidget title={widget.title} dragHandleProps={{...attributes, ...listeners}}>
-                {children}
+                {widgetContent}
             </DashboardWidget>
         </Grid>
     );
@@ -152,8 +155,40 @@ const DashboardPage = () => {
   const [layout, setLayout] = useState([
     { id: 'stats', title: 'Key Metrics', visible: true, component: 'stats', gridProps: { xs: 12 } },
     { id: 'lowStock', title: 'Low Stock Alerts', visible: true, component: 'lowStock', gridProps: { xs: 12, md: 6 } },
-    { id: 'trends', title: 'Inventory Trends', visible: true, component: 'trends', gridProps: { xs: 12, md: 6 } },
+    { id: 'trends', title: 'Inventory Breakdown', visible: true, component: 'trends', gridProps: { xs: 12, md: 6 }, chartType: 'trends' },
   ]);
+
+  const sunburstData = useMemo(() => {
+    if (!products) return { name: "Inventory", children: [] };
+
+    const categories = products.reduce((acc, product) => {
+        if (!acc[product.category]) {
+            acc[product.category] = {
+                name: product.category,
+                children: [],
+            };
+        }
+        acc[product.category].children.push({
+            name: product.name,
+            loc: product.stock,
+        });
+        return acc;
+    }, {});
+
+    return {
+        name: "Inventory",
+        children: Object.values(categories),
+    };
+  }, [products]);
+
+  const handleChartTypeChange = useCallback((event) => {
+    const newChartType = event.target.value;
+    setLayout(prevLayout =>
+        prevLayout.map(widget =>
+            widget.id === 'trends' ? { ...widget, chartType: newChartType } : widget
+        )
+    );
+  }, []);
 
   const widgets = useMemo(() => ({
     stats: (
@@ -193,20 +228,39 @@ const DashboardPage = () => {
         )}
         </>
     ),
-    trends: (
-        <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }} />
-            <Legend />
-            <Bar dataKey="Stock" fill="#6366f1" />
-            <Bar dataKey="Sales" fill="#ec4899" />
-            </BarChart>
-        </ResponsiveContainer>
+    trends: ({chartType}) => (
+        <Box sx={{ height: 350, position: 'relative' }}>
+            <FormControl sx={{ position: 'absolute', top: -40, right: 0, zIndex: 10, minWidth: 120 }} size="small">
+                <InputLabel id="chart-type-select-label">Chart Type</Input-Label>
+                <Select
+                    labelId="chart-type-select-label"
+                    id="chart-type-select"
+                    value={chartType}
+                    label="Chart Type"
+                    onChange={handleChartTypeChange}
+                >
+                    <MenuItem value="trends">Trends</MenuItem>
+                    <MenuItem value="sunburst">Analysis</MenuItem>
+                </Select>
+            </FormControl>
+            {chartType === 'trends' ? (
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255, 255, 255, 0.1)" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155' }} />
+                        <Legend />
+                        <Bar dataKey="Stock" fill="#6366f1" />
+                        <Bar dataKey="Sales" fill="#ec4899" />
+                    </BarChart>
+                </ResponsiveContainer>
+            ) : (
+                <SunburstChart data={sunburstData} />
+            )}
+        </Box>
     )
-  }), [stats, isLoading, error, lowStockProducts]);
+  }), [stats, isLoading, error, lowStockProducts, sunburstData, handleChartTypeChange]);
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
@@ -247,7 +301,7 @@ const DashboardPage = () => {
             <Grid container spacing={3}>
                 {layout.filter(w => w.visible).map(widget => (
                     <SortableWidget key={widget.id} id={widget.id} widget={widget}>
-                        {widgets[widget.component]}
+                        {(w) => widgets[w.component](w)}
                     </SortableWidget>
                 ))}
             </Grid>

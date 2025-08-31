@@ -47,7 +47,7 @@ const AddStockForm = ({ onClose }) => {
       return;
     }
     mutation.mutate({
-      productId: parseInt(productId, 10),
+      productId,
       quantity,
       batchNumber,
       expiryDate,

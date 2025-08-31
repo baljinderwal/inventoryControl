@@ -1,0 +1,11 @@
+{
+  "appId": "com.inventory.app",
+  "appName": "Inventory App",
+  "webDir": "dist",
+  "server": {
+    "url": "https://inventorybackend-loop.onrender.com",
+    "allowNavigation": [
+      "inventorybackend-loop.onrender.com"
+    ]
+  }
+}

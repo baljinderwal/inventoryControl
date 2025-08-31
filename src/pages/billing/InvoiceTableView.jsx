@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import MuiTable from '../../components/ui/Table';
 import { Box, Chip, Stack, IconButton, Button } from '@mui/material';
-import { Visibility, Edit, Delete, PictureAsPdf } from '@mui/icons-material';
+import { Visibility, Edit, Delete, PictureAsPdf, MarkEmailRead } from '@mui/icons-material';
 import { generateInvoicePDF } from '../../utils/generateInvoicePDF';
 import AppDialog from '../../components/ui/AppDialog';
 import { useNotification } from '../../utils/NotificationContext';
@@ -11,6 +11,12 @@ const InvoiceTableView = ({ invoices = [], customers = [] }) => {
   const { showNotification } = useNotification();
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [invoiceToView, setInvoiceToView] = useState(null);
+  const [remindersSent, setRemindersSent] = useState([]);
+
+  const handleSendReminder = (invoiceId) => {
+    setRemindersSent([...remindersSent, invoiceId]);
+    showNotification(`Reminder sent for Invoice #${invoiceId}`, 'success');
+  };
 
   const handleViewDetails = (invoice) => {
     setInvoiceToView(invoice);
@@ -40,21 +46,37 @@ const InvoiceTableView = ({ invoices = [], customers = [] }) => {
     { id: 'actions', label: 'Actions' },
   ];
 
-  const tableData = invoices.map((invoice) => ({
-    id: invoice.id,
-    customerName: invoice.customerName,
-    invoiceDate: new Date(invoice.invoiceDate).toLocaleDateString(),
-    dueDate: new Date(invoice.dueDate).toLocaleDateString(),
-    status: <Chip label={invoice.status} color={invoice.status === 'Paid' ? 'success' : (invoice.status === 'Draft' ? 'default' : 'warning')} size="small" />,
-    total: `$${invoice.total.toFixed(2)}`,
-    actions: (
-      <Stack direction="row" spacing={1}>
-        <IconButton onClick={() => handleViewDetails(invoice)} size="small"><Visibility /></IconButton>
-        <IconButton onClick={() => console.log('Edit', invoice.id)} size="small"><Edit /></IconButton>
-        <IconButton onClick={() => console.log('Delete', invoice.id)} size="small"><Delete /></IconButton>
-      </Stack>
-    ),
-  }));
+  const tableData = invoices.map((invoice) => {
+    const isOverdue = new Date(invoice.dueDate) < new Date() && invoice.status !== 'Paid';
+
+    return {
+      id: invoice.id,
+      customerName: invoice.customerName,
+      invoiceDate: new Date(invoice.invoiceDate).toLocaleDateString(),
+      dueDate: new Date(invoice.dueDate).toLocaleDateString(),
+      status: <Chip label={invoice.status} color={invoice.status === 'Paid' ? 'success' : (invoice.status === 'Draft' ? 'default' : 'warning')} size="small" />,
+      total: `$${invoice.total.toFixed(2)}`,
+      actions: (
+        <Stack direction="row" spacing={1} alignItems="center">
+          <IconButton onClick={() => handleViewDetails(invoice)} size="small"><Visibility /></IconButton>
+          <IconButton onClick={() => console.log('Edit', invoice.id)} size="small"><Edit /></IconButton>
+          <IconButton onClick={() => console.log('Delete', invoice.id)} size="small"><Delete /></IconButton>
+          {isOverdue && (
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<MarkEmailRead />}
+              onClick={() => handleSendReminder(invoice.id)}
+              disabled={remindersSent.includes(invoice.id)}
+              sx={{ ml: 1 }}
+            >
+              Send Reminder
+            </Button>
+          )}
+        </Stack>
+      ),
+    };
+  });
 
   return (
     <>

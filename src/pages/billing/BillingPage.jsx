@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import MuiTable from '../../components/ui/Table';
-import { Box, Typography, CircularProgress, Alert, Chip, Stack, IconButton, Button } from '@mui/material';
+import { Box, Typography, CircularProgress, Alert, Chip, Stack, IconButton, Button, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { Visibility, Edit, Delete, PictureAsPdf } from '@mui/icons-material';
 import { generateInvoicePDF } from '../../utils/generateInvoicePDF';
 import AppDialog from '../../components/ui/AppDialog';
 import { useNotification } from '../../utils/NotificationContext';
+import BillingDashboard from './BillingDashboard';
 
 
 const BillingPage = () => {
@@ -14,18 +15,21 @@ const BillingPage = () => {
   const { showNotification } = useNotification();
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [invoiceToView, setInvoiceToView] = useState(null);
+  const [view, setView] = useState('dashboard'); // 'dashboard' or 'table'
 
   const { data: customers = [] } = useQuery({
     queryKey: ['customers', mode],
     queryFn: () => services.customers.getCustomers(),
   });
 
-  // Define a getter for invoices in invoiceService.js first
-  // For now, let's assume it exists and is named getInvoices
   const { data: invoices = [], isLoading, isError, error } = useQuery({
     queryKey: ['invoices', mode],
-    queryFn: () => services.invoices.getInvoices(), // This function needs to be created
+    queryFn: () => services.invoices.getInvoices(),
   });
+
+  const handleViewChange = (event) => {
+    setView(event.target.value);
+  };
 
   const tableHeaders = [
     { id: 'id', label: 'Invoice ID' },
@@ -53,14 +57,6 @@ const BillingPage = () => {
     ),
   }));
 
-  if (isLoading) {
-    return <CircularProgress />;
-  }
-
-  if (isError) {
-    return <Alert severity="error">Error fetching invoices: {error.message}</Alert>;
-  }
-
   const handleViewDetails = (invoice) => {
     setInvoiceToView(invoice);
     setIsDetailsOpen(true);
@@ -82,10 +78,34 @@ const BillingPage = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Billing & Invoices
-      </Typography>
-      <MuiTable headers={tableHeaders} data={tableData} />
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
+        <Typography variant="h4" gutterBottom sx={{ mb: 0 }}>
+          Billing & Invoices
+        </Typography>
+        <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+          <InputLabel id="view-select-label">View</InputLabel>
+          <Select
+            labelId="view-select-label"
+            id="view-select"
+            value={view}
+            label="View"
+            onChange={handleViewChange}
+          >
+            <MenuItem value="dashboard">Dashboard</MenuItem>
+            <MenuItem value="table">Table</MenuItem>
+          </Select>
+        </FormControl>
+      </Stack>
+
+      {isLoading ? (
+        <CircularProgress />
+      ) : isError ? (
+        <Alert severity="error">Error fetching invoices: {error.message}</Alert>
+      ) : view === 'dashboard' ? (
+        <BillingDashboard invoices={invoices} />
+      ) : (
+        <MuiTable headers={tableHeaders} data={tableData} />
+      )}
 
       <AppDialog
         open={isDetailsOpen}

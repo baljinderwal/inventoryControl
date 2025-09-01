@@ -39,6 +39,12 @@ const AddEditProductForm = ({
     sku: '',
     barcode: '',
     category: '',
+    brand: '',
+    model: '',
+    gender: '',
+    weight: '',
+    countryOfOrigin: 'India',
+    description: '',
     price: '',
     costPrice: '',
     lowStockThreshold: '',
@@ -64,6 +70,12 @@ const AddEditProductForm = ({
         sku: product.sku || '',
         barcode: product.barcode || '',
         category: product.category || '',
+        brand: product.brand || '',
+        model: product.model || '',
+        gender: product.gender || '',
+        weight: product.weight || '',
+        countryOfOrigin: product.countryOfOrigin || '',
+        description: product.description || '',
         price: product.price || '',
         costPrice: product.costPrice || '',
         lowStockThreshold: product.lowStockThreshold || '',
@@ -197,6 +209,12 @@ const AddEditProductForm = ({
     { name: 'name', label: 'Product Name' },
     { name: 'sku', label: 'SKU' },
     { name: 'category', label: 'Category' },
+    { name: 'brand', label: 'Brand' },
+    { name: 'model', label: 'Model' },
+    { name: 'gender', label: 'Gender' },
+    { name: 'weight', label: 'Weight' },
+    { name: 'countryOfOrigin', label: 'Country of Origin' },
+    { name: 'description', label: 'Description' },
     { name: 'price', label: 'Price' },
     { name: 'costPrice', label: 'Cost Price' },
     { name: 'lowStockThreshold', label: 'Low Stock Threshold' },
@@ -286,6 +304,170 @@ const AddEditProductForm = ({
         }}
       />
       {listeningField === 'name' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
+      <TextField
+        margin="normal"
+        id="brand"
+        name="brand"
+        label="Brand"
+        inputProps={{ 'data-testid': 'brand-input' }}
+        type="text"
+        fullWidth
+        variant="outlined"
+        value={formData.brand}
+        onChange={handleChange}
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, brand: transcript }))}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'brand' : null)}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      {listeningField === 'brand' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
+      <TextField
+        margin="normal"
+        id="model"
+        name="model"
+        label="Model"
+        inputProps={{ 'data-testid': 'model-input' }}
+        type="text"
+        fullWidth
+        variant="outlined"
+        value={formData.model}
+        onChange={handleChange}
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, model: transcript }))}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'model' : null)}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      {listeningField === 'model' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
+      <TextField
+        margin="normal"
+        id="gender"
+        name="gender"
+        label="Gender"
+        inputProps={{ 'data-testid': 'gender-input' }}
+        type="text"
+        fullWidth
+        variant="outlined"
+        value={formData.gender}
+        onChange={handleChange}
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, gender: transcript }))}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'gender' : null)}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      {listeningField === 'gender' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
+      <TextField
+        margin="normal"
+        id="weight"
+        name="weight"
+        label="Weight"
+        inputProps={{ 'data-testid': 'weight-input' }}
+        type="text"
+        fullWidth
+        variant="outlined"
+        value={formData.weight}
+        onChange={handleChange}
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, weight: transcript }))}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'weight' : null)}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      {listeningField === 'weight' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
+      <TextField
+        margin="normal"
+        id="countryOfOrigin"
+        name="countryOfOrigin"
+        label="Country of Origin"
+        inputProps={{ 'data-testid': 'countryOfOrigin-input' }}
+        type="text"
+        fullWidth
+        variant="outlined"
+        value={formData.countryOfOrigin}
+        onChange={handleChange}
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, countryOfOrigin: transcript }))}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'countryOfOrigin' : null)}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      {listeningField === 'countryOfOrigin' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
+      <TextField
+        margin="normal"
+        id="description"
+        name="description"
+        label="Description"
+        inputProps={{ 'data-testid': 'description-input' }}
+        type="text"
+        fullWidth
+        multiline
+        rows={4}
+        variant="outlined"
+        value={formData.description}
+        onChange={handleChange}
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, description: transcript }))}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'description' : null)}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      {listeningField === 'description' && (
         <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
           Listening... Speak now.
         </Typography>

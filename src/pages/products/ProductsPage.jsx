@@ -131,7 +131,7 @@ const ProductsPage = () => {
 
   const handleExport = () => {
     if (!filteredProducts) return;
-    const fields = ['id', 'name', 'sku', 'barcode', 'category', 'price', 'costPrice', 'stock', 'lowStockThreshold', 'createdAt'];
+    const fields = ['id', 'name', 'brand', 'model', 'gender', 'weight', 'countryOfOrigin', 'description', 'sku', 'barcode', 'category', 'price', 'costPrice', 'stock', 'lowStockThreshold', 'createdAt'];
     const parser = new Parser({ fields });
     const csv = parser.parse(filteredProducts);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -174,6 +174,11 @@ const ProductsPage = () => {
   const tableHeaders = [
     { id: 'image', label: 'Image', isSortable: false },
     { id: 'name', label: 'Name', isSortable: true },
+    { id: 'brand', label: 'Brand', isSortable: true },
+    { id: 'model', label: 'Model', isSortable: true },
+    { id: 'gender', label: 'Gender', isSortable: true },
+    { id: 'weight', label: 'Weight', isSortable: true },
+    { id: 'countryOfOrigin', label: 'Country of Origin', isSortable: true },
     { id: 'sku', label: 'SKU', isSortable: true },
     { id: 'category', label: 'Category', isSortable: true },
     { id: 'price', label: 'Price', isSortable: true },
@@ -223,6 +228,11 @@ const ProductsPage = () => {
         {p.name}
       </Link>
     ),
+    brand: p.brand,
+    model: p.model,
+    gender: p.gender,
+    weight: p.weight,
+    countryOfOrigin: p.countryOfOrigin,
     sku: p.sku,
     category: p.category,
     price: `$${p.price.toFixed(2)}`,

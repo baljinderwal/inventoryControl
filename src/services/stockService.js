@@ -123,6 +123,9 @@ const local = {
       stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate });
 
       // Update sizes
+      if (!stockEntry.sizes) {
+        stockEntry.sizes = [];
+      }
       sizes.forEach(size => {
         const existingSize = stockEntry.sizes.find(s => s.size === size.size);
         if (existingSize) {
@@ -271,6 +274,9 @@ const remote = {
       stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate });
 
       // Update sizes
+      if (!stockEntry.sizes) {
+        stockEntry.sizes = [];
+      }
       sizes.forEach(size => {
         const existingSize = stockEntry.sizes.find(s => s.size === size.size);
         if (existingSize) {

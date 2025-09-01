@@ -8,6 +8,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import MuiTable from '../../components/ui/Table';
 import SearchBar from '../../components/ui/SearchBar';
 import AppDialog from '../../components/ui/AppDialog';
+import Chip from '@mui/material/Chip';
 import ConfirmationDialog from '../../components/ui/ConfirmationDialog';
 import AddEditProductForm from './AddEditProductForm';
 
@@ -175,6 +176,7 @@ const ProductsPage = () => {
     { id: 'name', label: 'Name', isSortable: true },
     { id: 'sku', label: 'SKU', isSortable: true },
     { id: 'category', label: 'Category', isSortable: true },
+    { id: 'colors', label: 'Colors', isSortable: false },
     { id: 'price', label: 'Price', isSortable: true },
     { id: 'stock', label: 'Stock', isSortable: true },
     { id: 'supplierName', label: 'Supplier', isSortable: true },
@@ -223,6 +225,20 @@ const ProductsPage = () => {
     ),
     sku: p.sku,
     category: p.category,
+    colors: (
+      <Stack direction="column" spacing={1}>
+        {p.colorOptions && p.colorOptions.map((option, index) => (
+          <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Stack direction="row" spacing={0.5}>
+              {option.colors.map(color => (
+                <Chip key={color} label={color} size="small" />
+              ))}
+            </Stack>
+            <Typography variant="caption">({option.quantity})</Typography>
+          </Box>
+        ))}
+      </Stack>
+    ),
     price: `$${p.price.toFixed(2)}`,
     stock: (
       <Box sx={{ display: 'flex', alignItems: 'center' }}>

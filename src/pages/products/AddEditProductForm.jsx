@@ -14,10 +14,17 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import InputAdornment from '@mui/material/InputAdornment';
 import Typography from '@mui/material/Typography';
+import Autocomplete from '@mui/material/Autocomplete';
+import Chip from '@mui/material/Chip';
+import IconButton from '@mui/material/IconButton';
+import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import VoiceRecognition from '../../components/ui/VoiceRecognition';
 import SmartVoiceAdd from '../../components/ui/SmartVoiceAdd';
 import GuidedVoiceAdd from '../../components/ui/GuidedVoiceAdd';
 import { generateBarcode } from '../../utils/barcodeGenerator';
+
+const availableColors = ["Black", "White", "Red", "Green", "Blue", "Yellow", "Orange", "Purple", "Pink", "Brown", "Gray", "Silver", "Gold"];
 
 const AddEditProductForm = ({
   onClose,
@@ -49,8 +56,9 @@ const AddEditProductForm = ({
       { size: '8', quantity: 1 },
       { size: '9', quantity: 1 },
     ],
-    color: '',
   });
+
+  const [colorOptions, setColorOptions] = useState([{ id: 1, colors: [], quantity: 0, ratio: '' }]);
 
   const isEditMode = Boolean(product);
 
@@ -68,7 +76,6 @@ const AddEditProductForm = ({
         stock: '',
         batchNumber: '',
         expiryDate: '',
-        color: product.color || '',
         sizes: product.sizes && product.sizes.length > 0 ? product.sizes : [
           { size: '6', quantity: 1 },
           { size: '7', quantity: 1 },
@@ -76,6 +83,9 @@ const AddEditProductForm = ({
           { size: '9', quantity: 1 },
         ],
       });
+      if (product.colorOptions && product.colorOptions.length > 0) {
+        setColorOptions(product.colorOptions);
+      }
     }
   }, [product]);
 
@@ -98,6 +108,36 @@ const AddEditProductForm = ({
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  const handleColorOptionChange = (index, newColors) => {
+    const newOptions = [...colorOptions];
+    newOptions[index].colors = newColors;
+    setColorOptions(newOptions);
+  };
+
+  const handleQuantityChange = (index, newQuantity) => {
+    const newOptions = [...colorOptions];
+    newOptions[index].quantity = parseInt(newQuantity, 10) || 0;
+    setColorOptions(newOptions);
+  };
+
+  const handleRatioChange = (index, newRatio) => {
+    const newOptions = [...colorOptions];
+    newOptions[index].ratio = newRatio;
+    setColorOptions(newOptions);
+  };
+
+  const addColorOption = () => {
+    setColorOptions([...colorOptions, { id: Date.now(), colors: [], quantity: 0, ratio: '' }]);
+  };
+
+  const removeColorOption = (index) => {
+    if (colorOptions.length > 1) {
+      const newOptions = colorOptions.filter((_, i) => i !== index);
+      setColorOptions(newOptions);
+    }
+  };
+
 
   const handleSizeQuantityChange = (index, quantity) => {
     const newSizes = [...formData.sizes];
@@ -166,7 +206,10 @@ const AddEditProductForm = ({
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const totalStock = formData.sizes.reduce((acc, item) => acc + item.quantity, 0);
+    const totalStockFromSizes = formData.sizes.reduce((acc, item) => acc + item.quantity, 0);
+    const totalStockFromColors = colorOptions.reduce((acc, item) => acc + item.quantity, 0);
+    const totalStock = totalStockFromSizes > 0 ? totalStockFromSizes : totalStockFromColors;
+
 
     const submissionData = {
       ...formData,
@@ -174,6 +217,7 @@ const AddEditProductForm = ({
       costPrice: parseFloat(formData.costPrice) || 0,
       lowStockThreshold: parseInt(formData.lowStockThreshold, 10) || 0,
       stock: totalStock,
+      colorOptions: colorOptions,
     };
     if (isEditMode) {
       delete submissionData.stock;
@@ -192,7 +236,6 @@ const AddEditProductForm = ({
     { name: 'lowStockThreshold', label: 'Low Stock Threshold' },
     { name: 'batchNumber', label: 'Batch Number' },
     { name: 'expiryDate', label: 'Expiry Date' },
-    { name: 'color', label: 'Color' },
   ];
 
   const handleGuidedVoiceUpdate = (fieldName, value) => {
@@ -467,33 +510,64 @@ const AddEditProductForm = ({
           Listening... Speak now.
         </Typography>
       )}
-      <TextField
-        margin="normal"
-        id="color"
-        name="color"
-        label="Color"
-        inputProps={{ 'data-testid': 'color-input' }}
-        type="text"
-        fullWidth
-        variant="outlined"
-        value={formData.color}
-        onChange={handleChange}
-        InputProps={{
-          endAdornment: inputMode === 'voicePerField' && (
-            <InputAdornment position="end">
-              <VoiceRecognition
-                onResult={(transcript) => setFormData((prev) => ({ ...prev, color: transcript }))}
-                onStateChange={(state) => setListeningField(state === 'listening' ? 'color' : null)}
+
+      <Typography variant="h6" sx={{ mt: 3, mb: 2, fontWeight: 600, color: 'text.primary' }}>
+        Color Options
+      </Typography>
+      {colorOptions.map((option, index) => (
+        <Box key={option.id} sx={{ display: 'flex', alignItems: 'center', mb: 2, p: 2, border: '1px solid #ccc', borderRadius: '4px' }}>
+          <Autocomplete
+            multiple
+            id={`colors-tags-${index}`}
+            options={availableColors}
+            value={option.colors}
+            onChange={(event, newValue) => {
+              handleColorOptionChange(index, newValue);
+            }}
+            renderTags={(value, getTagProps) =>
+              value.map((color, tagIndex) => (
+                <Chip variant="outlined" label={color} {...getTagProps({ index: tagIndex })} />
+              ))
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="outlined"
+                label="Colors"
+                placeholder="Select colors"
               />
-            </InputAdornment>
-          ),
-        }}
-      />
-      {listeningField === 'color' && (
-        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-          Listening... Speak now.
-        </Typography>
-      )}
+            )}
+            sx={{ flexGrow: 1, mr: 2 }}
+          />
+          <TextField
+            label="Quantity"
+            type="number"
+            value={option.quantity}
+            onChange={(e) => handleQuantityChange(index, e.target.value)}
+            sx={{ width: '120px', mr: 2 }}
+          />
+          <TextField
+            label="Ratio"
+            type="text"
+            value={option.ratio}
+            onChange={(e) => handleRatioChange(index, e.target.value)}
+            placeholder="e.g., 1:2:1"
+            sx={{ width: '120px', mr: 2 }}
+          />
+          <IconButton onClick={() => removeColorOption(index)} disabled={colorOptions.length === 1}>
+            <RemoveCircleOutlineIcon />
+          </IconButton>
+        </Box>
+      ))}
+      <Button
+        startIcon={<AddCircleOutlineIcon />}
+        onClick={addColorOption}
+        variant="outlined"
+        sx={{ mt: 1, mb: 2 }}
+      >
+        Add Color Option
+      </Button>
+
       <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Size Presets</Typography>
       <ButtonGroup variant="outlined" aria-label="size presets" sx={{ mb: 2 }}>
         <Button onClick={() => handleSizePresetChange('adult')}>Adult</Button>

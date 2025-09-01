@@ -20,6 +20,8 @@ import SmartVoiceAdd from '../../components/ui/SmartVoiceAdd';
 import GuidedVoiceAdd from '../../components/ui/GuidedVoiceAdd';
 import { generateBarcode } from '../../utils/barcodeGenerator';
 
+const AVAILABLE_COLORS = ["Black", "White", "Red", "Green", "Blue", "Yellow", "Orange", "Purple", "Pink", "Brown", "Gray", "Silver", "Gold", "Wood"];
+
 const AddEditProductForm = ({
   onClose,
   product
@@ -31,7 +33,6 @@ const AddEditProductForm = ({
   const [listeningField, setListeningField] = useState(null);
   const [inputMode, setInputMode] = useState('voicePerField');
   const [startGuidedVoice, setStartGuidedVoice] = useState(false);
-  const [currentColor, setCurrentColor] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -101,24 +102,11 @@ const AddEditProductForm = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddColor = (e) => {
-    if (e.key === 'Enter' && currentColor.trim() !== '') {
-      e.preventDefault();
-      if (!formData.colors.includes(currentColor.trim())) {
-        setFormData((prev) => ({
-          ...prev,
-          colors: [...prev.colors, currentColor.trim()],
-        }));
-      }
-      setCurrentColor('');
-    }
-  };
-
-  const handleDeleteColor = (colorToDelete) => {
-    setFormData((prev) => ({
-      ...prev,
-      colors: prev.colors.filter((color) => color !== colorToDelete),
-    }));
+  const handleColorSelect = (color) => {
+    const newColors = formData.colors.includes(color)
+      ? formData.colors.filter((c) => c !== color)
+      : [...formData.colors, color];
+    setFormData((prev) => ({ ...prev, colors: newColors }));
   };
 
   const handleSizeQuantityChange = (index, quantity) => {
@@ -219,8 +207,25 @@ const AddEditProductForm = ({
 
   const handleGuidedVoiceUpdate = (fieldName, value) => {
     if (fieldName === 'colors') {
-      const colorsArray = value.split(/, | /).filter(c => c.trim() !== '');
-      setFormData(prev => ({ ...prev, colors: [...new Set([...prev.colors, ...colorsArray])] }));
+      const lowerCaseValue = value.toLowerCase();
+      // Improved parsing to handle various separators and extra spaces
+      const colorsArray = lowerCaseValue
+        .replace(/add |remove /g, '')
+        .split(/,|\s+/)
+        .map(c => c.trim())
+        .filter(c => c)
+        .map(c => c.charAt(0).toUpperCase() + c.slice(1)); // Capitalize first letter
+
+      if (lowerCaseValue.startsWith('add')) {
+        const newColors = [...new Set([...formData.colors, ...colorsArray])];
+        setFormData(prev => ({ ...prev, colors: newColors.filter(c => AVAILABLE_COLORS.includes(c)) }));
+      } else if (lowerCaseValue.startsWith('remove')) {
+        setFormData(prev => ({ ...prev, colors: formData.colors.filter(c => !colorsArray.includes(c))}));
+      } else {
+        // Default behavior: add the colors
+        const newColors = [...new Set([...formData.colors, ...colorsArray])];
+        setFormData(prev => ({ ...prev, colors: newColors.filter(c => AVAILABLE_COLORS.includes(c)) }));
+      }
     } else {
       setFormData((prev) => ({ ...prev, [fieldName]: value }));
     }
@@ -494,47 +499,30 @@ const AddEditProductForm = ({
           Listening... Speak now.
         </Typography>
       )}
-      <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Colors</Typography>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2 }}>
-        {formData.colors.map((color) => (
+      <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Selected Colors</Typography>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2, p: 1, border: '1px solid #ccc', borderRadius: 1, minHeight: '48px' }}>
+        {formData.colors.length > 0 ? formData.colors.map((color) => (
           <Chip
             key={color}
             label={color}
-            onDelete={() => handleDeleteColor(color)}
+            onDelete={() => handleColorSelect(color)}
+          />
+        )) : <Typography variant="body2" color="text.secondary" sx={{p: 1}}>No colors selected.</Typography>}
+      </Box>
+
+      <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Choose from Available Colors</Typography>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        {AVAILABLE_COLORS.map((color) => (
+          <Chip
+            key={color}
+            label={color}
+            onClick={() => handleColorSelect(color)}
+            variant={formData.colors.includes(color) ? 'filled' : 'outlined'}
+            color={formData.colors.includes(color) ? 'primary' : 'default'}
+            sx={{ cursor: 'pointer' }}
           />
         ))}
       </Box>
-      <TextField
-        margin="normal"
-        id="color-input"
-        label="Add a color"
-        type="text"
-        fullWidth
-        variant="outlined"
-        value={currentColor}
-        onChange={(e) => setCurrentColor(e.target.value)}
-        onKeyDown={handleAddColor}
-        helperText="Press Enter to add a color."
-        InputProps={{
-          'data-testid': 'color-input',
-          endAdornment: inputMode === 'voicePerField' && (
-            <InputAdornment position="end">
-              <VoiceRecognition
-                onResult={(transcript) => {
-                  const colorsArray = transcript.split(/, | /).filter(c => c.trim() !== '');
-                  setFormData(prev => ({ ...prev, colors: [...new Set([...prev.colors, ...colorsArray])] }));
-                }}
-                onStateChange={(state) => setListeningField(state === 'listening' ? 'color' : null)}
-              />
-            </InputAdornment>
-          ),
-        }}
-      />
-      {listeningField === 'color' && (
-        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-          Listening... Speak now.
-        </Typography>
-      )}
       <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Size Presets</Typography>
       <ButtonGroup variant="outlined" aria-label="size presets" sx={{ mb: 2 }}>
         <Button onClick={() => handleSizePresetChange('adult')}>Adult</Button>

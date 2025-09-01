@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
@@ -13,6 +13,7 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 
 const AddStockForm = ({ onClose }) => {
   const queryClient = useQueryClient();
@@ -20,7 +21,8 @@ const AddStockForm = ({ onClose }) => {
   const { mode, services } = useApi();
 
   const [productId, setProductId] = useState('');
-  const [quantity, setQuantity] = useState(1);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [sizes, setSizes] = useState([]);
   const [batchNumber, setBatchNumber] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
 
@@ -28,6 +30,16 @@ const AddStockForm = ({ onClose }) => {
     queryKey: ['products', mode],
     queryFn: () => services.products.getProducts(),
   });
+
+  useEffect(() => {
+    const product = products.find((p) => p.id === productId);
+    setSelectedProduct(product);
+    if (product && product.sizes) {
+      setSizes(product.sizes.map(s => ({ ...s, quantity: 1 })));
+    } else {
+      setSizes([]);
+    }
+  }, [productId, products]);
 
   const mutation = useMutation({
     mutationFn: services.stock.addStock,
@@ -41,14 +53,23 @@ const AddStockForm = ({ onClose }) => {
     },
   });
 
+  const handleSizeQuantityChange = (size, quantity) => {
+    const newSizes = sizes.map((s) =>
+      s.size === size ? { ...s, quantity: Math.max(0, parseInt(quantity, 10)) } : s
+    );
+    setSizes(newSizes);
+  };
+
   const handleSubmit = () => {
     if (!productId || !batchNumber || !expiryDate) {
       showNotification('Please fill in all fields.', 'error');
       return;
     }
+    const totalQuantity = sizes.reduce((acc, curr) => acc + curr.quantity, 0);
     mutation.mutate({
       productId,
-      quantity,
+      quantity: totalQuantity,
+      sizes,
       batchNumber,
       expiryDate,
     });
@@ -76,18 +97,24 @@ const AddStockForm = ({ onClose }) => {
         </Select>
       </FormControl>
 
-      <TextField
-        autoFocus
-        margin="normal"
-        id="quantity"
-        label="Quantity"
-        type="number"
-        fullWidth
-        variant="outlined"
-        value={quantity}
-        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10)))}
-        InputProps={{ inputProps: { min: 1 } }}
-      />
+      {selectedProduct && selectedProduct.sizes && (
+        <Box>
+          <Typography variant="h6">Sizes</Typography>
+          {sizes.map((size, index) => (
+            <TextField
+              key={index}
+              margin="normal"
+              label={`Size ${size.size}`}
+              type="number"
+              fullWidth
+              variant="outlined"
+              value={size.quantity}
+              onChange={(e) => handleSizeQuantityChange(size.size, e.target.value)}
+              InputProps={{ inputProps: { min: 1 } }}
+            />
+          ))}
+        </Box>
+      )}
 
       <TextField
         margin="normal"

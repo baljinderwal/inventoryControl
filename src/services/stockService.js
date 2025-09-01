@@ -110,12 +110,13 @@ const local = {
     });
     return await putRes.json();
   },
-  addStock: async ({ productId, quantity, batchNumber, expiryDate }) => {
-    console.log('Adding new stock batch in local mode', { productId, quantity, batchNumber, expiryDate });
+  addStock: async ({ productId, quantity, batchNumber, expiryDate, sizes }) => {
+    console.log('Adding new stock batch in local mode', { productId, quantity, batchNumber, expiryDate, sizes });
     const newStockEntry = {
       productId,
       quantity,
-      batches: [{ batchNumber, expiryDate, quantity }]
+      sizes,
+      batches: [{ batchNumber, expiryDate, quantity, sizes }]
     };
     const response = await fetch('/stock', {
       method: 'POST',
@@ -233,12 +234,13 @@ const remote = {
     stockEntry.quantity = stockEntry.batches.reduce((sum, b) => sum + b.quantity, 0);
     return await api.put(`/stock/${stockEntry.productId}`, stockEntry);
   },
-  addStock: async ({ productId, quantity, batchNumber, expiryDate }) => {
-    console.log('Adding new stock batch via API', { productId, quantity, batchNumber, expiryDate });
+  addStock: async ({ productId, quantity, batchNumber, expiryDate, sizes }) => {
+    console.log('Adding new stock batch via API', { productId, quantity, batchNumber, expiryDate, sizes });
     const newStockEntry = {
       productId,
       quantity,
-      batches: [{ batchNumber, expiryDate, quantity }]
+      sizes,
+      batches: [{ batchNumber, expiryDate, quantity, sizes }]
     };
     return await api.post('/stock', newStockEntry);
   },

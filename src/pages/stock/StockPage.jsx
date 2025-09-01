@@ -192,6 +192,7 @@ const StockPage = () => {
                   <TableCell>Quantity</TableCell>
                   <TableCell>Batch Number</TableCell>
                   <TableCell>Expiry Date</TableCell>
+                  <TableCell>Sizes</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -200,6 +201,9 @@ const StockPage = () => {
                       <TableCell>{batch.quantity}</TableCell>
                       <TableCell>{batch.batchNumber}</TableCell>
                       <TableCell>{new Date(batch.expiryDate).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        {batch.sizes?.map(s => `${s.size}: ${s.quantity}`).join(', ')}
+                      </TableCell>
                     </TableRow>
                   ))
                 }

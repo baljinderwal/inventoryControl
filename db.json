@@ -22,14 +22,14 @@
     { "id": 5, "supplier": { "id": 1, "name": "ElectroSupply" }, "createdAt": "2025-08-12T08:30:00Z", "status": "Pending", "products": [{ "productId": 2, "quantity": 15 }, { "productId": 8, "quantity": 25 }] }
   ],
   "stock": [
-    { "id": 1, "productId": 1, "quantity": 150, "sizes": [{ "size": "S", "quantity": 50 }, { "size": "M", "quantity": 50 }, { "size": "L", "quantity": 50 }], "batches": [{ "batchNumber": "B001", "expiryDate": "2026-11-10T10:00:00Z", "quantity": 150, "sizes": [{ "size": "S", "quantity": 50 }, { "size": "M", "quantity": 50 }, { "size": "L", "quantity": 50 }] }] },
-    { "id": 2, "productId": 2, "quantity": 75, "sizes": [{ "size": "One Size", "quantity": 75 }], "batches": [{ "batchNumber": "B002", "expiryDate": "2026-01-15T11:30:00Z", "quantity": 75, "sizes": [{ "size": "One Size", "quantity": 75 }] }] },
-    { "id": 3, "productId": 3, "quantity": 120, "batches": [{ "batchNumber": "B003", "expiryDate": "2026-05-20T14:00:00Z", "quantity": 120 }] },
+    { "id": 1, "productId": 1, "quantity": 150, "sizes": [{ "size": "S", "quantity": 50 }, { "size": "M", "quantity": 50 }, { "size": "L", "quantity": 50 }], "batches": [{ "batchNumber": "B001", "expiryDate": "2026-11-10T10:00:00Z", "quantity": 150, "sizes": [{ "size": "S", "quantity": 50 }, { "size": "M", "quantity": 50 }, { "size": "L", "quantity": 50 }], "createdDate": "2024-11-10T10:00:00Z" }] },
+    { "id": 2, "productId": 2, "quantity": 75, "sizes": [{ "size": "One Size", "quantity": 75 }], "batches": [{ "batchNumber": "B002", "expiryDate": "2026-01-15T11:30:00Z", "quantity": 75, "sizes": [{ "size": "One Size", "quantity": 75 }], "createdDate": "2025-01-15T11:30:00Z" }] },
+    { "id": 3, "productId": 3, "quantity": 120, "batches": [{ "batchNumber": "B003", "expiryDate": "2026-05-20T14:00:00Z", "quantity": 120, "createdDate": "2025-05-20T14:00:00Z" }] },
     { "id": 4, "productId": 4, "quantity": 0, "sizes": [{ "size": "14\"", "quantity": 0 }], "batches": [] },
-    { "id": 5, "productId": 5, "quantity": 50, "batches": [{ "batchNumber": "B005", "expiryDate": "2026-07-22T18:00:00Z", "quantity": 50 }] },
-    { "id": 6, "productId": 6, "quantity": 30, "batches": [{ "batchNumber": "B006", "expiryDate": "2025-03-12T12:00:00Z", "quantity": 30 }] },
-    { "id": 7, "productId": 7, "quantity": 40, "batches": [{ "batchNumber": "B007", "expiryDate": "2026-06-30T16:45:00Z", "quantity": 40 }] },
-    { "id": 8, "productId": 8, "quantity": 90, "batches": [{ "batchNumber": "B008", "expiryDate": "2026-08-01T08:00:00Z", "quantity": 90 }] }
+    { "id": 5, "productId": 5, "quantity": 50, "batches": [{ "batchNumber": "B005", "expiryDate": "2026-07-22T18:00:00Z", "quantity": 50, "createdDate": "2025-07-22T18:00:00Z" }] },
+    { "id": 6, "productId": 6, "quantity": 30, "batches": [{ "batchNumber": "B006", "expiryDate": "2025-03-12T12:00:00Z", "quantity": 30, "createdDate": "2024-03-12T12:00:00Z" }] },
+    { "id": 7, "productId": 7, "quantity": 40, "batches": [{ "batchNumber": "B007", "expiryDate": "2026-06-30T16:45:00Z", "quantity": 40, "createdDate": "2025-06-30T16:45:00Z" }] },
+    { "id": 8, "productId": 8, "quantity": 90, "batches": [{ "batchNumber": "B008", "expiryDate": "2026-08-01T08:00:00Z", "quantity": 90, "createdDate": "2025-08-01T08:00:00Z" }] }
   ],
   "users": [
     { "id": 1, "name": "Admin User", "email": "admin@example.com", "password": "password", "role": "Admin" },

@@ -232,6 +232,7 @@ const AddEditProductForm = ({
       discountedPrice: parseFloat(formData.discountedPrice) || 0,
       lowStockThreshold: parseInt(formData.lowStockThreshold, 10) || 0,
       stock: totalStock,
+      sizes: formData.sizes.map(s => ({ size: s.size, quantity: 0 })),
     };
     if (isEditMode) {
       delete submissionData.stock;

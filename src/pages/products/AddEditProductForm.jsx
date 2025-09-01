@@ -42,7 +42,12 @@ const AddEditProductForm = ({
     stock: '',
     batchNumber: '',
     expiryDate: '',
-    sizes: '',
+    sizes: [
+      { size: '6', quantity: 1 },
+      { size: '7', quantity: 1 },
+      { size: '8', quantity: 1 },
+      { size: '9', quantity: 1 },
+    ],
     color: '',
   });
 
@@ -62,6 +67,13 @@ const AddEditProductForm = ({
         stock: '',
         batchNumber: '',
         expiryDate: '',
+        color: product.color || '',
+        sizes: product.sizes && product.sizes.length > 0 ? product.sizes : [
+          { size: '6', quantity: 1 },
+          { size: '7', quantity: 1 },
+          { size: '8', quantity: 1 },
+          { size: '9', quantity: 1 },
+        ],
       });
     }
   }, [product]);
@@ -84,6 +96,12 @@ const AddEditProductForm = ({
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSizeQuantityChange = (index, quantity) => {
+    const newSizes = [...formData.sizes];
+    newSizes[index].quantity = parseInt(quantity, 10) || 0;
+    setFormData((prev) => ({ ...prev, sizes: newSizes }));
   };
 
   const handleGenerateBarcode = () => {
@@ -111,13 +129,15 @@ const AddEditProductForm = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    const totalStock = formData.sizes.reduce((acc, item) => acc + item.quantity, 0);
+
     const submissionData = {
       ...formData,
       price: parseFloat(formData.price) || 0,
       costPrice: parseFloat(formData.costPrice) || 0,
       lowStockThreshold: parseInt(formData.lowStockThreshold, 10) || 0,
-      stock: parseInt(formData.stock, 10) || 0,
-      sizes: formData.sizes.split(',').map(s => s.trim()).filter(s => s),
+      stock: totalStock,
     };
     if (isEditMode) {
       delete submissionData.stock;
@@ -134,11 +154,9 @@ const AddEditProductForm = ({
     { name: 'price', label: 'Price' },
     { name: 'costPrice', label: 'Cost Price' },
     { name: 'lowStockThreshold', label: 'Low Stock Threshold' },
-    { name: 'stock', label: 'Initial Stock' },
     { name: 'batchNumber', label: 'Batch Number' },
     { name: 'expiryDate', label: 'Expiry Date' },
     { name: 'color', label: 'Color' },
-    { name: 'sizes', label: 'Sizes' },
   ];
 
   const handleGuidedVoiceUpdate = (fieldName, value) => {
@@ -440,67 +458,31 @@ const AddEditProductForm = ({
           Listening... Speak now.
         </Typography>
       )}
-      <TextField
-        margin="normal"
-        id="sizes"
-        name="sizes"
-        label="Sizes (comma-separated)"
-        inputProps={{ 'data-testid': 'sizes-input' }}
-        type="text"
-        fullWidth
-        variant="outlined"
-        value={formData.sizes}
-        onChange={handleChange}
-        InputProps={{
-          endAdornment: inputMode === 'voicePerField' && (
-            <InputAdornment position="end">
-              <VoiceRecognition
-                onResult={(transcript) => setFormData((prev) => ({ ...prev, sizes: transcript }))}
-                onStateChange={(state) => setListeningField(state === 'listening' ? 'sizes' : null)}
-              />
-            </InputAdornment>
-          ),
-        }}
-      />
-      {listeningField === 'sizes' && (
-        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-          Listening... Speak now.
-        </Typography>
-      )}
+      <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Sizes</Typography>
+      {formData.sizes && formData.sizes.map((size, index) => (
+        <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+          <TextField
+            label="Size"
+            value={size.size}
+            disabled
+            sx={{ mr: 2, width: '100px' }}
+          />
+          <TextField
+            label="Quantity"
+            type="number"
+            value={size.quantity}
+            onChange={(e) => handleSizeQuantityChange(index, e.target.value)}
+            inputProps={{ 'data-testid': `quantity-input-${size.size}` }}
+            sx={{ width: '100px' }}
+          />
+        </Box>
+      ))}
 
       {!isEditMode && (
         <>
           <Typography variant="h6" sx={{ mt: 3, mb: 2, fontWeight: 600, color: 'text.primary' }}>
             Stock Information
           </Typography>
-          
-          <TextField
-            margin="normal"
-            id="stock"
-            name="stock"
-            label="Initial Stock"
-            type="number"
-            fullWidth
-            variant="outlined"
-            value={formData.stock}
-            onChange={handleChange}
-            inputProps={{ 'data-testid': 'stock-input' }}
-            InputProps={{
-              endAdornment: inputMode === 'voicePerField' && (
-                <InputAdornment position="end">
-                  <VoiceRecognition
-                    onResult={(transcript) => setFormData((prev) => ({ ...prev, stock: transcript }))}
-                    onStateChange={(state) => setListeningField(state === 'listening' ? 'stock' : null)}
-                  />
-                </InputAdornment>
-              ),
-            }}
-          />
-          {listeningField === 'stock' && (
-            <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-              Listening... Speak now.
-            </Typography>
-          )}
           <TextField
             margin="normal"
             id="batchNumber"

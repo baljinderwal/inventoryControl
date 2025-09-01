@@ -603,60 +603,48 @@ const AddEditProductForm = ({
         Pricing & Inventory
       </Typography>
       
-      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-        <TextField
-          margin="normal"
-          id="costPrice"
-          name="costPrice"
-          label="Cost Price"
-          type="number"
-          fullWidth
-          variant="outlined"
-          value={formData.costPrice}
-          onChange={handleChange}
-          required
-          inputProps={{ 'data-testid': 'costPrice-input' }}
-          InputProps={{
-            endAdornment: inputMode === 'voicePerField' && (
-              <InputAdornment position="end">
-                <VoiceRecognition
-                  onResult={(transcript) => setFormData((prev) => ({ ...prev, costPrice: transcript }))}
-                  onStateChange={(state) => setListeningField(state === 'listening' ? 'costPrice' : null)}
-                />
-              </InputAdornment>
-            ),
-          }}
-        />
-        {listeningField === 'costPrice' && (
-          <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-            Listening... Speak now.
-          </Typography>
-        )}
-        <TextField
-          margin="normal"
-          label="Price Multiplier"
-          type="number"
-          value={priceMultiplier}
-          onChange={(e) => setPriceMultiplier(parseFloat(e.target.value) || 0)}
-          InputProps={{
-            endAdornment: <InputAdornment position="end">x</InputAdornment>,
-          }}
-          sx={{width: '250px'}}
-        />
-      </Box>
+      <TextField
+        margin="normal"
+        id="costPrice"
+        name="costPrice"
+        label="Cost Price"
+        type="number"
+        fullWidth
+        variant="outlined"
+        value={formData.costPrice}
+        onChange={handleChange}
+        required
+        inputProps={{ 'data-testid': 'costPrice-input' }}
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, costPrice: transcript }))}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'costPrice' : null)}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      {listeningField === 'costPrice' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
 
-      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
         <TextField
           margin="normal"
           id="price"
           name="price"
-          label="Price"
+          label="Selling Price"
           type="number"
           fullWidth
           variant="outlined"
           value={formData.price}
           onChange={handleChange}
           required
+          helperText="Calculated as Cost Price × Multiplier"
           inputProps={{ 'data-testid': 'price-input' }}
           InputProps={{
             endAdornment: inputMode === 'voicePerField' && (
@@ -676,6 +664,33 @@ const AddEditProductForm = ({
         )}
         <TextField
           margin="normal"
+          label="Price Multiplier"
+          type="number"
+          value={priceMultiplier}
+          onChange={(e) => setPriceMultiplier(parseFloat(e.target.value) || 0)}
+          InputProps={{
+            endAdornment: <InputAdornment position="end">x</InputAdornment>,
+          }}
+          sx={{width: '250px', mt: 2}}
+        />
+      </Box>
+
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
+        <TextField
+          margin="normal"
+          id="discountedPrice"
+          name="discountedPrice"
+          label="Discounted Price"
+          type="number"
+          fullWidth
+          variant="outlined"
+          value={formData.discountedPrice}
+          onChange={handleChange}
+          helperText="Calculated from Selling Price and Discount %"
+          inputProps={{ 'data-testid': 'discountedPrice-input' }}
+        />
+        <TextField
+          margin="normal"
           label="Discount"
           type="number"
           value={discountPercentage}
@@ -683,21 +698,9 @@ const AddEditProductForm = ({
           InputProps={{
             endAdornment: <InputAdornment position="end">%</InputAdornment>,
           }}
-          sx={{width: '250px'}}
+          sx={{width: '250px', mt: 2}}
         />
       </Box>
-      <TextField
-        margin="normal"
-        id="discountedPrice"
-        name="discountedPrice"
-        label="Discounted Price"
-        type="number"
-        fullWidth
-        variant="outlined"
-        value={formData.discountedPrice}
-        onChange={handleChange}
-        inputProps={{ 'data-testid': 'discountedPrice-input' }}
-      />
       <TextField
         margin="normal"
         id="lowStockThreshold"

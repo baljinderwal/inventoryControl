@@ -23,17 +23,16 @@ const decodeJwt = (token) => {
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
+  const [user, setUser] = useState(() => {
     const token = localStorage.getItem('authToken');
     if (token) {
       const decodedUser = decodeJwt(token);
       if (decodedUser) {
-        setUser(decodedUser);
+        return decodedUser;
       }
     }
-  }, []);
+    return null;
+  });
 
   const login = async (email, password) => {
     try {

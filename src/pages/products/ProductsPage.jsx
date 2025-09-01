@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
@@ -10,6 +10,7 @@ import SearchBar from '../../components/ui/SearchBar';
 import AppDialog from '../../components/ui/AppDialog';
 import ConfirmationDialog from '../../components/ui/ConfirmationDialog';
 import AddEditProductForm from './AddEditProductForm';
+import ColumnVisibilityControl from '../../components/ui/ColumnVisibilityControl';
 
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
@@ -47,6 +48,36 @@ const ProductsPage = () => {
   const [productToEdit, setProductToEdit] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+
+  const allColumns = [
+    { id: 'image', label: 'Image', isSortable: false },
+    { id: 'name', label: 'Name', isSortable: true },
+    { id: 'brand', label: 'Brand', isSortable: true },
+    { id: 'model', label: 'Model', isSortable: true },
+    { id: 'gender', label: 'Gender', isSortable: true },
+    { id: 'weight', label: 'Weight', isSortable: true },
+    { id: 'countryOfOrigin', label: 'Country of Origin', isSortable: true },
+    { id: 'sku', label: 'SKU', isSortable: true },
+    { id: 'category', label: 'Category', isSortable: true },
+    { id: 'price', label: 'Price', isSortable: true },
+    { id: 'stock', label: 'Stock', isSortable: true },
+    { id: 'colors', label: 'Colors', isSortable: false },
+    { id: 'supplierName', label: 'Supplier', isSortable: true },
+    { id: 'actions', label: 'Actions', isSortable: false },
+  ];
+
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    const savedColumns = localStorage.getItem('visibleProductColumns');
+    if (savedColumns) {
+      return JSON.parse(savedColumns);
+    }
+    // Default visible columns
+    return ['image', 'name', 'sku', 'category', 'price', 'stock', 'actions'];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('visibleProductColumns', JSON.stringify(visibleColumns));
+  }, [visibleColumns]);
 
   const { data: products = [], isLoading, isError, error } = useQuery({
     queryKey: ['stock', mode], // Refetch when mode changes
@@ -171,22 +202,9 @@ const ProductsPage = () => {
     setProductToEdit(null);
   }
 
-  const tableHeaders = [
-    { id: 'image', label: 'Image', isSortable: false },
-    { id: 'name', label: 'Name', isSortable: true },
-    { id: 'brand', label: 'Brand', isSortable: true },
-    { id: 'model', label: 'Model', isSortable: true },
-    { id: 'gender', label: 'Gender', isSortable: true },
-    { id: 'weight', label: 'Weight', isSortable: true },
-    { id: 'countryOfOrigin', label: 'Country of Origin', isSortable: true },
-    { id: 'sku', label: 'SKU', isSortable: true },
-    { id: 'category', label: 'Category', isSortable: true },
-    { id: 'price', label: 'Price', isSortable: true },
-    { id: 'stock', label: 'Stock', isSortable: true },
-    { id: 'colors', label: 'Colors', isSortable: false },
-    { id: 'supplierName', label: 'Supplier', isSortable: true },
-    { id: 'actions', label: 'Actions', isSortable: false },
-  ];
+  const tableHeaders = useMemo(() => {
+    return allColumns.filter(col => visibleColumns.includes(col.id));
+  }, [visibleColumns]);
 
   const StockStatusIndicator = ({ product }) => {
     let color;
@@ -270,7 +288,12 @@ const ProductsPage = () => {
     <div>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4">Products</Typography>
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <ColumnVisibilityControl
+            allColumns={allColumns.filter(c => c.id !== 'actions')} // 'Actions' is always visible
+            visibleColumns={visibleColumns}
+            onColumnChange={setVisibleColumns}
+          />
           <Button
             variant="outlined"
             startIcon={<UploadFileIcon />}

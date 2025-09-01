@@ -19,8 +19,15 @@ import VoiceRecognition from '../../components/ui/VoiceRecognition';
 import SmartVoiceAdd from '../../components/ui/SmartVoiceAdd';
 import GuidedVoiceAdd from '../../components/ui/GuidedVoiceAdd';
 import { generateBarcode } from '../../utils/barcodeGenerator';
+import { generateSku } from '../../utils/skuGenerator';
 
 const AVAILABLE_COLORS = ["Black", "White", "Red", "Green", "Blue", "Yellow", "Orange", "Purple", "Pink", "Brown", "Gray", "Silver", "Gold", "Wood"];
+
+const getFutureDate = () => {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() + 1);
+  return date.toISOString().split('T')[0];
+};
 
 const AddEditProductForm = ({
   onClose,
@@ -36,12 +43,12 @@ const AddEditProductForm = ({
 
   const [formData, setFormData] = useState({
     name: '',
-    sku: '',
+    sku: generateSku(),
     barcode: '',
     category: '',
     brand: '',
     model: '',
-    gender: '',
+    gender: 'Male',
     weight: '',
     countryOfOrigin: 'India',
     description: '',
@@ -50,8 +57,9 @@ const AddEditProductForm = ({
     lowStockThreshold: '',
     imageUrl: '',
     stock: '',
-    batchNumber: '',
-    expiryDate: '',
+    batchNumber: 'B-1001',
+    expiryDate: getFutureDate(),
+    createdDate: new Date().toISOString().split('T')[0],
     sizes: [
       { size: '6', quantity: 1 },
       { size: '7', quantity: 1 },
@@ -83,6 +91,7 @@ const AddEditProductForm = ({
         stock: '',
         batchNumber: '',
         expiryDate: '',
+        createdDate: product.createdDate || '',
         colors: product.colors || [],
         sizes: product.sizes && product.sizes.length > 0 ? product.sizes : [
           { size: '6', quantity: 1 },
@@ -167,6 +176,11 @@ const AddEditProductForm = ({
     setFormData((prev) => ({ ...prev, barcode: newBarcode }));
   };
 
+  const handleGenerateSku = () => {
+    const newSku = generateSku();
+    setFormData((prev) => ({ ...prev, sku: newSku }));
+  };
+
   useEffect(() => {
     if (!isEditMode) {
       handleGenerateBarcode();
@@ -201,6 +215,7 @@ const AddEditProductForm = ({
       delete submissionData.stock;
       delete submissionData.batchNumber;
       delete submissionData.expiryDate;
+      delete submissionData.createdDate;
     }
     mutation.mutate(submissionData);
   };
@@ -485,12 +500,15 @@ const AddEditProductForm = ({
         onChange={handleChange}
         required
         InputProps={{
-          endAdornment: inputMode === 'voicePerField' && (
+          endAdornment: (
             <InputAdornment position="end">
-              <VoiceRecognition
-                onResult={(transcript) => setFormData((prev) => ({ ...prev, sku: transcript }))}
-                onStateChange={(state) => setListeningField(state === 'listening' ? 'sku' : null)}
-              />
+              {inputMode === 'voicePerField' && (
+                <VoiceRecognition
+                  onResult={(transcript) => setFormData((prev) => ({ ...prev, sku: transcript }))}
+                  onStateChange={(state) => setListeningField(state === 'listening' ? 'sku' : null)}
+                />
+              )}
+              <Button onClick={handleGenerateSku}>Generate</Button>
             </InputAdornment>
           ),
         }}
@@ -793,6 +811,19 @@ const AddEditProductForm = ({
               Listening... Speak now.
             </Typography>
           )}
+          <TextField
+            margin="normal"
+            id="createdDate"
+            name="createdDate"
+            label="Created Date"
+            type="date"
+            fullWidth
+            variant="outlined"
+            value={formData.createdDate}
+            onChange={handleChange}
+            disabled
+            InputLabelProps={{ shrink: true }}
+          />
         </>
       )}
 

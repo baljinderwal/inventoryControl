@@ -4,6 +4,7 @@ import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import ButtonGroup from '@mui/material/ButtonGroup';
 import CircularProgress from '@mui/material/CircularProgress';
 import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
@@ -101,6 +102,41 @@ const AddEditProductForm = ({
   const handleSizeQuantityChange = (index, quantity) => {
     const newSizes = [...formData.sizes];
     newSizes[index].quantity = parseInt(quantity, 10) || 0;
+    setFormData((prev) => ({ ...prev, sizes: newSizes }));
+  };
+
+  const handleSizePresetChange = (preset) => {
+    let newSizes = [];
+    switch (preset) {
+      case 'adult':
+        newSizes = [
+          { size: '6', quantity: 1 },
+          { size: '7', quantity: 1 },
+          { size: '8', quantity: 1 },
+          { size: '9', quantity: 1 },
+        ];
+        break;
+      case 'boy':
+        newSizes = [
+          { size: '4', quantity: 1 },
+          { size: '5', quantity: 1 },
+        ];
+        break;
+      case 'toddler':
+        newSizes = [
+          { size: '8', quantity: 1 },
+          { size: '9', quantity: 1 },
+          { size: '10', quantity: 1 },
+          { size: '11', quantity: 1 },
+          { size: '12', quantity: 1 },
+          { size: '1', quantity: 1 },
+          { size: '2', quantity: 1 },
+          { size: '3', quantity: 1 },
+        ];
+        break;
+      default:
+        newSizes = formData.sizes;
+    }
     setFormData((prev) => ({ ...prev, sizes: newSizes }));
   };
 
@@ -458,6 +494,13 @@ const AddEditProductForm = ({
           Listening... Speak now.
         </Typography>
       )}
+      <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Size Presets</Typography>
+      <ButtonGroup variant="outlined" aria-label="size presets" sx={{ mb: 2 }}>
+        <Button onClick={() => handleSizePresetChange('adult')}>Adult</Button>
+        <Button onClick={() => handleSizePresetChange('boy')}>Boy</Button>
+        <Button onClick={() => handleSizePresetChange('toddler')}>Toddler</Button>
+      </ButtonGroup>
+
       <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Sizes</Typography>
       {formData.sizes && formData.sizes.map((size, index) => (
         <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>

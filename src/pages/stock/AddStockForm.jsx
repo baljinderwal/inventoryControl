@@ -31,6 +31,12 @@ const AddStockForm = ({ onClose }) => {
     queryFn: () => services.products.getProducts(),
   });
 
+  const { data: stockData } = useQuery({
+    queryKey: ['stock', productId, mode],
+    queryFn: () => services.stock.getProductWithStock(productId),
+    enabled: !!productId,
+  });
+
   useEffect(() => {
     const product = products.find((p) => p.id === productId);
     setSelectedProduct(product);
@@ -39,7 +45,22 @@ const AddStockForm = ({ onClose }) => {
     } else {
       setSizes([]);
     }
-  }, [productId, products]);
+
+    // Set default expiry date to one year from now
+    const nextYear = new Date();
+    nextYear.setFullYear(nextYear.getFullYear() + 1);
+    setExpiryDate(nextYear.toISOString().split('T')[0]);
+
+    if (stockData && stockData.batches) {
+      const highestBatchNumber = stockData.batches.reduce((max, batch) => {
+        const num = parseInt(batch.batchNumber.replace('B-', ''), 10);
+        return num > max ? num : max;
+      }, 0);
+      setBatchNumber(`B-${highestBatchNumber + 1}`);
+    } else {
+      setBatchNumber('B-1');
+    }
+  }, [productId, products, stockData]);
 
   const mutation = useMutation({
     mutationFn: services.stock.addStock,
@@ -72,6 +93,7 @@ const AddStockForm = ({ onClose }) => {
       sizes,
       batchNumber,
       expiryDate,
+      createdDate: new Date().toISOString(),
     });
   };
 

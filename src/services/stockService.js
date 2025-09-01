@@ -110,24 +110,49 @@ const local = {
     });
     return await putRes.json();
   },
-  addStock: async ({ productId, quantity, batchNumber, expiryDate, sizes }) => {
-    console.log('Adding new stock batch in local mode', { productId, quantity, batchNumber, expiryDate, sizes });
-    const newStockEntry = {
-      productId,
-      quantity,
-      sizes,
-      batches: [{ batchNumber, expiryDate, quantity, sizes }]
-    };
-    const response = await fetch('/stock', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newStockEntry)
-    });
-    if (!response.ok) {
-        const errorBody = await response.text();
-        throw new Error(`Failed to add stock: ${errorBody}`);
+  addStock: async ({ productId, quantity, batchNumber, expiryDate, sizes, createdDate }) => {
+    console.log('Adding new stock batch in local mode', { productId, quantity, batchNumber, expiryDate, sizes, createdDate });
+
+    const res = await fetch(`/stock?productId=${productId}`);
+    const stockEntries = await res.json();
+    let stockEntry = stockEntries[0];
+
+    if (stockEntry) {
+      // Update existing stock entry
+      stockEntry.quantity += quantity;
+      stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate });
+
+      // Update sizes
+      sizes.forEach(size => {
+        const existingSize = stockEntry.sizes.find(s => s.size === size.size);
+        if (existingSize) {
+          existingSize.quantity += size.quantity;
+        } else {
+          stockEntry.sizes.push(size);
+        }
+      });
+
+      const putRes = await fetch(`/stock/${stockEntry.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(stockEntry)
+      });
+      return await putRes.json();
+    } else {
+      // Create new stock entry
+      const newStockEntry = {
+        productId,
+        quantity,
+        sizes,
+        batches: [{ batchNumber, expiryDate, quantity, sizes, createdDate }]
+      };
+      const postRes = await fetch('/stock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newStockEntry)
+      });
+      return await postRes.json();
     }
-    return await response.json();
   },
   getProductWithStock: async (id) => {
     console.log(`Fetching product ${id} with stock from local db.json`);
@@ -234,15 +259,38 @@ const remote = {
     stockEntry.quantity = stockEntry.batches.reduce((sum, b) => sum + b.quantity, 0);
     return await api.put(`/stock/${stockEntry.productId}`, stockEntry);
   },
-  addStock: async ({ productId, quantity, batchNumber, expiryDate, sizes }) => {
-    console.log('Adding new stock batch via API', { productId, quantity, batchNumber, expiryDate, sizes });
-    const newStockEntry = {
-      productId,
-      quantity,
-      sizes,
-      batches: [{ batchNumber, expiryDate, quantity, sizes }]
-    };
-    return await api.post('/stock', newStockEntry);
+  addStock: async ({ productId, quantity, batchNumber, expiryDate, sizes, createdDate }) => {
+    console.log('Adding new stock batch via API', { productId, quantity, batchNumber, expiryDate, sizes, createdDate });
+
+    const stockRes = await api.get(`/stock?productId=${productId}`);
+    let stockEntry = stockRes.data[0];
+
+    if (stockEntry) {
+      // Update existing stock entry
+      stockEntry.quantity += quantity;
+      stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate });
+
+      // Update sizes
+      sizes.forEach(size => {
+        const existingSize = stockEntry.sizes.find(s => s.size === size.size);
+        if (existingSize) {
+          existingSize.quantity += size.quantity;
+        } else {
+          stockEntry.sizes.push(size);
+        }
+      });
+
+      return await api.put(`/stock/${stockEntry.id}`, stockEntry);
+    } else {
+      // Create new stock entry
+      const newStockEntry = {
+        productId,
+        quantity,
+        sizes,
+        batches: [{ batchNumber, expiryDate, quantity, sizes, createdDate }]
+      };
+      return await api.post('/stock', newStockEntry);
+    }
   },
   getProductWithStock: async (id) => {
     console.log(`Fetching product ${id} with stock from API`);

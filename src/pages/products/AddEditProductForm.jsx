@@ -40,6 +40,8 @@ const AddEditProductForm = ({
   const [listeningField, setListeningField] = useState(null);
   const [inputMode, setInputMode] = useState('voicePerField');
   const [startGuidedVoice, setStartGuidedVoice] = useState(false);
+  const [priceMultiplier, setPriceMultiplier] = useState(1.5);
+  const [discountPercentage, setDiscountPercentage] = useState(10);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -54,6 +56,7 @@ const AddEditProductForm = ({
     description: '',
     price: '',
     costPrice: '',
+    discountedPrice: '',
     lowStockThreshold: '',
     imageUrl: '',
     stock: '',
@@ -86,6 +89,7 @@ const AddEditProductForm = ({
         description: product.description || '',
         price: product.price || '',
         costPrice: product.costPrice || '',
+        discountedPrice: product.discountedPrice || '',
         lowStockThreshold: product.lowStockThreshold || '',
         imageUrl: product.imageUrl || '',
         stock: '',
@@ -182,6 +186,23 @@ const AddEditProductForm = ({
   };
 
   useEffect(() => {
+    const cost = parseFloat(formData.costPrice);
+    if (!isNaN(cost)) {
+      const newPrice = cost * priceMultiplier;
+      setFormData((prev) => ({ ...prev, price: newPrice.toFixed(2) }));
+    }
+  }, [formData.costPrice, priceMultiplier]);
+
+  useEffect(() => {
+    const price = parseFloat(formData.price);
+    if (!isNaN(price)) {
+      const discount = price * (discountPercentage / 100);
+      const newDiscountedPrice = price - discount;
+      setFormData((prev) => ({ ...prev, discountedPrice: newDiscountedPrice.toFixed(2) }));
+    }
+  }, [formData.price, discountPercentage]);
+
+  useEffect(() => {
     if (!isEditMode) {
       handleGenerateBarcode();
     }
@@ -208,6 +229,7 @@ const AddEditProductForm = ({
       ...formData,
       price: parseFloat(formData.price) || 0,
       costPrice: parseFloat(formData.costPrice) || 0,
+      discountedPrice: parseFloat(formData.discountedPrice) || 0,
       lowStockThreshold: parseInt(formData.lowStockThreshold, 10) || 0,
       stock: totalStock,
     };
@@ -581,62 +603,101 @@ const AddEditProductForm = ({
         Pricing & Inventory
       </Typography>
       
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+        <TextField
+          margin="normal"
+          id="costPrice"
+          name="costPrice"
+          label="Cost Price"
+          type="number"
+          fullWidth
+          variant="outlined"
+          value={formData.costPrice}
+          onChange={handleChange}
+          required
+          inputProps={{ 'data-testid': 'costPrice-input' }}
+          InputProps={{
+            endAdornment: inputMode === 'voicePerField' && (
+              <InputAdornment position="end">
+                <VoiceRecognition
+                  onResult={(transcript) => setFormData((prev) => ({ ...prev, costPrice: transcript }))}
+                  onStateChange={(state) => setListeningField(state === 'listening' ? 'costPrice' : null)}
+                />
+              </InputAdornment>
+            ),
+          }}
+        />
+        {listeningField === 'costPrice' && (
+          <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+            Listening... Speak now.
+          </Typography>
+        )}
+        <TextField
+          margin="normal"
+          label="Price Multiplier"
+          type="number"
+          value={priceMultiplier}
+          onChange={(e) => setPriceMultiplier(parseFloat(e.target.value) || 0)}
+          InputProps={{
+            endAdornment: <InputAdornment position="end">x</InputAdornment>,
+          }}
+          sx={{width: '250px'}}
+        />
+      </Box>
+
+      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+        <TextField
+          margin="normal"
+          id="price"
+          name="price"
+          label="Price"
+          type="number"
+          fullWidth
+          variant="outlined"
+          value={formData.price}
+          onChange={handleChange}
+          required
+          inputProps={{ 'data-testid': 'price-input' }}
+          InputProps={{
+            endAdornment: inputMode === 'voicePerField' && (
+              <InputAdornment position="end">
+                <VoiceRecognition
+                  onResult={(transcript) => setFormData((prev) => ({ ...prev, price: transcript }))}
+                  onStateChange={(state) => setListeningField(state === 'listening' ? 'price' : null)}
+                />
+              </InputAdornment>
+            ),
+          }}
+        />
+        {listeningField === 'price' && (
+          <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+            Listening... Speak now.
+          </Typography>
+        )}
+        <TextField
+          margin="normal"
+          label="Discount"
+          type="number"
+          value={discountPercentage}
+          onChange={(e) => setDiscountPercentage(parseFloat(e.target.value) || 0)}
+          InputProps={{
+            endAdornment: <InputAdornment position="end">%</InputAdornment>,
+          }}
+          sx={{width: '250px'}}
+        />
+      </Box>
       <TextField
         margin="normal"
-        id="price"
-        name="price"
-        label="Price"
+        id="discountedPrice"
+        name="discountedPrice"
+        label="Discounted Price"
         type="number"
         fullWidth
         variant="outlined"
-        value={formData.price}
+        value={formData.discountedPrice}
         onChange={handleChange}
-        required
-        inputProps={{ 'data-testid': 'price-input' }}
-        InputProps={{
-          endAdornment: inputMode === 'voicePerField' && (
-            <InputAdornment position="end">
-              <VoiceRecognition
-                onResult={(transcript) => setFormData((prev) => ({ ...prev, price: transcript }))}
-                onStateChange={(state) => setListeningField(state === 'listening' ? 'price' : null)}
-              />
-            </InputAdornment>
-          ),
-        }}
+        inputProps={{ 'data-testid': 'discountedPrice-input' }}
       />
-      {listeningField === 'price' && (
-        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-          Listening... Speak now.
-        </Typography>
-      )}
-      <TextField
-        margin="normal"
-        id="costPrice"
-        name="costPrice"
-        label="Cost Price"
-        type="number"
-        fullWidth
-        variant="outlined"
-        value={formData.costPrice}
-        onChange={handleChange}
-        required
-        inputProps={{ 'data-testid': 'costPrice-input' }}
-        InputProps={{
-          endAdornment: inputMode === 'voicePerField' && (
-            <InputAdornment position="end">
-              <VoiceRecognition
-                onResult={(transcript) => setFormData((prev) => ({ ...prev, costPrice: transcript }))}
-                onStateChange={(state) => setListeningField(state === 'listening' ? 'costPrice' : null)}
-              />
-            </InputAdornment>
-          ),
-        }}
-      />
-      {listeningField === 'costPrice' && (
-        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-          Listening... Speak now.
-        </Typography>
-      )}
       <TextField
         margin="normal"
         id="lowStockThreshold"

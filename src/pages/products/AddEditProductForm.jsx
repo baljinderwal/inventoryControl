@@ -8,6 +8,7 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import CircularProgress from '@mui/material/CircularProgress';
 import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
+import Chip from '@mui/material/Chip';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
@@ -30,6 +31,7 @@ const AddEditProductForm = ({
   const [listeningField, setListeningField] = useState(null);
   const [inputMode, setInputMode] = useState('voicePerField');
   const [startGuidedVoice, setStartGuidedVoice] = useState(false);
+  const [currentColor, setCurrentColor] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -49,7 +51,7 @@ const AddEditProductForm = ({
       { size: '8', quantity: 1 },
       { size: '9', quantity: 1 },
     ],
-    color: '',
+    colors: [],
   });
 
   const isEditMode = Boolean(product);
@@ -68,7 +70,7 @@ const AddEditProductForm = ({
         stock: '',
         batchNumber: '',
         expiryDate: '',
-        color: product.color || '',
+        colors: product.colors || [],
         sizes: product.sizes && product.sizes.length > 0 ? product.sizes : [
           { size: '6', quantity: 1 },
           { size: '7', quantity: 1 },
@@ -97,6 +99,26 @@ const AddEditProductForm = ({
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleAddColor = (e) => {
+    if (e.key === 'Enter' && currentColor.trim() !== '') {
+      e.preventDefault();
+      if (!formData.colors.includes(currentColor.trim())) {
+        setFormData((prev) => ({
+          ...prev,
+          colors: [...prev.colors, currentColor.trim()],
+        }));
+      }
+      setCurrentColor('');
+    }
+  };
+
+  const handleDeleteColor = (colorToDelete) => {
+    setFormData((prev) => ({
+      ...prev,
+      colors: prev.colors.filter((color) => color !== colorToDelete),
+    }));
   };
 
   const handleSizeQuantityChange = (index, quantity) => {
@@ -192,11 +214,16 @@ const AddEditProductForm = ({
     { name: 'lowStockThreshold', label: 'Low Stock Threshold' },
     { name: 'batchNumber', label: 'Batch Number' },
     { name: 'expiryDate', label: 'Expiry Date' },
-    { name: 'color', label: 'Color' },
+    { name: 'colors', label: 'Colors' },
   ];
 
   const handleGuidedVoiceUpdate = (fieldName, value) => {
-    setFormData((prev) => ({ ...prev, [fieldName]: value }));
+    if (fieldName === 'colors') {
+      const colorsArray = value.split(/, | /).filter(c => c.trim() !== '');
+      setFormData(prev => ({ ...prev, colors: [...new Set([...prev.colors, ...colorsArray])] }));
+    } else {
+      setFormData((prev) => ({ ...prev, [fieldName]: value }));
+    }
   };
 
   return (
@@ -467,22 +494,36 @@ const AddEditProductForm = ({
           Listening... Speak now.
         </Typography>
       )}
+      <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Colors</Typography>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2 }}>
+        {formData.colors.map((color) => (
+          <Chip
+            key={color}
+            label={color}
+            onDelete={() => handleDeleteColor(color)}
+          />
+        ))}
+      </Box>
       <TextField
         margin="normal"
-        id="color"
-        name="color"
-        label="Color"
-        inputProps={{ 'data-testid': 'color-input' }}
+        id="color-input"
+        label="Add a color"
         type="text"
         fullWidth
         variant="outlined"
-        value={formData.color}
-        onChange={handleChange}
+        value={currentColor}
+        onChange={(e) => setCurrentColor(e.target.value)}
+        onKeyDown={handleAddColor}
+        helperText="Press Enter to add a color."
         InputProps={{
+          'data-testid': 'color-input',
           endAdornment: inputMode === 'voicePerField' && (
             <InputAdornment position="end">
               <VoiceRecognition
-                onResult={(transcript) => setFormData((prev) => ({ ...prev, color: transcript }))}
+                onResult={(transcript) => {
+                  const colorsArray = transcript.split(/, | /).filter(c => c.trim() !== '');
+                  setFormData(prev => ({ ...prev, colors: [...new Set([...prev.colors, ...colorsArray])] }));
+                }}
                 onStateChange={(state) => setListeningField(state === 'listening' ? 'color' : null)}
               />
             </InputAdornment>

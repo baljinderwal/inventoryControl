@@ -21,6 +21,8 @@ import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
 import EditIcon from '@mui/icons-material/Edit';
 
 import AppDialog from '../../components/ui/AppDialog';
@@ -96,6 +98,16 @@ const ProductDetailPage = () => {
               <Typography variant="body2" color="text.secondary"><strong>Price:</strong> ${product.price?.toFixed(2)}</Typography>
               <Typography variant="body2" color="text.secondary"><strong>Cost Price:</strong> ${product.costPrice?.toFixed(2)}</Typography>
               <Typography variant="body2" color="text.secondary"><strong>Low Stock Threshold:</strong> {product.lowStockThreshold}</Typography>
+              {product.colors && product.colors.length > 0 && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="body2" color="text.secondary"><strong>Colors:</strong></Typography>
+                  <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap', gap: 0.5 }}>
+                    {product.colors.map((color) => (
+                      <Chip key={color} label={color} />
+                    ))}
+                  </Stack>
+                </Box>
+              )}
             </CardContent>
           </Card>
         </Grid>

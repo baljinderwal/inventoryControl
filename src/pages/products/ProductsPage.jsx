@@ -17,6 +17,7 @@ import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import IconButton from '@mui/material/IconButton';
+import Chip from '@mui/material/Chip';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -177,6 +178,7 @@ const ProductsPage = () => {
     { id: 'category', label: 'Category', isSortable: true },
     { id: 'price', label: 'Price', isSortable: true },
     { id: 'stock', label: 'Stock', isSortable: true },
+    { id: 'colors', label: 'Colors', isSortable: false },
     { id: 'supplierName', label: 'Supplier', isSortable: true },
     { id: 'actions', label: 'Actions', isSortable: false },
   ];
@@ -229,6 +231,13 @@ const ProductsPage = () => {
         <StockStatusIndicator product={p} />
         {p.stock}
       </Box>
+    ),
+    colors: (
+      <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+        {p.colors?.map(color => (
+          <Chip key={color} label={color} size="small" />
+        ))}
+      </Stack>
     ),
     supplierName: p.supplierName,
     actions: (

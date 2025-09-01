@@ -59,6 +59,7 @@ const AddEditProductForm = ({
     stock: '',
     batchNumber: 'B-1001',
     expiryDate: getFutureDate(),
+    createdDate: new Date().toISOString().split('T')[0],
     sizes: [
       { size: '6', quantity: 1 },
       { size: '7', quantity: 1 },
@@ -90,6 +91,7 @@ const AddEditProductForm = ({
         stock: '',
         batchNumber: '',
         expiryDate: '',
+        createdDate: product.createdDate || '',
         colors: product.colors || [],
         sizes: product.sizes && product.sizes.length > 0 ? product.sizes : [
           { size: '6', quantity: 1 },
@@ -213,6 +215,7 @@ const AddEditProductForm = ({
       delete submissionData.stock;
       delete submissionData.batchNumber;
       delete submissionData.expiryDate;
+      delete submissionData.createdDate;
     }
     mutation.mutate(submissionData);
   };
@@ -808,6 +811,19 @@ const AddEditProductForm = ({
               Listening... Speak now.
             </Typography>
           )}
+          <TextField
+            margin="normal"
+            id="createdDate"
+            name="createdDate"
+            label="Created Date"
+            type="date"
+            fullWidth
+            variant="outlined"
+            value={formData.createdDate}
+            onChange={handleChange}
+            disabled
+            InputLabelProps={{ shrink: true }}
+          />
         </>
       )}
 

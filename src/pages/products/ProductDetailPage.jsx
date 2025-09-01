@@ -95,6 +95,12 @@ const ProductDetailPage = () => {
               <Typography variant="body2" color="text.secondary"><strong>SKU:</strong> {product.sku}</Typography>
               <Typography variant="body2" color="text.secondary"><strong>Barcode:</strong> {product.barcode}</Typography>
               <Typography variant="body2" color="text.secondary"><strong>Category:</strong> {product.category}</Typography>
+              <Typography variant="body2" color="text.secondary"><strong>Brand:</strong> {product.brand}</Typography>
+              <Typography variant="body2" color="text.secondary"><strong>Model:</strong> {product.model}</Typography>
+              <Typography variant="body2" color="text.secondary"><strong>Gender:</strong> {product.gender}</Typography>
+              <Typography variant="body2" color="text.secondary"><strong>Weight:</strong> {product.weight}</Typography>
+              <Typography variant="body2" color="text.secondary"><strong>Country of Origin:</strong> {product.countryOfOrigin}</Typography>
+              <Typography variant="body2" color="text.secondary"><strong>Description:</strong> {product.description}</Typography>
               <Typography variant="body2" color="text.secondary"><strong>Price:</strong> ${product.price?.toFixed(2)}</Typography>
               <Typography variant="body2" color="text.secondary"><strong>Cost Price:</strong> ${product.costPrice?.toFixed(2)}</Typography>
               <Typography variant="body2" color="text.secondary"><strong>Low Stock Threshold:</strong> {product.lowStockThreshold}</Typography>

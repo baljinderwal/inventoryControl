@@ -8,6 +8,7 @@ import ButtonGroup from '@mui/material/ButtonGroup';
 import CircularProgress from '@mui/material/CircularProgress';
 import DialogActions from '@mui/material/DialogActions';
 import TextField from '@mui/material/TextField';
+import Chip from '@mui/material/Chip';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
@@ -18,6 +19,8 @@ import VoiceRecognition from '../../components/ui/VoiceRecognition';
 import SmartVoiceAdd from '../../components/ui/SmartVoiceAdd';
 import GuidedVoiceAdd from '../../components/ui/GuidedVoiceAdd';
 import { generateBarcode } from '../../utils/barcodeGenerator';
+
+const AVAILABLE_COLORS = ["Black", "White", "Red", "Green", "Blue", "Yellow", "Orange", "Purple", "Pink", "Brown", "Gray", "Silver", "Gold", "Wood"];
 
 const AddEditProductForm = ({
   onClose,
@@ -49,7 +52,7 @@ const AddEditProductForm = ({
       { size: '8', quantity: 1 },
       { size: '9', quantity: 1 },
     ],
-    color: '',
+    colors: [],
   });
 
   const isEditMode = Boolean(product);
@@ -68,7 +71,7 @@ const AddEditProductForm = ({
         stock: '',
         batchNumber: '',
         expiryDate: '',
-        color: product.color || '',
+        colors: product.colors || [],
         sizes: product.sizes && product.sizes.length > 0 ? product.sizes : [
           { size: '6', quantity: 1 },
           { size: '7', quantity: 1 },
@@ -97,6 +100,13 @@ const AddEditProductForm = ({
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleColorSelect = (color) => {
+    const newColors = formData.colors.includes(color)
+      ? formData.colors.filter((c) => c !== color)
+      : [...formData.colors, color];
+    setFormData((prev) => ({ ...prev, colors: newColors }));
   };
 
   const handleSizeQuantityChange = (index, quantity) => {
@@ -192,11 +202,33 @@ const AddEditProductForm = ({
     { name: 'lowStockThreshold', label: 'Low Stock Threshold' },
     { name: 'batchNumber', label: 'Batch Number' },
     { name: 'expiryDate', label: 'Expiry Date' },
-    { name: 'color', label: 'Color' },
+    { name: 'colors', label: 'Colors' },
   ];
 
   const handleGuidedVoiceUpdate = (fieldName, value) => {
-    setFormData((prev) => ({ ...prev, [fieldName]: value }));
+    if (fieldName === 'colors') {
+      const lowerCaseValue = value.toLowerCase();
+      // Improved parsing to handle various separators and extra spaces
+      const colorsArray = lowerCaseValue
+        .replace(/add |remove /g, '')
+        .split(/,|\s+/)
+        .map(c => c.trim())
+        .filter(c => c)
+        .map(c => c.charAt(0).toUpperCase() + c.slice(1)); // Capitalize first letter
+
+      if (lowerCaseValue.startsWith('add')) {
+        const newColors = [...new Set([...formData.colors, ...colorsArray])];
+        setFormData(prev => ({ ...prev, colors: newColors.filter(c => AVAILABLE_COLORS.includes(c)) }));
+      } else if (lowerCaseValue.startsWith('remove')) {
+        setFormData(prev => ({ ...prev, colors: formData.colors.filter(c => !colorsArray.includes(c))}));
+      } else {
+        // Default behavior: add the colors
+        const newColors = [...new Set([...formData.colors, ...colorsArray])];
+        setFormData(prev => ({ ...prev, colors: newColors.filter(c => AVAILABLE_COLORS.includes(c)) }));
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [fieldName]: value }));
+    }
   };
 
   return (
@@ -467,33 +499,30 @@ const AddEditProductForm = ({
           Listening... Speak now.
         </Typography>
       )}
-      <TextField
-        margin="normal"
-        id="color"
-        name="color"
-        label="Color"
-        inputProps={{ 'data-testid': 'color-input' }}
-        type="text"
-        fullWidth
-        variant="outlined"
-        value={formData.color}
-        onChange={handleChange}
-        InputProps={{
-          endAdornment: inputMode === 'voicePerField' && (
-            <InputAdornment position="end">
-              <VoiceRecognition
-                onResult={(transcript) => setFormData((prev) => ({ ...prev, color: transcript }))}
-                onStateChange={(state) => setListeningField(state === 'listening' ? 'color' : null)}
-              />
-            </InputAdornment>
-          ),
-        }}
-      />
-      {listeningField === 'color' && (
-        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-          Listening... Speak now.
-        </Typography>
-      )}
+      <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Selected Colors</Typography>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2, p: 1, border: '1px solid #ccc', borderRadius: 1, minHeight: '48px' }}>
+        {formData.colors.length > 0 ? formData.colors.map((color) => (
+          <Chip
+            key={color}
+            label={color}
+            onDelete={() => handleColorSelect(color)}
+          />
+        )) : <Typography variant="body2" color="text.secondary" sx={{p: 1}}>No colors selected.</Typography>}
+      </Box>
+
+      <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Choose from Available Colors</Typography>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        {AVAILABLE_COLORS.map((color) => (
+          <Chip
+            key={color}
+            label={color}
+            onClick={() => handleColorSelect(color)}
+            variant={formData.colors.includes(color) ? 'filled' : 'outlined'}
+            color={formData.colors.includes(color) ? 'primary' : 'default'}
+            sx={{ cursor: 'pointer' }}
+          />
+        ))}
+      </Box>
       <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Size Presets</Typography>
       <ButtonGroup variant="outlined" aria-label="size presets" sx={{ mb: 2 }}>
         <Button onClick={() => handleSizePresetChange('adult')}>Adult</Button>

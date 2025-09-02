@@ -17,33 +17,33 @@ const local = {
     const stockData = await stockResponse.json();
     const suppliers = await suppliersResponse.json();
 
-    const supplierMap = new Map();
-    suppliers.forEach(supplier => {
-      if (supplier.products && Array.isArray(supplier.products)) {
-        supplier.products.forEach(productId => {
-          supplierMap.set(productId, supplier.name);
-        });
-      }
-    });
+    const supplierMap = new Map(suppliers.map(s => [s.id, s.name]));
 
-    const stockMap = new Map();
-    stockData.forEach(item => {
-      if (!stockMap.has(item.productId)) {
-        stockMap.set(item.productId, { quantity: 0, batches: [] });
+    const stockByProduct = stockData.reduce((acc, item) => {
+      if (!acc[item.productId]) {
+        acc[item.productId] = {
+          quantity: 0,
+          batches: [],
+          supplierIds: new Set(),
+        };
       }
-      const existing = stockMap.get(item.productId);
-      existing.quantity += item.quantity;
-      // Ensure batches are properly concatenated
-      existing.batches = existing.batches.concat(item.batches);
-    });
+      acc[item.productId].quantity += item.quantity;
+      acc[item.productId].batches.push(...item.batches);
+      if (item.supplierId) {
+        acc[item.productId].supplierIds.add(item.supplierId);
+      }
+      return acc;
+    }, {});
 
     return products.map(product => {
-      const stockInfo = stockMap.get(product.id) || { quantity: 0, batches: [] };
+      const stockInfo = stockByProduct[product.id] || { quantity: 0, batches: [], supplierIds: new Set() };
+      const supplierNames = [...stockInfo.supplierIds].map(id => supplierMap.get(id) || 'N/A').join(', ');
+
       return {
         ...product,
         stock: stockInfo.quantity,
         batches: stockInfo.batches,
-        supplierName: supplierMap.get(product.id) || 'N/A',
+        supplierName: supplierNames,
       };
     });
   },
@@ -110,31 +110,27 @@ const local = {
     });
     return await putRes.json();
   },
-  addStock: async ({ productId, quantity, batchNumber, expiryDate, sizes, createdDate }) => {
-    console.log('Adding new stock batch in local mode', { productId, quantity, batchNumber, expiryDate, sizes, createdDate });
+  addStock: async ({ productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate }) => {
+    console.log('Adding new stock batch in local mode', { productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate });
 
-    const res = await fetch(`/stock?productId=${productId}`);
+    const res = await fetch(`/stock?productId=${productId}&supplierId=${supplierId}`);
     const stockEntries = await res.json();
     let stockEntry = stockEntries[0];
 
     if (stockEntry) {
-      // Update existing stock entry
       stockEntry.quantity += quantity;
-      stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate });
-
-      // Update sizes
-      if (!stockEntry.sizes) {
-        stockEntry.sizes = [];
+      stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate, supplierId });
+      if (sizes && sizes.length > 0) {
+        if (!stockEntry.sizes) stockEntry.sizes = [];
+        sizes.forEach(size => {
+          const existingSize = stockEntry.sizes.find(s => s.size === size.size);
+          if (existingSize) {
+            existingSize.quantity += size.quantity;
+          } else {
+            stockEntry.sizes.push(size);
+          }
+        });
       }
-      sizes.forEach(size => {
-        const existingSize = stockEntry.sizes.find(s => s.size === size.size);
-        if (existingSize) {
-          existingSize.quantity += size.quantity;
-        } else {
-          stockEntry.sizes.push(size);
-        }
-      });
-
       const putRes = await fetch(`/stock/${stockEntry.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -142,12 +138,12 @@ const local = {
       });
       return await putRes.json();
     } else {
-      // Create new stock entry
       const newStockEntry = {
         productId,
+        supplierId,
         quantity,
-        sizes,
-        batches: [{ batchNumber, expiryDate, quantity, sizes, createdDate }]
+        sizes: sizes || [],
+        batches: [{ batchNumber, expiryDate, quantity, sizes, createdDate, supplierId }]
       };
       const postRes = await fetch('/stock', {
         method: 'POST',
@@ -156,6 +152,30 @@ const local = {
       });
       return await postRes.json();
     }
+  },
+  updateBatchSupplier: async ({ productId, batchNumber, supplierId }) => {
+    console.log('Updating batch supplier in local mode', { productId, batchNumber, supplierId });
+    const res = await fetch(`/stock?productId=${productId}`);
+    const stockEntries = await res.json();
+    let stockEntry = stockEntries[0];
+
+    if (!stockEntry) {
+      throw new Error("Stock entry not found for this product.");
+    }
+
+    const batchIndex = stockEntry.batches.findIndex(b => b.batchNumber === batchNumber);
+    if (batchIndex === -1) {
+      throw new Error("Batch not found.");
+    }
+
+    stockEntry.batches[batchIndex].supplierId = supplierId;
+
+    const putRes = await fetch(`/stock/${stockEntry.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(stockEntry)
+    });
+    return await putRes.json();
   },
   getProductWithStock: async (id) => {
     console.log(`Fetching product ${id} with stock from local db.json`);
@@ -188,34 +208,33 @@ const remote = {
     const stockData = stockResponse.data;
     const suppliers = suppliersResponse.data;
 
-    const supplierMap = new Map();
-    suppliers.forEach(supplier => {
-      // Defensively check if supplier.products exists and is an array
-      if (supplier.products && Array.isArray(supplier.products)) {
-        supplier.products.forEach(productId => {
-          supplierMap.set(productId, supplier.name);
-        });
-      }
-    });
+    const supplierMap = new Map(suppliers.map(s => [s.id, s.name]));
 
-    const stockMap = new Map();
-
-    for (const item of stockData) {
-      if (!stockMap.has(item.productId)) {
-        stockMap.set(item.productId, { quantity: 0, batches: [] });
+    const stockByProduct = stockData.reduce((acc, item) => {
+      if (!acc[item.productId]) {
+        acc[item.productId] = {
+          quantity: 0,
+          batches: [],
+          supplierIds: new Set(),
+        };
       }
-      const existing = stockMap.get(item.productId);
-      existing.quantity += item.quantity;
-      existing.batches.push(...item.batches);
-    }
+      acc[item.productId].quantity += item.quantity;
+      acc[item.productId].batches.push(...item.batches);
+      if (item.supplierId) {
+        acc[item.productId].supplierIds.add(item.supplierId);
+      }
+      return acc;
+    }, {});
 
     return products.map(product => {
-      const stockInfo = stockMap.get(product.id) || { quantity: 0, batches: [] };
+      const stockInfo = stockByProduct[product.id] || { quantity: 0, batches: [], supplierIds: new Set() };
+      const supplierNames = [...stockInfo.supplierIds].map(id => supplierMap.get(id) || 'N/A').join(', ');
+
       return {
         ...product,
         stock: stockInfo.quantity,
         batches: stockInfo.batches,
-        supplierName: supplierMap.get(product.id) || 'N/A',
+        supplierName: supplierNames,
       };
     });
   },
@@ -262,41 +281,55 @@ const remote = {
     stockEntry.quantity = stockEntry.batches.reduce((sum, b) => sum + b.quantity, 0);
     return await api.put(`/stock/${stockEntry.productId}`, stockEntry);
   },
-  addStock: async ({ productId, quantity, batchNumber, expiryDate, sizes, createdDate }) => {
-    console.log('Adding new stock batch via API', { productId, quantity, batchNumber, expiryDate, sizes, createdDate });
+  addStock: async ({ productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate }) => {
+    console.log('Adding new stock batch via API', { productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate });
 
-    const stockRes = await api.get(`/stock?productId=${productId}`);
+    const stockRes = await api.get(`/stock?productId=${productId}&supplierId=${supplierId}`);
     let stockEntry = stockRes.data[0];
 
     if (stockEntry) {
-      // Update existing stock entry
       stockEntry.quantity += quantity;
-      stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate });
-
-      // Update sizes
-      if (!stockEntry.sizes) {
-        stockEntry.sizes = [];
+      stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate, supplierId });
+      if (sizes && sizes.length > 0) {
+        if (!stockEntry.sizes) stockEntry.sizes = [];
+        sizes.forEach(size => {
+          const existingSize = stockEntry.sizes.find(s => s.size === size.size);
+          if (existingSize) {
+            existingSize.quantity += size.quantity;
+          } else {
+            stockEntry.sizes.push(size);
+          }
+        });
       }
-      sizes.forEach(size => {
-        const existingSize = stockEntry.sizes.find(s => s.size === size.size);
-        if (existingSize) {
-          existingSize.quantity += size.quantity;
-        } else {
-          stockEntry.sizes.push(size);
-        }
-      });
-
       return await api.put(`/stock/${stockEntry.id}`, stockEntry);
     } else {
-      // Create new stock entry
       const newStockEntry = {
         productId,
+        supplierId,
         quantity,
-        sizes,
-        batches: [{ batchNumber, expiryDate, quantity, sizes, createdDate }]
+        sizes: sizes || [],
+        batches: [{ batchNumber, expiryDate, quantity, sizes, createdDate, supplierId }]
       };
       return await api.post('/stock', newStockEntry);
     }
+  },
+  updateBatchSupplier: async ({ productId, batchNumber, supplierId }) => {
+    console.log('Updating batch supplier via API', { productId, batchNumber, supplierId });
+    const stockRes = await api.get(`/stock?productId=${productId}`);
+    let stockEntry = stockRes.data[0];
+
+    if (!stockEntry) {
+      throw new Error("Stock entry not found for this product.");
+    }
+
+    const batchIndex = stockEntry.batches.findIndex(b => b.batchNumber === batchNumber);
+    if (batchIndex === -1) {
+      throw new Error("Batch not found.");
+    }
+
+    stockEntry.batches[batchIndex].supplierId = supplierId;
+
+    return await api.put(`/stock/${stockEntry.id}`, stockEntry);
   },
   getProductWithStock: async (id) => {
     console.log(`Fetching product ${id} with stock from API`);

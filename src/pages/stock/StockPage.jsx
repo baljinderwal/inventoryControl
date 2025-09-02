@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import StockAdjustmentForm from './StockAdjustmentForm';
@@ -35,10 +35,20 @@ const StockPage = () => {
   const { mode, services } = useApi();
   const { showNotification } = useNotification();
 
-  const { data: stockLevels = [], isLoading, isError, error } = useQuery({
+  const { data: stockLevels = [], isLoading: isLoadingStock, isError: isErrorStock, error: errorStock } = useQuery({
     queryKey: ['stock', mode],
     queryFn: services.stock.getStockLevels,
   });
+
+  const { data: suppliers = [], isLoading: isLoadingSuppliers } = useQuery({
+    queryKey: ['suppliers', mode],
+    queryFn: services.suppliers.getSuppliers,
+  });
+
+  const supplierMap = useMemo(() => {
+    if (!suppliers) return new Map();
+    return new Map(suppliers.map(s => [s.id, s.name]));
+  }, [suppliers]);
 
   const handleOpenAddModal = () => setIsAddModalOpen(true);
   const handleCloseAddModal = () => setIsAddModalOpen(false);
@@ -76,6 +86,7 @@ const StockPage = () => {
   const tableHeaders = [
     { id: 'name', label: 'Name' },
     { id: 'sku', label: 'SKU' },
+    { id: 'supplierName', label: 'Supplier' },
     { id: 'quantity', label: 'Total Stock' },
     { id: 'status', label: 'Status' },
     { id: 'actions', label: 'Actions' },
@@ -85,6 +96,7 @@ const StockPage = () => {
     id: p.id,
     name: p.name,
     sku: p.sku,
+    supplierName: p.supplierName,
     quantity: p.stock,
     status: (
       <Chip
@@ -121,8 +133,8 @@ const StockPage = () => {
     )
   }));
 
-  if (isLoading) return <CircularProgress />;
-  if (isError) return <Alert severity="error">Error fetching stock levels: {error.message}</Alert>;
+  if (isLoadingStock || isLoadingSuppliers) return <CircularProgress />;
+  if (isErrorStock) return <Alert severity="error">Error fetching stock levels: {errorStock.message}</Alert>;
 
   return (
     <div>
@@ -192,6 +204,7 @@ const StockPage = () => {
                   <TableCell>Quantity</TableCell>
                   <TableCell>Batch Number</TableCell>
                   <TableCell>Expiry Date</TableCell>
+                  <TableCell>Supplier</TableCell>
                   <TableCell>Sizes</TableCell>
                 </TableRow>
               </TableHead>
@@ -201,6 +214,7 @@ const StockPage = () => {
                       <TableCell>{batch.quantity}</TableCell>
                       <TableCell>{batch.batchNumber}</TableCell>
                       <TableCell>{new Date(batch.expiryDate).toLocaleDateString()}</TableCell>
+                      <TableCell>{supplierMap.get(batch.supplierId) || 'N/A'}</TableCell>
                       <TableCell>
                         {batch.sizes?.map(s => `${s.size}: ${s.quantity}`).join(', ')}
                       </TableCell>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
+import AddEditSupplierForm from '../suppliers/AddEditSupplierForm';
+import AppDialog from '../../components/ui/AppDialog';
 
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -14,6 +16,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
 
 const AddStockForm = ({ onClose }) => {
   const queryClient = useQueryClient();
@@ -21,14 +24,21 @@ const AddStockForm = ({ onClose }) => {
   const { mode, services } = useApi();
 
   const [productId, setProductId] = useState('');
+  const [supplierId, setSupplierId] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [sizes, setSizes] = useState([]);
   const [batchNumber, setBatchNumber] = useState('');
   const [expiryDate, setExpiryDate] = useState('');
+  const [isAddSupplierModalOpen, setAddSupplierModalOpen] = useState(false);
 
-  const { data: products = [], isLoading: isLoadingProducts, isError, error } = useQuery({
+  const { data: products = [], isLoading: isLoadingProducts, isError: isErrorProducts, error: errorProducts } = useQuery({
     queryKey: ['products', mode],
     queryFn: () => services.products.getProducts(),
+  });
+
+  const { data: suppliers = [], isLoading: isLoadingSuppliers, isError: isErrorSuppliers, error: errorSuppliers } = useQuery({
+    queryKey: ['suppliers', mode],
+    queryFn: () => services.suppliers.getSuppliers(),
   });
 
   const { data: stockData } = useQuery({
@@ -46,7 +56,6 @@ const AddStockForm = ({ onClose }) => {
       setSizes([]);
     }
 
-    // Set default expiry date to one year from now
     const nextYear = new Date();
     nextYear.setFullYear(nextYear.getFullYear() + 1);
     setExpiryDate(nextYear.toISOString().split('T')[0]);
@@ -63,7 +72,7 @@ const AddStockForm = ({ onClose }) => {
   }, [productId, products, stockData]);
 
   const mutation = useMutation({
-    mutationFn: services.stock.addStock,
+    mutationFn: (newStock) => services.stock.addStock(newStock),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stock'] });
       showNotification('Stock added successfully', 'success');
@@ -83,12 +92,13 @@ const AddStockForm = ({ onClose }) => {
 
   const handleSubmit = () => {
     if (!productId || !batchNumber || !expiryDate) {
-      showNotification('Please fill in all fields.', 'error');
+      showNotification('Please fill in all fields except supplier.', 'error');
       return;
     }
     const totalQuantity = sizes.reduce((acc, curr) => acc + curr.quantity, 0);
     mutation.mutate({
       productId,
+      supplierId,
       quantity: totalQuantity,
       sizes,
       batchNumber,
@@ -97,8 +107,15 @@ const AddStockForm = ({ onClose }) => {
     });
   };
 
-  if (isLoadingProducts) return <CircularProgress />;
-  if (isError) return <Alert severity="error">Error fetching products: {error.message}</Alert>;
+  const handleSupplierAdded = (newSupplier) => {
+    setAddSupplierModalOpen(false);
+    queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+    setSupplierId(newSupplier.id);
+  };
+
+  if (isLoadingProducts || isLoadingSuppliers) return <CircularProgress />;
+  if (isErrorProducts) return <Alert severity="error">Error fetching products: {errorProducts.message}</Alert>;
+  if (isErrorSuppliers) return <Alert severity="error">Error fetching suppliers: {errorSuppliers.message}</Alert>;
 
   return (
     <Box>
@@ -118,6 +135,26 @@ const AddStockForm = ({ onClose }) => {
           ))}
         </Select>
       </FormControl>
+
+      <Stack direction="row" spacing={1} alignItems="center">
+        <FormControl fullWidth margin="normal" variant="outlined">
+          <InputLabel id="supplier-select-label">Supplier</InputLabel>
+          <Select
+            labelId="supplier-select-label"
+            id="supplier-select"
+            value={supplierId}
+            onChange={(e) => setSupplierId(e.target.value)}
+            label="Supplier"
+          >
+            {suppliers.map((supplier) => (
+              <MenuItem key={supplier.id} value={supplier.id}>
+                {supplier.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Button onClick={() => setAddSupplierModalOpen(true)}>Add New</Button>
+      </Stack>
 
       {selectedProduct && selectedProduct.sizes && (
         <Box>
@@ -168,6 +205,17 @@ const AddStockForm = ({ onClose }) => {
           {mutation.isPending ? <CircularProgress size={24} /> : 'Add Stock'}
         </Button>
       </DialogActions>
+
+      <AppDialog
+        open={isAddSupplierModalOpen}
+        onClose={() => setAddSupplierModalOpen(false)}
+        title="Add New Supplier"
+      >
+        <AddEditSupplierForm
+          onClose={() => setAddSupplierModalOpen(false)}
+          onSupplierAdded={handleSupplierAdded}
+        />
+      </AppDialog>
     </Box>
   );
 };

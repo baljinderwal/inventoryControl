@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
@@ -26,8 +26,23 @@ const StockAdjustmentForm = ({
   const [adjustmentType, setAdjustmentType] = useState('out'); // 'in' or 'out'
   const [quantity, setQuantity] = useState(1);
   const [batchNumber, setBatchNumber] = useState(batches.length > 0 ? batches[0].batchNumber : '');
+  const [supplierId, setSupplierId] = useState('');
 
-  const mutation = useMutation({
+  const { data: suppliers = [] } = useQuery({
+    queryKey: ['suppliers', mode],
+    queryFn: () => services.suppliers.getSuppliers(),
+  });
+
+  useEffect(() => {
+    if (batchNumber) {
+      const selectedBatch = batches.find(b => b.batchNumber === batchNumber);
+      if (selectedBatch) {
+        setSupplierId(selectedBatch.supplierId || '');
+      }
+    }
+  }, [batchNumber, batches]);
+
+  const adjustStockMutation = useMutation({
     mutationFn: services.stock.adjustStockLevel,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stock'] });
@@ -39,16 +54,39 @@ const StockAdjustmentForm = ({
     },
   });
 
+  const updateSupplierMutation = useMutation({
+    mutationFn: services.stock.updateBatchSupplier,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stock'] });
+      showNotification('Supplier updated successfully', 'success');
+    },
+    onError: (err) => {
+      showNotification(`Error updating supplier: ${err.message}`, 'error');
+    },
+  });
+
   const handleSubmit = () => {
     const adjQuantity = adjustmentType === 'in' ? quantity : -quantity;
     if (!batchNumber) {
       showNotification('Please select a batch to adjust.', 'error');
       return;
     }
-    mutation.mutate({
+    adjustStockMutation.mutate({
       productId: product.id,
       quantity: adjQuantity,
       batchNumber,
+    });
+  };
+
+  const handleSupplierUpdate = () => {
+    if (!batchNumber || !supplierId) {
+      showNotification('Please select a batch and a supplier.', 'error');
+      return;
+    }
+    updateSupplierMutation.mutate({
+      productId: product.id,
+      batchNumber,
+      supplierId,
     });
   };
 
@@ -92,6 +130,35 @@ const StockAdjustmentForm = ({
         </Select>
       </FormControl>
 
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <FormControl fullWidth margin="normal" variant="outlined">
+          <InputLabel id="supplier-select-label">Supplier</InputLabel>
+          <Select
+            labelId="supplier-select-label"
+            id="supplier-select"
+            value={supplierId}
+            onChange={(e) => setSupplierId(e.target.value)}
+            label="Supplier"
+          >
+            <MenuItem value="">
+              <em>None</em>
+            </MenuItem>
+            {suppliers.map((supplier) => (
+              <MenuItem key={supplier.id} value={supplier.id}>
+                {supplier.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Button
+          onClick={handleSupplierUpdate}
+          disabled={updateSupplierMutation.isPending || !supplierId || supplierId === batches.find(b => b.batchNumber === batchNumber)?.supplierId}
+          variant="outlined"
+        >
+          Update Supplier
+        </Button>
+      </Box>
+
       <TextField
         autoFocus
         margin="normal"
@@ -107,8 +174,8 @@ const StockAdjustmentForm = ({
 
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSubmit} variant="contained" disabled={mutation.isPending}>
-          {mutation.isPending ? <CircularProgress size={24} /> : 'Submit Adjustment'}
+        <Button onClick={handleSubmit} variant="contained" disabled={adjustStockMutation.isPending}>
+          {adjustStockMutation.isPending ? <CircularProgress size={24} /> : 'Submit Adjustment'}
         </Button>
       </DialogActions>
     </Box>

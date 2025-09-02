@@ -34,10 +34,13 @@ const local = {
       const newStockEntry = {
         productId: newProduct.id,
         quantity: stock,
+        sizes: sizes,
         batches: [{
           batchNumber: batchNumber || `B${newProduct.id}-INIT`,
           expiryDate: expiryDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
-          quantity: stock
+          quantity: stock,
+          sizes: sizes,
+          createdDate: new Date().toISOString()
         }]
       };
       await fetch('/stock', {
@@ -105,10 +108,13 @@ const remote = {
       const newStockEntry = {
         productId: newProduct.id,
         quantity: stock,
+        sizes: sizes,
         batches: [{
           batchNumber: batchNumber || `B${newProduct.id}-INIT`,
           expiryDate: expiryDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
-          quantity: stock
+          quantity: stock,
+          sizes: sizes,
+          createdDate: new Date().toISOString()
         }]
       };
       await api.post('/stock', newStockEntry);

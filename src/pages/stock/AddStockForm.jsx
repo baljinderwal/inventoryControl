@@ -91,8 +91,8 @@ const AddStockForm = ({ onClose }) => {
   };
 
   const handleSubmit = () => {
-    if (!productId || !supplierId || !batchNumber || !expiryDate) {
-      showNotification('Please fill in all fields.', 'error');
+    if (!productId || !batchNumber || !expiryDate) {
+      showNotification('Please fill in all fields except supplier.', 'error');
       return;
     }
     const totalQuantity = sizes.reduce((acc, curr) => acc + curr.quantity, 0);

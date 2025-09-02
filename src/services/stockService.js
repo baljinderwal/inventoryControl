@@ -153,6 +153,30 @@ const local = {
       return await postRes.json();
     }
   },
+  updateBatchSupplier: async ({ productId, batchNumber, supplierId }) => {
+    console.log('Updating batch supplier in local mode', { productId, batchNumber, supplierId });
+    const res = await fetch(`/stock?productId=${productId}`);
+    const stockEntries = await res.json();
+    let stockEntry = stockEntries[0];
+
+    if (!stockEntry) {
+      throw new Error("Stock entry not found for this product.");
+    }
+
+    const batchIndex = stockEntry.batches.findIndex(b => b.batchNumber === batchNumber);
+    if (batchIndex === -1) {
+      throw new Error("Batch not found.");
+    }
+
+    stockEntry.batches[batchIndex].supplierId = supplierId;
+
+    const putRes = await fetch(`/stock/${stockEntry.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(stockEntry)
+    });
+    return await putRes.json();
+  },
   getProductWithStock: async (id) => {
     console.log(`Fetching product ${id} with stock from local db.json`);
     const response = await fetch('/db.json');
@@ -288,6 +312,24 @@ const remote = {
       };
       return await api.post('/stock', newStockEntry);
     }
+  },
+  updateBatchSupplier: async ({ productId, batchNumber, supplierId }) => {
+    console.log('Updating batch supplier via API', { productId, batchNumber, supplierId });
+    const stockRes = await api.get(`/stock?productId=${productId}`);
+    let stockEntry = stockRes.data[0];
+
+    if (!stockEntry) {
+      throw new Error("Stock entry not found for this product.");
+    }
+
+    const batchIndex = stockEntry.batches.findIndex(b => b.batchNumber === batchNumber);
+    if (batchIndex === -1) {
+      throw new Error("Batch not found.");
+    }
+
+    stockEntry.batches[batchIndex].supplierId = supplierId;
+
+    return await api.put(`/stock/${stockEntry.id}`, stockEntry);
   },
   getProductWithStock: async (id) => {
     console.log(`Fetching product ${id} with stock from API`);

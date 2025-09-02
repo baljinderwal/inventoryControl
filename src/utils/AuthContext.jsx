@@ -36,33 +36,30 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('https://inventorybackend-loop.onrender.com/auth/login', {
-        email,
-        password,
-      });
+      // Simulate a network request to the local JSON server
+      const response = await axios.get('http://localhost:3001/users');
+      const users = response.data;
+      const user = users.find(u => u.email === email && u.password === password);
 
-      if (response.data && response.data.token) {
-        const { token } = response.data;
+      if (user) {
+        // Create a dummy JWT token for local development
+        const tokenPayload = {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        };
+        const token = `dummy-header.${btoa(JSON.stringify(tokenPayload))}.dummy-signature`;
+
         localStorage.setItem('authToken', token);
-        const decodedUser = decodeJwt(token);
-        if (decodedUser) {
-          setUser(decodedUser);
-          return decodedUser;
-        } else {
-          throw new Error('Invalid token received from server.');
-        }
+        setUser(tokenPayload);
+        return tokenPayload;
       } else {
-        throw new Error('Login failed: No token received.');
+        throw new Error('Invalid credentials');
       }
     } catch (error) {
-      console.error('Login failed:', error.response ? error.response.data : error.message);
-      if (error.response) {
-        throw new Error(error.response.data.message || 'Invalid credentials');
-      } else if (error.request) {
-        throw new Error('Network error, please try again.');
-      } else {
-        throw new Error('An unexpected error occurred.');
-      }
+      console.error('Login failed:', error.message);
+      throw new Error(error.message || 'An unexpected error occurred.');
     }
   };
 

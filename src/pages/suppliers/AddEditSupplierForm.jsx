@@ -16,7 +16,7 @@ import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import OutlinedInput from '@mui/material/OutlinedInput';
 
-const AddEditSupplierForm = ({ onClose, supplier }) => {
+const AddEditSupplierForm = ({ onClose, supplier, onSupplierAdded }) => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
   const { services } = useApi();
@@ -50,9 +50,12 @@ const AddEditSupplierForm = ({ onClose, supplier }) => {
     mutationFn: isEditMode
       ? (updatedSupplier) => services.suppliers.updateSupplier(supplier.id, updatedSupplier)
       : services.suppliers.addSupplier,
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       showNotification(`Supplier ${isEditMode ? 'updated' : 'added'} successfully`, 'success');
+      if (!isEditMode && onSupplierAdded) {
+        onSupplierAdded(data);
+      }
       onClose();
     },
     onError: (err) => {

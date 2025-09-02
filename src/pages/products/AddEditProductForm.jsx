@@ -42,6 +42,7 @@ const AddEditProductForm = ({
   const [startGuidedVoice, setStartGuidedVoice] = useState(false);
   const [priceMultiplier, setPriceMultiplier] = useState(1.5);
   const [discountPercentage, setDiscountPercentage] = useState(10);
+  const [showStockInfo, setShowStockInfo] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -239,6 +240,9 @@ const AddEditProductForm = ({
       delete submissionData.batchNumber;
       delete submissionData.expiryDate;
       delete submissionData.createdDate;
+    } else if (!showStockInfo) {
+      delete submissionData.batchNumber;
+      delete submissionData.expiryDate;
     }
     mutation.mutate(submissionData);
   };
@@ -815,7 +819,17 @@ const AddEditProductForm = ({
         </Box>
       ))}
 
-      {!isEditMode && (
+      {!isEditMode && !showStockInfo && (
+        <Button
+          variant="outlined"
+          onClick={() => setShowStockInfo(true)}
+          sx={{ mt: 2, mb: 2 }}
+        >
+          Add Stock
+        </Button>
+      )}
+
+      {!isEditMode && showStockInfo && (
         <>
           <Typography variant="h6" sx={{ mt: 3, mb: 2, fontWeight: 600, color: 'text.primary' }}>
             Stock Information

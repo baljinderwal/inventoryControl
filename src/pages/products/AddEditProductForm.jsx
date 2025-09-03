@@ -232,16 +232,13 @@ const AddEditProductForm = ({
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const totalStock = formData.sizes.reduce((acc, item) => acc + item.quantity, 0);
-
     const submissionData = {
       ...formData,
       price: parseFloat(formData.price) || 0,
       costPrice: parseFloat(formData.costPrice) || 0,
       discountedPrice: parseFloat(formData.discountedPrice) || 0,
       lowStockThreshold: parseInt(formData.lowStockThreshold, 10) || 0,
-      stock: totalStock,
-      sizes: formData.sizes.map(s => ({ size: s.size, quantity: 0 })),
+      sizes: formData.sizes,
     };
     if (isEditMode) {
       delete submissionData.stock;

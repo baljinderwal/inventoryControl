@@ -19,25 +19,28 @@ const local = {
   },
   addProduct: async (productData) => {
     console.log('Adding product in local mode', productData);
-    const { stock, batchNumber, expiryDate, sizes, colors, ...productDetails } = productData;
+    const { batchNumber, expiryDate, sizes, colors, ...productDetails } = productData;
 
     // Create product
     const productResponse = await fetch('/products', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...productDetails, createdAt: new Date().toISOString(), sizes, colors }),
+      body: JSON.stringify({ ...productDetails, createdAt: new Date().toISOString(), colors }),
     });
     const newProduct = await productResponse.json();
 
     // Create stock entry
-    if (stock > 0) {
+    const totalStock = sizes.reduce((acc, item) => acc + item.quantity, 0);
+    if (totalStock > 0) {
       const newStockEntry = {
         productId: newProduct.id,
-        quantity: stock,
+        quantity: totalStock,
+        sizes: sizes,
         batches: [{
           batchNumber: batchNumber || `B${newProduct.id}-INIT`,
           expiryDate: expiryDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
-          quantity: stock
+          quantity: totalStock,
+          sizes: sizes
         }]
       };
       await fetch('/stock', {
@@ -94,21 +97,24 @@ const remote = {
   },
   addProduct: async (productData) => {
     console.log('Adding product via API', productData);
-    const { stock, batchNumber, expiryDate, sizes, colors, ...productDetails } = productData;
+    const { batchNumber, expiryDate, sizes, colors, ...productDetails } = productData;
 
     // Create product
-    const productResponse = await api.post('/products', { ...productDetails, sizes, colors });
+    const productResponse = await api.post('/products', { ...productDetails, colors });
     const newProduct = productResponse.data;
 
     // Create stock entry
-    if (stock > 0) {
+    const totalStock = sizes.reduce((acc, item) => acc + item.quantity, 0);
+    if (totalStock > 0) {
       const newStockEntry = {
         productId: newProduct.id,
-        quantity: stock,
+        quantity: totalStock,
+        sizes: sizes,
         batches: [{
           batchNumber: batchNumber || `B${newProduct.id}-INIT`,
           expiryDate: expiryDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
-          quantity: stock
+          quantity: totalStock,
+          sizes: sizes
         }]
       };
       await api.post('/stock', newStockEntry);

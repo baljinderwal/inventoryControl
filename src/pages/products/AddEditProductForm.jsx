@@ -138,7 +138,20 @@ const AddEditProductForm = ({
   };
 
   const handleAccordionChange = (panel) => (event, isExpanded) => {
+    if (panel === 'add-stock' && !addStock) {
+      return;
+    }
     setExpanded(isExpanded ? panel : false);
+  };
+
+  const handleStockToggle = (event) => {
+    const isChecked = event.target.checked;
+    setAddStock(isChecked);
+    if (isChecked) {
+      setExpanded('add-stock');
+    } else {
+      setExpanded(false);
+    }
   };
 
   const handleColorSelect = (color) => {
@@ -857,15 +870,20 @@ const AddEditProductForm = ({
       </Accordion>
 
       <Accordion expanded={expanded === 'add-stock'} onChange={handleAccordionChange('add-stock')}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="add-stock-content" id="add-stock-header">
-          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary', flexGrow: 1 }}>Add Stock</Typography>
-            <Switch
-              checked={addStock}
-              onChange={(e) => setAddStock(e.target.checked)}
-              onClick={(e) => e.stopPropagation()}
-            />
-          </Box>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon sx={{ color: addStock ? 'inherit' : 'text.disabled' }} />}
+          aria-controls="add-stock-content"
+          id="add-stock-header"
+          sx={{ '& .MuiAccordionSummary-content': { alignItems: 'center' } }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 600, color: addStock ? 'text.primary' : 'text.disabled', flexGrow: 1 }}>
+            Add Stock
+          </Typography>
+          <Switch
+            checked={addStock}
+            onChange={handleStockToggle}
+            onClick={(e) => e.stopPropagation()}
+          />
         </AccordionSummary>
         <AccordionDetails>
           <fieldset disabled={!addStock} style={{ border: 'none', padding: 0, margin: 0 }}>

@@ -684,8 +684,7 @@ const AddEditProductForm = ({
                   label="Quantity"
                   type="number"
                   value={size.quantity}
-                  onChange={(e) => handleSizeQuantityChange(.jsx
-                  index, e.target.value)}
+                  onChange={(e) => handleSizeQuantityChange(index, e.target.value)}
                   inputProps={{ 'data-testid': `quantity-input-${size.size}` }}
                   sx={{ width: '100px' }}
                 />

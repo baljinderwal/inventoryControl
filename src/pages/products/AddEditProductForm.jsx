@@ -15,6 +15,8 @@ import FormControl from '@mui/material/FormControl';
 import Switch from '@mui/material/Switch';
 import InputLabel from '@mui/material/InputLabel';
 import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
 import Typography from '@mui/material/Typography';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -149,6 +151,25 @@ const AddEditProductForm = ({
     const newSizes = [...formData.sizes];
     newSizes[index].quantity = parseInt(quantity, 10) || 0;
     setFormData((prev) => ({ ...prev, sizes: newSizes }));
+  };
+
+  const handleSizeChange = (index, size) => {
+    const newSizes = [...formData.sizes];
+    newSizes[index].size = size;
+    setFormData((prev) => ({ ...prev, sizes: newSizes }));
+  };
+
+  const handleDeleteSize = (index) => {
+    const newSizes = [...formData.sizes];
+    newSizes.splice(index, 1);
+    setFormData((prev) => ({ ...prev, sizes: newSizes }));
+  };
+
+  const handleAddSize = () => {
+    setFormData((prev) => ({
+      ...prev,
+      sizes: [...prev.sizes, { size: '', quantity: 1 }],
+    }));
   };
 
   const handleSizePresetChange = (preset) => {
@@ -850,7 +871,7 @@ const AddEditProductForm = ({
                 <TextField
                   label="Size"
                   value={size.size}
-                  disabled
+                  onChange={(e) => handleSizeChange(index, e.target.value)}
                   sx={{ mr: 2, width: '100px' }}
                 />
                 <TextField
@@ -861,8 +882,14 @@ const AddEditProductForm = ({
                   inputProps={{ 'data-testid': `quantity-input-${size.size}` }}
                   sx={{ width: '100px' }}
                 />
+                <IconButton onClick={() => handleDeleteSize(index)} aria-label="delete size">
+                  <DeleteIcon />
+                </IconButton>
               </Box>
             ))}
+            <Button onClick={handleAddSize} variant="outlined" sx={{ mt: 1 }}>
+              Add Size
+            </Button>
 
             {!isEditMode && (
               <>

@@ -639,6 +639,36 @@ const AddEditProductForm = ({
               sx={{width: '250px', mt: 2}}
             />
           </Box>
+          <TextField
+            margin="normal"
+            id="lowStockThreshold"
+            name="lowStockThreshold"
+            label="Low Stock Threshold"
+            type="number"
+            fullWidth
+            variant="outlined"
+            value={formData.lowStockThreshold}
+            onChange={handleChange}
+            required
+            inputProps={{ 'data-testid': 'lowStockThreshold-input' }}
+            InputProps={{
+              endAdornment: inputMode === 'voicePerField' && (
+                <InputAdornment position="end">
+                  <VoiceRecognition
+                    onResult={(transcript) =>
+                      setFormData((prev) => ({ ...prev, lowStockThreshold: transcript }))
+                    }
+                    onStateChange={(state) => setListeningField(state === 'listening' ? 'lowStockThreshold' : null)}
+                  />
+                </InputAdornment>
+              ),
+            }}
+          />
+          {listeningField === 'lowStockThreshold' && (
+            <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+              Listening... Speak now.
+            </Typography>
+          )}
         </AccordionDetails>
       </Accordion>
 
@@ -898,36 +928,6 @@ const AddEditProductForm = ({
                   </Typography>
                 )}
               </>
-            )}
-            <TextField
-              margin="normal"
-              id="lowStockThreshold"
-              name="lowStockThreshold"
-              label="Low Stock Threshold"
-              type="number"
-              fullWidth
-              variant="outlined"
-              value={formData.lowStockThreshold}
-              onChange={handleChange}
-              required
-              inputProps={{ 'data-testid': 'lowStockThreshold-input' }}
-              InputProps={{
-                endAdornment: inputMode === 'voicePerField' && (
-                  <InputAdornment position="end">
-                    <VoiceRecognition
-                      onResult={(transcript) =>
-                        setFormData((prev) => ({ ...prev, lowStockThreshold: transcript }))
-                      }
-                      onStateChange={(state) => setListeningField(state === 'listening' ? 'lowStockThreshold' : null)}
-                    />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            {listeningField === 'lowStockThreshold' && (
-              <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-                Listening... Speak now.
-              </Typography>
             )}
           </fieldset>
         </AccordionDetails>

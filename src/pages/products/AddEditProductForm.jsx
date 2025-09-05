@@ -51,6 +51,7 @@ const AddEditProductForm = ({
   const [priceMultiplier, setPriceMultiplier] = useState(1.5);
   const [discountPercentage, setDiscountPercentage] = useState(10);
   const [addStock, setAddStock] = useState(false);
+  const [sizeProfile, setSizeProfile] = useState('adult');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -566,9 +567,12 @@ const AddEditProductForm = ({
             <Select
               labelId="size-profile-label"
               id="size-profile"
-              value=""
+              value={sizeProfile}
               label="Size Profile"
-              onChange={(e) => handleSizePresetChange(e.target.value)}
+              onChange={(e) => {
+                handleSizePresetChange(e.target.value);
+                setSizeProfile(e.target.value);
+              }}
             >
               <MenuItem value="adult">Adult</MenuItem>
               <MenuItem value="boy">Boy</MenuItem>

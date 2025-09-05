@@ -526,30 +526,6 @@ const AddEditProductForm = ({
             </Typography>
           )}
 
-          {/* Variant Attributes */}
-          <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Colors</Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2, p: 1, border: '1px solid #ccc', borderRadius: 1, minHeight: '48px' }}>
-            {formData.colors.length > 0 ? formData.colors.map((color) => (
-              <Chip
-                key={color}
-                label={color}
-                onDelete={() => handleColorSelect(color)}
-              />
-            )) : <Typography variant="body2" color="text.secondary" sx={{p: 1}}>No colors selected.</Typography>}
-          </Box>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {AVAILABLE_COLORS.map((color) => (
-              <Chip
-                key={color}
-                label={color}
-                onClick={() => handleColorSelect(color)}
-                variant={formData.colors.includes(color) ? 'filled' : 'outlined'}
-                color={formData.colors.includes(color) ? 'primary' : 'default'}
-                sx={{ cursor: 'pointer' }}
-              />
-            ))}
-          </Box>
-
           {/* Sales & Pricing */}
           <TextField
             margin="normal"
@@ -804,6 +780,29 @@ const AddEditProductForm = ({
         </AccordionSummary>
         <AccordionDetails>
           {/* Supplier & Logistics */}
+          {/* Variant Attributes */}
+          <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Colors</Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2, p: 1, border: '1px solid #ccc', borderRadius: 1, minHeight: '48px' }}>
+            {formData.colors.length > 0 ? formData.colors.map((color) => (
+              <Chip
+                key={color}
+                label={color}
+                onDelete={() => handleColorSelect(color)}
+              />
+            )) : <Typography variant="body2" color="text.secondary" sx={{p: 1}}>No colors selected.</Typography>}
+          </Box>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {AVAILABLE_COLORS.map((color) => (
+              <Chip
+                key={color}
+                label={color}
+                onClick={() => handleColorSelect(color)}
+                variant={formData.colors.includes(color) ? 'filled' : 'outlined'}
+                color={formData.colors.includes(color) ? 'primary' : 'default'}
+                sx={{ cursor: 'pointer' }}
+              />
+            ))}
+          </Box>
           <TextField
             margin="normal"
             id="countryOfOrigin"

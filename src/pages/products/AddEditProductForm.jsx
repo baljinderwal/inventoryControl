@@ -17,6 +17,7 @@ import InputLabel from '@mui/material/InputLabel';
 import InputAdornment from '@mui/material/InputAdornment';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import Typography from '@mui/material/Typography';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -435,7 +436,9 @@ const AddEditProductForm = ({
                       onStateChange={(state) => setListeningField(state === 'listening' ? 'sku' : null)}
                     />
                   )}
-                  <Button onClick={handleGenerateSku}>Generate</Button>
+                  <IconButton onClick={handleGenerateSku} aria-label="generate sku">
+                    <RefreshIcon />
+                  </IconButton>
                 </InputAdornment>
               ),
             }}
@@ -465,7 +468,9 @@ const AddEditProductForm = ({
                       onStateChange={(state) => setListeningField(state === 'listening' ? 'barcode' : null)}
                     />
                   )}
-                  <Button onClick={handleGenerateBarcode}>Generate</Button>
+                  <IconButton onClick={handleGenerateBarcode} aria-label="generate barcode">
+                    <RefreshIcon />
+                  </IconButton>
                 </InputAdornment>
               ),
             }}

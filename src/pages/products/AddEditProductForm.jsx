@@ -27,6 +27,8 @@ import SmartVoiceAdd from '../../components/ui/SmartVoiceAdd';
 import GuidedVoiceAdd from '../../components/ui/GuidedVoiceAdd';
 import { generateBarcode } from '../../utils/barcodeGenerator';
 import { generateSku } from '../../utils/skuGenerator';
+import AppDialog from '../../components/ui/AppDialog';
+import AddEditSupplierForm from '../suppliers/AddEditSupplierForm';
 
 const AVAILABLE_COLORS = ["Black", "White", "Red", "Green", "Blue", "Yellow", "Orange", "Purple", "Pink", "Brown", "Gray", "Silver", "Gold", "Wood"];
 
@@ -44,6 +46,11 @@ const AddEditProductForm = ({
   const { showNotification } = useNotification();
   const { mode, services } = useApi();
 
+  const { data: suppliers } = useQuery({
+    queryKey: ['suppliers', mode],
+    queryFn: () => services.suppliers.getSuppliers(),
+  });
+
   const [listeningField, setListeningField] = useState(null);
   const [inputMode, setInputMode] = useState('voicePerField');
   const [startGuidedVoice, setStartGuidedVoice] = useState(false);
@@ -52,6 +59,7 @@ const AddEditProductForm = ({
   const [discountPercentage, setDiscountPercentage] = useState(10);
   const [addStock, setAddStock] = useState(false);
   const [sizeProfile, setSizeProfile] = useState('adult');
+  const [isAddSupplierDialogOpen, setAddSupplierDialogOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -70,6 +78,7 @@ const AddEditProductForm = ({
     lowStockThreshold: '',
     imageUrl: '',
     stock: '',
+    supplierId: '',
     batchNumber: 'B-1001',
     expiryDate: getFutureDate(),
     createdDate: new Date().toISOString().split('T')[0],
@@ -282,6 +291,7 @@ const AddEditProductForm = ({
       submissionData.batchNumber = formData.batchNumber;
       submissionData.expiryDate = formData.expiryDate;
       submissionData.createdDate = formData.createdDate;
+      submissionData.supplierId = formData.supplierId;
     } else {
       delete submissionData.sizes;
       delete submissionData.batchNumber;
@@ -915,8 +925,42 @@ const AddEditProductForm = ({
 
             {!isEditMode && (
               <>
-                <TextField
-                  margin="normal"
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <FormControl fullWidth margin="normal" disabled={!addStock}>
+                    <InputLabel id="supplier-label">Supplier</InputLabel>
+                    <Select
+                      labelId="supplier-label"
+                      id="supplierId"
+                      name="supplierId"
+                      value={formData.supplierId}
+                      onChange={handleChange}
+                      label="Supplier"
+                    >
+                      {suppliers?.map((supplier) => (
+                        <MenuItem key={supplier.id} value={supplier.id}>
+                          {supplier.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <Button onClick={() => setAddSupplierDialogOpen(true)} variant="outlined" sx={{ mt: 1, whiteSpace: 'nowrap' }}>
+                    Add New
+                  </Button>
+                </Box>
+              <AppDialog
+                open={isAddSupplierDialogOpen}
+                onClose={() => setAddSupplierDialogOpen(false)}
+                title="Add New Supplier"
+              >
+                <AddEditSupplierForm
+                  onClose={() => {
+                    setAddSupplierDialogOpen(false);
+                    queryClient.invalidateQueries(['suppliers', mode]);
+                  }}
+                />
+              </AppDialog>
+              <TextField
+                margin="normal"
                   id="batchNumber"
                   name="batchNumber"
                   label="Batch Number"

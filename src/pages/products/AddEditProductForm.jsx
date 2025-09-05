@@ -540,6 +540,21 @@ const AddEditProductForm = ({
             </Typography>
           )}
 
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="size-profile-label">Size Profile</InputLabel>
+            <Select
+              labelId="size-profile-label"
+              id="size-profile"
+              value=""
+              label="Size Profile"
+              onChange={(e) => handleSizePresetChange(e.target.value)}
+            >
+              <MenuItem value="adult">Adult</MenuItem>
+              <MenuItem value="boy">Boy</MenuItem>
+              <MenuItem value="toddler">Toddler</MenuItem>
+            </Select>
+          </FormControl>
+
           {/* Sales & Pricing */}
           <TextField
             margin="normal"
@@ -829,13 +844,6 @@ const AddEditProductForm = ({
         </AccordionSummary>
         <AccordionDetails>
           <fieldset disabled={!addStock} style={{ border: 'none', padding: 0, margin: 0 }}>
-            <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Size Presets</Typography>
-            <ButtonGroup variant="outlined" aria-label="size presets" sx={{ mb: 2 }}>
-              <Button onClick={() => handleSizePresetChange('adult')}>Adult</Button>
-              <Button onClick={() => handleSizePresetChange('boy')}>Boy</Button>
-              <Button onClick={() => handleSizePresetChange('toddler')}>Toddler</Button>
-            </ButtonGroup>
-
             <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Sizes & Quantity</Typography>
             {formData.sizes && formData.sizes.map((size, index) => (
               <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>

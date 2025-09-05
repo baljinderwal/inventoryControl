@@ -15,6 +15,8 @@ import FormControl from '@mui/material/FormControl';
 import Switch from '@mui/material/Switch';
 import InputLabel from '@mui/material/InputLabel';
 import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
 import Typography from '@mui/material/Typography';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -45,10 +47,11 @@ const AddEditProductForm = ({
   const [listeningField, setListeningField] = useState(null);
   const [inputMode, setInputMode] = useState('voicePerField');
   const [startGuidedVoice, setStartGuidedVoice] = useState(false);
-  const [expanded, setExpanded] = useState('basic-info');
+  const [expanded, setExpanded] = useState('product-details');
   const [priceMultiplier, setPriceMultiplier] = useState(1.5);
   const [discountPercentage, setDiscountPercentage] = useState(10);
   const [addStock, setAddStock] = useState(false);
+  const [sizeProfile, setSizeProfile] = useState('adult');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -135,7 +138,20 @@ const AddEditProductForm = ({
   };
 
   const handleAccordionChange = (panel) => (event, isExpanded) => {
+    if (panel === 'add-stock' && !addStock) {
+      return;
+    }
     setExpanded(isExpanded ? panel : false);
+  };
+
+  const handleStockToggle = (event) => {
+    const isChecked = event.target.checked;
+    setAddStock(isChecked);
+    if (isChecked) {
+      setExpanded('add-stock');
+    } else {
+      setExpanded(false);
+    }
   };
 
   const handleColorSelect = (color) => {
@@ -149,6 +165,25 @@ const AddEditProductForm = ({
     const newSizes = [...formData.sizes];
     newSizes[index].quantity = parseInt(quantity, 10) || 0;
     setFormData((prev) => ({ ...prev, sizes: newSizes }));
+  };
+
+  const handleSizeChange = (index, size) => {
+    const newSizes = [...formData.sizes];
+    newSizes[index].size = size;
+    setFormData((prev) => ({ ...prev, sizes: newSizes }));
+  };
+
+  const handleDeleteSize = (index) => {
+    const newSizes = [...formData.sizes];
+    newSizes.splice(index, 1);
+    setFormData((prev) => ({ ...prev, sizes: newSizes }));
+  };
+
+  const handleAddSize = () => {
+    setFormData((prev) => ({
+      ...prev,
+      sizes: [...prev.sizes, { size: '', quantity: 1 }],
+    }));
   };
 
   const handleSizePresetChange = (preset) => {
@@ -540,6 +575,24 @@ const AddEditProductForm = ({
             </Typography>
           )}
 
+          <FormControl fullWidth margin="normal">
+            <InputLabel id="size-profile-label">Size Profile</InputLabel>
+            <Select
+              labelId="size-profile-label"
+              id="size-profile"
+              value={sizeProfile}
+              label="Size Profile"
+              onChange={(e) => {
+                handleSizePresetChange(e.target.value);
+                setSizeProfile(e.target.value);
+              }}
+            >
+              <MenuItem value="adult">Adult</MenuItem>
+              <MenuItem value="boy">Boy</MenuItem>
+              <MenuItem value="toddler">Toddler</MenuItem>
+            </Select>
+          </FormControl>
+
           {/* Sales & Pricing */}
           <TextField
             margin="normal"
@@ -639,6 +692,36 @@ const AddEditProductForm = ({
               sx={{width: '250px', mt: 2}}
             />
           </Box>
+          <TextField
+            margin="normal"
+            id="lowStockThreshold"
+            name="lowStockThreshold"
+            label="Low Stock Threshold"
+            type="number"
+            fullWidth
+            variant="outlined"
+            value={formData.lowStockThreshold}
+            onChange={handleChange}
+            required
+            inputProps={{ 'data-testid': 'lowStockThreshold-input' }}
+            InputProps={{
+              endAdornment: inputMode === 'voicePerField' && (
+                <InputAdornment position="end">
+                  <VoiceRecognition
+                    onResult={(transcript) =>
+                      setFormData((prev) => ({ ...prev, lowStockThreshold: transcript }))
+                    }
+                    onStateChange={(state) => setListeningField(state === 'listening' ? 'lowStockThreshold' : null)}
+                  />
+                </InputAdornment>
+              ),
+            }}
+          />
+          {listeningField === 'lowStockThreshold' && (
+            <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+              Listening... Speak now.
+            </Typography>
+          )}
         </AccordionDetails>
       </Accordion>
 
@@ -787,32 +870,30 @@ const AddEditProductForm = ({
       </Accordion>
 
       <Accordion expanded={expanded === 'add-stock'} onChange={handleAccordionChange('add-stock')}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="add-stock-content" id="add-stock-header">
-          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary', flexGrow: 1 }}>Add Stock</Typography>
-            <Switch
-              checked={addStock}
-              onChange={(e) => setAddStock(e.target.checked)}
-              onClick={(e) => e.stopPropagation()}
-            />
-          </Box>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon sx={{ color: addStock ? 'inherit' : 'text.disabled' }} />}
+          aria-controls="add-stock-content"
+          id="add-stock-header"
+          sx={{ '& .MuiAccordionSummary-content': { alignItems: 'center' } }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 600, color: addStock ? 'text.primary' : 'text.disabled', flexGrow: 1 }}>
+            Add Stock
+          </Typography>
+          <Switch
+            checked={addStock}
+            onChange={handleStockToggle}
+            onClick={(e) => e.stopPropagation()}
+          />
         </AccordionSummary>
         <AccordionDetails>
           <fieldset disabled={!addStock} style={{ border: 'none', padding: 0, margin: 0 }}>
-            <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Size Presets</Typography>
-            <ButtonGroup variant="outlined" aria-label="size presets" sx={{ mb: 2 }}>
-              <Button onClick={() => handleSizePresetChange('adult')}>Adult</Button>
-              <Button onClick={() => handleSizePresetChange('boy')}>Boy</Button>
-              <Button onClick={() => handleSizePresetChange('toddler')}>Toddler</Button>
-            </ButtonGroup>
-
             <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Sizes & Quantity</Typography>
             {formData.sizes && formData.sizes.map((size, index) => (
               <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <TextField
                   label="Size"
                   value={size.size}
-                  disabled
+                  onChange={(e) => handleSizeChange(index, e.target.value)}
                   sx={{ mr: 2, width: '100px' }}
                 />
                 <TextField
@@ -823,8 +904,14 @@ const AddEditProductForm = ({
                   inputProps={{ 'data-testid': `quantity-input-${size.size}` }}
                   sx={{ width: '100px' }}
                 />
+                <IconButton onClick={() => handleDeleteSize(index)} aria-label="delete size">
+                  <DeleteIcon />
+                </IconButton>
               </Box>
             ))}
+            <Button onClick={handleAddSize} variant="outlined" sx={{ mt: 1 }}>
+              Add Size
+            </Button>
 
             {!isEditMode && (
               <>
@@ -898,36 +985,6 @@ const AddEditProductForm = ({
                   </Typography>
                 )}
               </>
-            )}
-            <TextField
-              margin="normal"
-              id="lowStockThreshold"
-              name="lowStockThreshold"
-              label="Low Stock Threshold"
-              type="number"
-              fullWidth
-              variant="outlined"
-              value={formData.lowStockThreshold}
-              onChange={handleChange}
-              required
-              inputProps={{ 'data-testid': 'lowStockThreshold-input' }}
-              InputProps={{
-                endAdornment: inputMode === 'voicePerField' && (
-                  <InputAdornment position="end">
-                    <VoiceRecognition
-                      onResult={(transcript) =>
-                        setFormData((prev) => ({ ...prev, lowStockThreshold: transcript }))
-                      }
-                      onStateChange={(state) => setListeningField(state === 'listening' ? 'lowStockThreshold' : null)}
-                    />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            {listeningField === 'lowStockThreshold' && (
-              <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-                Listening... Speak now.
-              </Typography>
             )}
           </fieldset>
         </AccordionDetails>

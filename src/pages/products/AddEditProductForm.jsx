@@ -958,10 +958,12 @@ const AddEditProductForm = ({
                 title="Add New Supplier"
               >
                 <AddEditSupplierForm
-                  onClose={() => {
+                  onSupplierAdded={(newSupplier) => {
                     setAddSupplierDialogOpen(false);
                     queryClient.invalidateQueries(['suppliers', mode]);
+                    setFormData((prev) => ({ ...prev, supplierId: newSupplier.id }));
                   }}
+                  onClose={() => setAddSupplierDialogOpen(false)}
                 />
               </AppDialog>
               <TextField

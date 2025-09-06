@@ -61,6 +61,7 @@ const AddEditProductForm = ({
   const [addStock, setAddStock] = useState(false);
   const [sizeProfile, setSizeProfile] = useState('adult');
   const [isAddSupplierDialogOpen, setAddSupplierDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -127,20 +128,65 @@ const AddEditProductForm = ({
     }
   }, [product]);
 
-  const mutation = useMutation({
-    mutationFn: isEditMode ?
-      (updatedProduct) => services.products.updateProduct(product.id, updatedProduct) :
-      services.products.addProduct,
-    onSuccess: () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      // Step 1: Prepare and add/update the product.
+      const productData = {
+        name: formData.name,
+        sku: formData.sku,
+        barcode: formData.barcode,
+        category: formData.category,
+        brand: formData.brand,
+        model: formData.model,
+        gender: formData.gender,
+        weight: formData.weight,
+        countryOfOrigin: formData.countryOfOrigin,
+        description: formData.description,
+        price: parseFloat(formData.price) || 0,
+        costPrice: parseFloat(formData.costPrice) || 0,
+        discountedPrice: parseFloat(formData.discountedPrice) || 0,
+        lowStockThreshold: parseInt(formData.lowStockThreshold, 10) || 0,
+        imageUrl: formData.imageUrl,
+        colors: formData.colors,
+      };
+
+      let productResponse;
+      if (isEditMode) {
+        productResponse = await services.products.updateProduct(product.id, productData);
+      } else {
+        productResponse = await services.products.addProduct(productData);
+      }
+
+      // Step 2: If stock is to be added, create a new stock entry.
+      if (addStock && !isEditMode) {
+        const sizes = formData.sizes || [];
+        const totalQuantity = sizes.reduce((sum, size) => sum + (size.quantity || 0), 0);
+        const stockData = {
+          productId: productResponse.id,
+          supplierId: formData.supplierId,
+          quantity: totalQuantity,
+          batchNumber: formData.batchNumber,
+          expiryDate: formData.expiryDate,
+          sizes: sizes,
+          createdDate: formData.createdDate,
+        };
+        await services.stock.addStock(stockData);
+      }
+
       showNotification(`Product ${isEditMode ? 'updated' : 'added'} successfully`, 'success');
-      // Invalidate the specific query key used by the ProductsPage to ensure it refetches.
       queryClient.invalidateQueries({ queryKey: ['stock', mode] });
+      queryClient.invalidateQueries({ queryKey: ['products', mode] });
       onClose();
-    },
-    onError: (err) => {
+
+    } catch (err) {
       showNotification(`Error: ${err.message}`, 'error');
-    },
-  });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -276,39 +322,6 @@ const AddEditProductForm = ({
     setFormData((prev) => ({ ...prev, ...data }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const submissionData = {
-      ...formData,
-      price: parseFloat(formData.price) || 0,
-      costPrice: parseFloat(formData.costPrice) || 0,
-      discountedPrice: parseFloat(formData.discountedPrice) || 0,
-      lowStockThreshold: parseInt(formData.lowStockThreshold, 10) || 0,
-    };
-
-    if (addStock) {
-      submissionData.sizes = formData.sizes;
-      submissionData.batchNumber = formData.batchNumber;
-      submissionData.expiryDate = formData.expiryDate;
-      submissionData.createdDate = formData.createdDate;
-      submissionData.supplierId = formData.supplierId;
-    } else {
-      delete submissionData.sizes;
-      delete submissionData.batchNumber;
-      delete submissionData.expiryDate;
-      delete submissionData.createdDate;
-      delete submissionData.stock;
-    }
-
-    if (isEditMode) {
-      delete submissionData.stock;
-      delete submissionData.batchNumber;
-      delete submissionData.expiryDate;
-      delete submissionData.createdDate;
-    }
-    mutation.mutate(submissionData);
-  };
 
   const guidedVoiceFields = [
     { name: 'name', label: 'Product Name' },
@@ -1043,8 +1056,8 @@ const AddEditProductForm = ({
 
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button type="submit" variant="contained" disabled={mutation.isPending}>
-          {mutation.isPending ? <CircularProgress size={24} /> : (isEditMode ? 'Update Product' : 'Add Product')}
+        <Button type="submit" variant="contained" disabled={isSubmitting}>
+          {isSubmitting ? <CircularProgress size={24} /> : (isEditMode ? 'Update Product' : 'Add Product')}
         </Button>
       </DialogActions>
     </Box>

@@ -162,14 +162,15 @@ const AddEditProductForm = ({
 
       // Step 2: If stock is to be added, create a new stock entry.
       if (addStock && !isEditMode) {
-        const totalQuantity = formData.sizes.reduce((sum, size) => sum + (size.quantity || 0), 0);
+        const sizes = formData.sizes || [];
+        const totalQuantity = sizes.reduce((sum, size) => sum + (size.quantity || 0), 0);
         const stockData = {
           productId: productResponse.id,
           supplierId: formData.supplierId,
           quantity: totalQuantity,
           batchNumber: formData.batchNumber,
           expiryDate: formData.expiryDate,
-          sizes: formData.sizes,
+          sizes: sizes,
           createdDate: formData.createdDate,
         };
         await services.stock.addStock(stockData);

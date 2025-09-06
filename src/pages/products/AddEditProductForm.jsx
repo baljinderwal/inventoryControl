@@ -59,7 +59,6 @@ const AddEditProductForm = ({
   const [priceMultiplier, setPriceMultiplier] = useState(1.5);
   const [discountPercentage, setDiscountPercentage] = useState(10);
   const [addStock, setAddStock] = useState(false);
-  const [sizeProfile, setSizeProfile] = useState('adult');
   const [isAddSupplierDialogOpen, setAddSupplierDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -70,6 +69,7 @@ const AddEditProductForm = ({
     category: '',
     brand: '',
     model: '',
+    sizeProfile: 'adult',
     gender: 'Male',
     weight: '',
     countryOfOrigin: 'India',
@@ -104,6 +104,7 @@ const AddEditProductForm = ({
         category: product.category || '',
         brand: product.brand || '',
         model: product.model || '',
+        sizeProfile: product.sizeProfile || 'adult',
         gender: product.gender || '',
         weight: product.weight || '',
         countryOfOrigin: product.countryOfOrigin || '',
@@ -141,6 +142,7 @@ const AddEditProductForm = ({
         category: formData.category,
         brand: formData.brand,
         model: formData.model,
+        sizeProfile: formData.sizeProfile,
         gender: formData.gender,
         weight: formData.weight,
         countryOfOrigin: formData.countryOfOrigin,
@@ -552,7 +554,7 @@ const AddEditProductForm = ({
             margin="normal"
             id="model"
             name="model"
-            label="Subcategory"
+            label="Model"
             inputProps={{ 'data-testid': 'model-input' }}
             type="text"
             fullWidth
@@ -608,11 +610,12 @@ const AddEditProductForm = ({
             <Select
               labelId="size-profile-label"
               id="size-profile"
-              value={sizeProfile}
+              name="sizeProfile"
+              value={formData.sizeProfile}
               label="Size Profile"
               onChange={(e) => {
+                handleChange(e);
                 handleSizePresetChange(e.target.value);
-                setSizeProfile(e.target.value);
               }}
             >
               <MenuItem value="adult">Adult</MenuItem>

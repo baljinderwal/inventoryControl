@@ -114,7 +114,7 @@ const local = {
   addStock: async ({ productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate }) => {
     console.log('Adding new stock batch in local mode', { productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate });
 
-    const res = await fetch(`/stock?productId=${productId}&supplierId=${supplierId}`);
+    const res = await fetch(`/stock?productId=${productId}`);
     const stockEntries = await res.json();
     let stockEntry = stockEntries[0];
 
@@ -141,7 +141,6 @@ const local = {
     } else {
       const newStockEntry = {
         productId,
-        supplierId,
         quantity,
         sizes: sizes || [],
         batches: [{ batchNumber, expiryDate, quantity, sizes, createdDate, supplierId }]
@@ -292,7 +291,7 @@ const remote = {
   addStock: async ({ productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate }) => {
     console.log('Adding new stock batch via API', { productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate });
 
-    const stockRes = await api.get(`/stock?productId=${productId}&supplierId=${supplierId}`);
+    const stockRes = await api.get(`/stock?productId=${productId}`);
     let stockEntry = stockRes.data[0];
 
     if (stockEntry && stockEntry.id) {
@@ -313,7 +312,6 @@ const remote = {
     } else {
       const newStockEntry = {
         productId,
-        supplierId,
         quantity,
         sizes: sizes || [],
         batches: [{ batchNumber, expiryDate, quantity, sizes, createdDate, supplierId }]

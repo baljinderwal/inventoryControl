@@ -3,11 +3,10 @@ import api from './api';
 const local = {
   getStockLevels: async () => {
     console.log('Fetching stock levels from local API endpoints');
-    const fetchOptions = { cache: 'no-cache' };
     const [productsResponse, stockResponse, suppliersResponse] = await Promise.all([
-      fetch('/products', fetchOptions),
-      fetch('/stock', fetchOptions),
-      fetch('/suppliers', fetchOptions)
+      fetch('/products'),
+      fetch('/stock'),
+      fetch('/suppliers')
     ]);
 
     if (!productsResponse.ok || !stockResponse.ok || !suppliersResponse.ok) {
@@ -118,7 +117,7 @@ const local = {
     const stockEntries = await res.json();
     let stockEntry = stockEntries[0];
 
-    if (stockEntry && stockEntry.id) {
+    if (stockEntry) {
       stockEntry.quantity += quantity;
       stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate, supplierId });
       if (sizes && sizes.length > 0) {
@@ -200,17 +199,10 @@ const remote = {
   getStockLevels: async () => {
     console.log('Fetching stock levels from API');
     const stockUrl = '/stock';
-    const config = {
-      headers: {
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      },
-    };
     const [productsResponse, stockResponse, suppliersResponse] = await Promise.all([
-      api.get('/products', config),
-      api.get(stockUrl, config),
-      api.get('/suppliers', config),
+      api.get('/products'),
+      api.get(stockUrl),
+      api.get('/suppliers'),
     ]);
     const products = productsResponse.data;
     const stockData = stockResponse.data;
@@ -295,7 +287,7 @@ const remote = {
     const stockRes = await api.get(`/stock?productId=${productId}&supplierId=${supplierId}`);
     let stockEntry = stockRes.data[0];
 
-    if (stockEntry && stockEntry.id) {
+    if (stockEntry) {
       stockEntry.quantity += quantity;
       stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate, supplierId });
       if (sizes && sizes.length > 0) {

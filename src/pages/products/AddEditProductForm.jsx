@@ -12,12 +12,8 @@ import Chip from '@mui/material/Chip';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import Switch from '@mui/material/Switch';
 import InputLabel from '@mui/material/InputLabel';
 import InputAdornment from '@mui/material/InputAdornment';
-import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
-import RefreshIcon from '@mui/icons-material/Refresh';
 import Typography from '@mui/material/Typography';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -28,8 +24,6 @@ import SmartVoiceAdd from '../../components/ui/SmartVoiceAdd';
 import GuidedVoiceAdd from '../../components/ui/GuidedVoiceAdd';
 import { generateBarcode } from '../../utils/barcodeGenerator';
 import { generateSku } from '../../utils/skuGenerator';
-import AppDialog from '../../components/ui/AppDialog';
-import AddEditSupplierForm from '../suppliers/AddEditSupplierForm';
 
 const AVAILABLE_COLORS = ["Black", "White", "Red", "Green", "Blue", "Yellow", "Orange", "Purple", "Pink", "Brown", "Gray", "Silver", "Gold", "Wood"];
 
@@ -47,20 +41,13 @@ const AddEditProductForm = ({
   const { showNotification } = useNotification();
   const { mode, services } = useApi();
 
-  const { data: suppliers } = useQuery({
-    queryKey: ['suppliers', mode],
-    queryFn: () => services.suppliers.getSuppliers(),
-  });
-
   const [listeningField, setListeningField] = useState(null);
   const [inputMode, setInputMode] = useState('voicePerField');
   const [startGuidedVoice, setStartGuidedVoice] = useState(false);
-  const [expanded, setExpanded] = useState('product-details');
+  const [expanded, setExpanded] = useState('basic-info');
   const [priceMultiplier, setPriceMultiplier] = useState(1.5);
   const [discountPercentage, setDiscountPercentage] = useState(10);
-  const [addStock, setAddStock] = useState(false);
-  const [isAddSupplierDialogOpen, setAddSupplierDialogOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showStockSection, setShowStockSection] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -69,7 +56,6 @@ const AddEditProductForm = ({
     category: '',
     brand: '',
     model: '',
-    sizeProfile: 'adult',
     gender: 'Male',
     weight: '',
     countryOfOrigin: 'India',
@@ -80,7 +66,6 @@ const AddEditProductForm = ({
     lowStockThreshold: '',
     imageUrl: '',
     stock: '',
-    supplierId: '',
     batchNumber: 'B-1001',
     expiryDate: getFutureDate(),
     createdDate: new Date().toISOString().split('T')[0],
@@ -104,7 +89,6 @@ const AddEditProductForm = ({
         category: product.category || '',
         brand: product.brand || '',
         model: product.model || '',
-        sizeProfile: product.sizeProfile || 'adult',
         gender: product.gender || '',
         weight: product.weight || '',
         countryOfOrigin: product.countryOfOrigin || '',
@@ -129,66 +113,20 @@ const AddEditProductForm = ({
     }
   }, [product]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      // Step 1: Prepare and add/update the product.
-      const productData = {
-        name: formData.name,
-        sku: formData.sku,
-        barcode: formData.barcode,
-        category: formData.category,
-        brand: formData.brand,
-        model: formData.model,
-        sizeProfile: formData.sizeProfile,
-        gender: formData.gender,
-        weight: formData.weight,
-        countryOfOrigin: formData.countryOfOrigin,
-        description: formData.description,
-        price: parseFloat(formData.price) || 0,
-        costPrice: parseFloat(formData.costPrice) || 0,
-        discountedPrice: parseFloat(formData.discountedPrice) || 0,
-        lowStockThreshold: parseInt(formData.lowStockThreshold, 10) || 0,
-        imageUrl: formData.imageUrl,
-        colors: formData.colors,
-      };
-
-      let productResponse;
-      if (isEditMode) {
-        productResponse = await services.products.updateProduct(product.id, productData);
-      } else {
-        productResponse = await services.products.addProduct(productData);
-      }
-
-      // Step 2: If stock is to be added, create a new stock entry.
-      if (addStock && !isEditMode) {
-        const sizes = formData.sizes || [];
-        const totalQuantity = sizes.reduce((sum, size) => sum + (size.quantity || 0), 0);
-        const stockData = {
-          productId: productResponse.id,
-          supplierId: formData.supplierId,
-          quantity: totalQuantity,
-          batchNumber: formData.batchNumber,
-          expiryDate: formData.expiryDate,
-          sizes: sizes,
-          createdDate: formData.createdDate,
-        };
-        await services.stock.addStock(stockData);
-      }
-
+  const mutation = useMutation({
+    mutationFn: isEditMode ?
+      (updatedProduct) => services.products.updateProduct(product.id, updatedProduct) :
+      services.products.addProduct,
+    onSuccess: () => {
       showNotification(`Product ${isEditMode ? 'updated' : 'added'} successfully`, 'success');
+      // Invalidate the specific query key used by the ProductsPage to ensure it refetches.
       queryClient.invalidateQueries({ queryKey: ['stock', mode] });
-      queryClient.invalidateQueries({ queryKey: ['products', mode] });
       onClose();
-
-    } catch (err) {
+    },
+    onError: (err) => {
       showNotification(`Error: ${err.message}`, 'error');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    },
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -196,20 +134,7 @@ const AddEditProductForm = ({
   };
 
   const handleAccordionChange = (panel) => (event, isExpanded) => {
-    if (panel === 'add-stock' && !addStock) {
-      return;
-    }
     setExpanded(isExpanded ? panel : false);
-  };
-
-  const handleStockToggle = (event) => {
-    const isChecked = event.target.checked;
-    setAddStock(isChecked);
-    if (isChecked) {
-      setExpanded('add-stock');
-    } else {
-      setExpanded(false);
-    }
   };
 
   const handleColorSelect = (color) => {
@@ -223,25 +148,6 @@ const AddEditProductForm = ({
     const newSizes = [...formData.sizes];
     newSizes[index].quantity = parseInt(quantity, 10) || 0;
     setFormData((prev) => ({ ...prev, sizes: newSizes }));
-  };
-
-  const handleSizeChange = (index, size) => {
-    const newSizes = [...formData.sizes];
-    newSizes[index].size = size;
-    setFormData((prev) => ({ ...prev, sizes: newSizes }));
-  };
-
-  const handleDeleteSize = (index) => {
-    const newSizes = [...formData.sizes];
-    newSizes.splice(index, 1);
-    setFormData((prev) => ({ ...prev, sizes: newSizes }));
-  };
-
-  const handleAddSize = () => {
-    setFormData((prev) => ({
-      ...prev,
-      sizes: [...prev.sizes, { size: '', quantity: 1 }],
-    }));
   };
 
   const handleSizePresetChange = (preset) => {
@@ -324,6 +230,25 @@ const AddEditProductForm = ({
     setFormData((prev) => ({ ...prev, ...data }));
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const submissionData = {
+      ...formData,
+      price: parseFloat(formData.price) || 0,
+      costPrice: parseFloat(formData.costPrice) || 0,
+      discountedPrice: parseFloat(formData.discountedPrice) || 0,
+      lowStockThreshold: parseInt(formData.lowStockThreshold, 10) || 0,
+      sizes: formData.sizes,
+    };
+    if (isEditMode) {
+      delete submissionData.stock;
+      delete submissionData.batchNumber;
+      delete submissionData.expiryDate;
+      delete submissionData.createdDate;
+    }
+    mutation.mutate(submissionData);
+  };
 
   const guidedVoiceFields = [
     { name: 'name', label: 'Product Name' },
@@ -396,235 +321,393 @@ const AddEditProductForm = ({
         />
       )}
       
-      <Accordion expanded={expanded === 'product-details'} onChange={handleAccordionChange('product-details')}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="product-details-content" id="product-details-header">
-          <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>Product details</Typography>
+      <Accordion expanded={expanded === 'basic-info'} onChange={handleAccordionChange('basic-info')}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="basic-info-content" id="basic-info-header">
+          <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>Basic Information</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {/* Basic Information */}
           <TextField
             margin="normal"
             id="name"
-            name="name"
-            label="Product Name"
-            inputProps={{ 'data-testid': 'name-input' }}
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            InputProps={{
-              endAdornment: inputMode === 'voicePerField' && (
-                <InputAdornment position="end">
-                  <VoiceRecognition
-                    onResult={(transcript) => setFormData((prev) => ({ ...prev, name: transcript }))}
-                    onStateChange={(state) => setListeningField(state === 'listening' ? 'name' : null)}
-                  />
-                </InputAdornment>
-              ),
-            }}
-          />
-          {listeningField === 'name' && (
-            <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-              Listening... Speak now.
-            </Typography>
-          )}
-          <TextField
-            margin="normal"
-            id="sku"
-            name="sku"
-            label="SKU"
-            inputProps={{ 'data-testid': 'sku-input' }}
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={formData.sku}
-            onChange={handleChange}
-            required
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  {inputMode === 'voicePerField' && (
-                    <VoiceRecognition
-                      onResult={(transcript) => setFormData((prev) => ({ ...prev, sku: transcript }))}
-                      onStateChange={(state) => setListeningField(state === 'listening' ? 'sku' : null)}
-                    />
-                  )}
-                  <IconButton onClick={handleGenerateSku} aria-label="generate sku">
-                    <RefreshIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          {listeningField === 'sku' && (
-            <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-              Listening... Speak now.
-            </Typography>
-          )}
-          <TextField
-            margin="normal"
-            id="barcode"
-            name="barcode"
-            label="Barcode"
-            inputProps={{ 'data-testid': 'barcode-input' }}
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={formData.barcode}
-            onChange={handleChange}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  {inputMode === 'voicePerField' && (
-                    <VoiceRecognition
-                      onResult={(transcript) => setFormData((prev) => ({ ...prev, barcode: transcript }))}
-                      onStateChange={(state) => setListeningField(state === 'listening' ? 'barcode' : null)}
-                    />
-                  )}
-                  <IconButton onClick={handleGenerateBarcode} aria-label="generate barcode">
-                    <RefreshIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          {listeningField === 'barcode' && (
-            <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-              Listening... Speak now.
-            </Typography>
-          )}
-          <TextField
-            margin="normal"
-            id="brand"
-            name="brand"
-            label="Brand"
-            inputProps={{ 'data-testid': 'brand-input' }}
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={formData.brand}
-            onChange={handleChange}
-            InputProps={{
-              endAdornment: inputMode === 'voicePerField' && (
-                <InputAdornment position="end">
-                  <VoiceRecognition
-                    onResult={(transcript) => setFormData((prev) => ({ ...prev, brand: transcript }))}
-                    onStateChange={(state) => setListeningField(state === 'listening' ? 'brand' : null)}
-                  />
-                </InputAdornment>
-              ),
-            }}
-          />
-          {listeningField === 'brand' && (
-            <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-              Listening... Speak now.
-            </Typography>
-          )}
-          <TextField
-            margin="normal"
-            id="category"
-            name="category"
-            label="Category"
-            inputProps={{ 'data-testid': 'category-input' }}
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={formData.category}
-            onChange={handleChange}
-            required
-            InputProps={{
-              endAdornment: inputMode === 'voicePerField' && (
-                <InputAdornment position="end">
-                  <VoiceRecognition
-                    onResult={(transcript) => setFormData((prev) => ({ ...prev, category: transcript }))}
-                    onStateChange={(state) => setListeningField(state === 'listening' ? 'category' : null)}
-                  />
-                </InputAdornment>
-              ),
-            }}
-          />
-          {listeningField === 'category' && (
-            <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-              Listening... Speak now.
-            </Typography>
-          )}
-          <TextField
-            margin="normal"
-            id="model"
-            name="model"
-            label="Model"
-            inputProps={{ 'data-testid': 'model-input' }}
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={formData.model}
-            onChange={handleChange}
-            InputProps={{
-              endAdornment: inputMode === 'voicePerField' && (
-                <InputAdornment position="end">
-                  <VoiceRecognition
-                    onResult={(transcript) => setFormData((prev) => ({ ...prev, model: transcript }))}
-                    onStateChange={(state) => setListeningField(state === 'listening' ? 'model' : null)}
-                  />
-                </InputAdornment>
-              ),
-            }}
-          />
-          {listeningField === 'model' && (
-            <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-              Listening... Speak now.
-            </Typography>
-          )}
-          <TextField
-            margin="normal"
-            id="gender"
-            name="gender"
-            label="Gender"
-            inputProps={{ 'data-testid': 'gender-input' }}
-            type="text"
-            fullWidth
-            variant="outlined"
-            value={formData.gender}
-            onChange={handleChange}
-            InputProps={{
-              endAdornment: inputMode === 'voicePerField' && (
-                <InputAdornment position="end">
-                  <VoiceRecognition
-                    onResult={(transcript) => setFormData((prev) => ({ ...prev, gender: transcript }))}
-                    onStateChange={(state) => setListeningField(state === 'listening' ? 'gender' : null)}
-                  />
-                </InputAdornment>
-              ),
-            }}
-          />
-          {listeningField === 'gender' && (
-            <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-              Listening... Speak now.
-            </Typography>
-          )}
+        name="name"
+        label="Product Name"
+        inputProps={{ 'data-testid': 'name-input' }}
+        type="text"
+        fullWidth
+        variant="outlined"
+        value={formData.name}
+        onChange={handleChange}
+        required
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, name: transcript }))}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'name' : null)}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      {listeningField === 'name' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
+      <TextField
+        margin="normal"
+        id="sku"
+        name="sku"
+        label="SKU"
+        inputProps={{ 'data-testid': 'sku-input' }}
+        type="text"
+        fullWidth
+        variant="outlined"
+        value={formData.sku}
+        onChange={handleChange}
+        required
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              {inputMode === 'voicePerField' && (
+                <VoiceRecognition
+                  onResult={(transcript) => setFormData((prev) => ({ ...prev, sku: transcript }))}
+                  onStateChange={(state) => setListeningField(state === 'listening' ? 'sku' : null)}
+                />
+              )}
+              <Button onClick={handleGenerateSku}>Generate</Button>
+            </InputAdornment>
+          ),
+        }}
+      />
+      {listeningField === 'sku' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
+      <TextField
+        margin="normal"
+        id="barcode"
+        name="barcode"
+        label="Barcode"
+        inputProps={{ 'data-testid': 'barcode-input' }}
+        type="text"
+        fullWidth
+        variant="outlined"
+        value={formData.barcode}
+        onChange={handleChange}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              {inputMode === 'voicePerField' && (
+                <VoiceRecognition
+                  onResult={(transcript) => setFormData((prev) => ({ ...prev, barcode: transcript }))}
+                  onStateChange={(state) => setListeningField(state === 'listening' ? 'barcode' : null)}
+                />
+              )}
+              <Button onClick={handleGenerateBarcode}>Generate</Button>
+            </InputAdornment>
+          ),
+        }}
+      />
+      {listeningField === 'barcode' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
+      <TextField
+        margin="normal"
+        id="brand"
+        name="brand"
+        label="Brand"
+        inputProps={{ 'data-testid': 'brand-input' }}
+        type="text"
+        fullWidth
+        variant="outlined"
+        value={formData.brand}
+        onChange={handleChange}
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, brand: transcript }))}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'brand' : null)}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      {listeningField === 'brand' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
+      <TextField
+        margin="normal"
+        id="category"
+        name="category"
+        label="Category"
+        inputProps={{ 'data-testid': 'category-input' }}
+        type="text"
+        fullWidth
+        variant="outlined"
+        value={formData.category}
+        onChange={handleChange}
+        required
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, category: transcript }))}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'category' : null)}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      {listeningField === 'category' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
+      <TextField
+        margin="normal"
+        id="model"
+        name="model"
+        label="Subcategory"
+        inputProps={{ 'data-testid': 'model-input' }}
+        type="text"
+        fullWidth
+        variant="outlined"
+        value={formData.model}
+        onChange={handleChange}
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, model: transcript }))}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'model' : null)}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      {listeningField === 'model' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
+      <TextField
+        margin="normal"
+        id="gender"
+        name="gender"
+        label="Gender"
+        inputProps={{ 'data-testid': 'gender-input' }}
+        type="text"
+        fullWidth
+        variant="outlined"
+        value={formData.gender}
+        onChange={handleChange}
+        InputProps={{
+          endAdornment: inputMode === 'voicePerField' && (
+            <InputAdornment position="end">
+              <VoiceRecognition
+                onResult={(transcript) => setFormData((prev) => ({ ...prev, gender: transcript }))}
+                onStateChange={(state) => setListeningField(state === 'listening' ? 'gender' : null)}
+              />
+            </InputAdornment>
+          ),
+        }}
+      />
+      {listeningField === 'gender' && (
+        <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+          Listening... Speak now.
+        </Typography>
+      )}
+        </AccordionDetails>
+      </Accordion>
 
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="size-profile-label">Size Profile</InputLabel>
-            <Select
-              labelId="size-profile-label"
-              id="size-profile"
-              name="sizeProfile"
-              value={formData.sizeProfile}
-              label="Size Profile"
-              onChange={(e) => {
-                handleChange(e);
-                handleSizePresetChange(e.target.value);
+      <Accordion expanded={expanded === 'variant-attributes'} onChange={handleAccordionChange('variant-attributes')}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="variant-attributes-content" id="variant-attributes-header">
+          <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>Variant Attributes</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Colors</Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2, p: 1, border: '1px solid #ccc', borderRadius: 1, minHeight: '48px' }}>
+            {formData.colors.length > 0 ? formData.colors.map((color) => (
+              <Chip
+                key={color}
+                label={color}
+                onDelete={() => handleColorSelect(color)}
+              />
+            )) : <Typography variant="body2" color="text.secondary" sx={{p: 1}}>No colors selected.</Typography>}
+          </Box>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {AVAILABLE_COLORS.map((color) => (
+              <Chip
+                key={color}
+                label={color}
+                onClick={() => handleColorSelect(color)}
+                variant={formData.colors.includes(color) ? 'filled' : 'outlined'}
+                color={formData.colors.includes(color) ? 'primary' : 'default'}
+                sx={{ cursor: 'pointer' }}
+              />
+            ))}
+          </Box>
+        </AccordionDetails>
+      </Accordion>
+
+      {!isEditMode && !showStockSection && (
+        <Button onClick={() => setShowStockSection(true)} variant="outlined" sx={{ mt: 2, mb: 2 }}>
+          Add Stock
+        </Button>
+      )}
+
+      {(isEditMode || showStockSection) && (
+        <Accordion expanded={expanded === 'stock'} onChange={handleAccordionChange('stock')}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="stock-content" id="stock-header">
+            <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>Stock</Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Size Presets</Typography>
+            <ButtonGroup variant="outlined" aria-label="size presets" sx={{ mb: 2 }}>
+              <Button onClick={() => handleSizePresetChange('adult')}>Adult</Button>
+              <Button onClick={() => handleSizePresetChange('boy')}>Boy</Button>
+              <Button onClick={() => handleSizePresetChange('toddler')}>Toddler</Button>
+            </ButtonGroup>
+
+            <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Sizes & Quantity</Typography>
+            {formData.sizes && formData.sizes.map((size, index) => (
+              <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <TextField
+                  label="Size"
+                  value={size.size}
+                  disabled
+                  sx={{ mr: 2, width: '100px' }}
+                />
+                <TextField
+                  label="Quantity"
+                  type="number"
+                  value={size.quantity}
+                  onChange={(e) => handleSizeQuantityChange(index, e.target.value)}
+                  inputProps={{ 'data-testid': `quantity-input-${size.size}` }}
+                  sx={{ width: '100px' }}
+                />
+              </Box>
+            ))}
+
+            {!isEditMode && (
+              <>
+                <TextField
+                  margin="normal"
+                  id="batchNumber"
+                  name="batchNumber"
+                  label="Batch Number"
+                  inputProps={{ 'data-testid': 'batchNumber-input' }}
+                  type="text"
+                  fullWidth
+                  variant="outlined"
+                  value={formData.batchNumber}
+                  onChange={handleChange}
+                  InputProps={{
+                    endAdornment: inputMode === 'voicePerField' && (
+                      <InputAdornment position="end">
+                        <VoiceRecognition
+                          onResult={(transcript) => setFormData((prev) => ({ ...prev, batchNumber: transcript }))}
+                          onStateChange={(state) => setListeningField(state === 'listening' ? 'batchNumber' : null)}
+                        />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                {listeningField === 'batchNumber' && (
+                  <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+                    Listening... Speak now.
+                  </Typography>
+                )}
+                <TextField
+                  margin="normal"
+                  id="createdDate"
+                  name="createdDate"
+                  label="Created Date"
+                  type="date"
+                  fullWidth
+                  variant="outlined"
+                  value={formData.createdDate}
+                  onChange={handleChange}
+                  disabled
+                  InputLabelProps={{ shrink: true }}
+                />
+                <TextField
+                  margin="normal"
+                  id="expiryDate"
+                  name="expiryDate"
+                  label="Expiry Date"
+                  type="date"
+                  fullWidth
+                  variant="outlined"
+                  value={formData.expiryDate}
+                  onChange={handleChange}
+                  InputLabelProps={{ shrink: true }}
+                  InputProps={{
+                    endAdornment: inputMode === 'voicePerField' && (
+                      <InputAdornment position="end">
+                        <VoiceRecognition
+                          onResult={(transcript) =>
+                            setFormData((prev) => ({ ...prev, expiryDate: transcript }))
+                          }
+                          onStateChange={(state) => setListeningField(state === 'listening' ? 'expiryDate' : null)}
+                        />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                {listeningField === 'expiryDate' && (
+                  <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+                    Listening... Speak now.
+                  </Typography>
+                )}
+              </>
+            )}
+            <TextField
+              margin="normal"
+              id="lowStockThreshold"
+              name="lowStockThreshold"
+              label="Low Stock Threshold"
+              type="number"
+              fullWidth
+              variant="outlined"
+              value={formData.lowStockThreshold}
+              onChange={handleChange}
+              required
+              inputProps={{ 'data-testid': 'lowStockThreshold-input' }}
+              InputProps={{
+                endAdornment: inputMode === 'voicePerField' && (
+                  <InputAdornment position="end">
+                    <VoiceRecognition
+                      onResult={(transcript) =>
+                        setFormData((prev) => ({ ...prev, lowStockThreshold: transcript }))
+                      }
+                      onStateChange={(state) => setListeningField(state === 'listening' ? 'lowStockThreshold' : null)}
+                    />
+                  </InputAdornment>
+                ),
               }}
-            >
-              <MenuItem value="adult">Adult</MenuItem>
-              <MenuItem value="boy">Boy</MenuItem>
-              <MenuItem value="toddler">Toddler</MenuItem>
-            </Select>
-          </FormControl>
+            />
+            {listeningField === 'lowStockThreshold' && (
+              <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
+                Listening... Speak now.
+              </Typography>
+            )}
+          </AccordionDetails>
+        </Accordion>
+      )}
 
-          {/* Sales & Pricing */}
+      <Accordion expanded={expanded === 'sales-pricing'} onChange={handleAccordionChange('sales-pricing')}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="sales-pricing-content" id="sales-pricing-header">
+          <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>Sales & Pricing</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
           <TextField
             margin="normal"
             id="costPrice"
@@ -723,68 +806,14 @@ const AddEditProductForm = ({
               sx={{width: '250px', mt: 2}}
             />
           </Box>
-          <TextField
-            margin="normal"
-            id="lowStockThreshold"
-            name="lowStockThreshold"
-            label="Low Stock Threshold"
-            type="number"
-            fullWidth
-            variant="outlined"
-            value={formData.lowStockThreshold}
-            onChange={handleChange}
-            required
-            inputProps={{ 'data-testid': 'lowStockThreshold-input' }}
-            InputProps={{
-              endAdornment: inputMode === 'voicePerField' && (
-                <InputAdornment position="end">
-                  <VoiceRecognition
-                    onResult={(transcript) =>
-                      setFormData((prev) => ({ ...prev, lowStockThreshold: transcript }))
-                    }
-                    onStateChange={(state) => setListeningField(state === 'listening' ? 'lowStockThreshold' : null)}
-                  />
-                </InputAdornment>
-              ),
-            }}
-          />
-          {listeningField === 'lowStockThreshold' && (
-            <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-              Listening... Speak now.
-            </Typography>
-          )}
         </AccordionDetails>
       </Accordion>
 
-      <Accordion expanded={expanded === 'additional-details'} onChange={handleAccordionChange('additional-details')}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="additional-details-content" id="additional-details-header">
-          <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>Additional details</Typography>
+      <Accordion expanded={expanded === 'supplier-logistics'} onChange={handleAccordionChange('supplier-logistics')}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="supplier-logistics-content" id="supplier-logistics-header">
+          <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>Supplier & Logistics</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          {/* Supplier & Logistics */}
-          {/* Variant Attributes */}
-          <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Colors</Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2, p: 1, border: '1px solid #ccc', borderRadius: 1, minHeight: '48px' }}>
-            {formData.colors.length > 0 ? formData.colors.map((color) => (
-              <Chip
-                key={color}
-                label={color}
-                onDelete={() => handleColorSelect(color)}
-              />
-            )) : <Typography variant="body2" color="text.secondary" sx={{p: 1}}>No colors selected.</Typography>}
-          </Box>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {AVAILABLE_COLORS.map((color) => (
-              <Chip
-                key={color}
-                label={color}
-                onClick={() => handleColorSelect(color)}
-                variant={formData.colors.includes(color) ? 'filled' : 'outlined'}
-                color={formData.colors.includes(color) ? 'primary' : 'default'}
-                sx={{ cursor: 'pointer' }}
-              />
-            ))}
-          </Box>
           <TextField
             margin="normal"
             id="countryOfOrigin"
@@ -839,8 +868,14 @@ const AddEditProductForm = ({
               Listening... Speak now.
             </Typography>
           )}
+        </AccordionDetails>
+      </Accordion>
 
-          {/* Description & Media */}
+      <Accordion expanded={expanded === 'description-media'} onChange={handleAccordionChange('description-media')}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="description-media-content" id="description-media-header">
+          <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>Description & Media</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
           <TextField
             margin="normal"
             id="description"
@@ -900,167 +935,10 @@ const AddEditProductForm = ({
         </AccordionDetails>
       </Accordion>
 
-      <Accordion expanded={expanded === 'add-stock'} onChange={handleAccordionChange('add-stock')}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon sx={{ color: addStock ? 'inherit' : 'text.disabled' }} />}
-          aria-controls="add-stock-content"
-          id="add-stock-header"
-          sx={{ '& .MuiAccordionSummary-content': { alignItems: 'center' } }}
-        >
-          <Typography variant="h6" sx={{ fontWeight: 600, color: addStock ? 'text.primary' : 'text.disabled', flexGrow: 1 }}>
-            Add Stock
-          </Typography>
-          <Switch
-            checked={addStock}
-            onChange={handleStockToggle}
-            onClick={(e) => e.stopPropagation()}
-          />
-        </AccordionSummary>
-        <AccordionDetails>
-          <fieldset disabled={!addStock} style={{ border: 'none', padding: 0, margin: 0 }}>
-            <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Sizes & Quantity</Typography>
-            {formData.sizes && formData.sizes.map((size, index) => (
-              <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <TextField
-                  label="Size"
-                  value={size.size}
-                  onChange={(e) => handleSizeChange(index, e.target.value)}
-                  sx={{ mr: 2, width: '100px' }}
-                />
-                <TextField
-                  label="Quantity"
-                  type="number"
-                  value={size.quantity}
-                  onChange={(e) => handleSizeQuantityChange(index, e.target.value)}
-                  inputProps={{ 'data-testid': `quantity-input-${size.size}` }}
-                  sx={{ width: '100px' }}
-                />
-                <IconButton onClick={() => handleDeleteSize(index)} aria-label="delete size">
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            ))}
-            <Button onClick={handleAddSize} variant="outlined" sx={{ mt: 1 }}>
-              Add Size
-            </Button>
-
-            {!isEditMode && (
-              <>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <FormControl fullWidth margin="normal" disabled={!addStock}>
-                    <InputLabel id="supplier-label">Supplier</InputLabel>
-                    <Select
-                      labelId="supplier-label"
-                      id="supplierId"
-                      name="supplierId"
-                      value={formData.supplierId}
-                      onChange={handleChange}
-                      label="Supplier"
-                    >
-                      {suppliers?.map((supplier) => (
-                        <MenuItem key={supplier.id} value={supplier.id}>
-                          {supplier.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <Button onClick={() => setAddSupplierDialogOpen(true)} variant="outlined" sx={{ mt: 1, whiteSpace: 'nowrap' }}>
-                    Add New
-                  </Button>
-                </Box>
-              <AppDialog
-                open={isAddSupplierDialogOpen}
-                onClose={() => setAddSupplierDialogOpen(false)}
-                title="Add New Supplier"
-              >
-                <AddEditSupplierForm
-                  onSupplierAdded={(newSupplier) => {
-                    setAddSupplierDialogOpen(false);
-                    queryClient.invalidateQueries(['suppliers', mode]);
-                    setFormData((prev) => ({ ...prev, supplierId: newSupplier.id }));
-                  }}
-                  onClose={() => setAddSupplierDialogOpen(false)}
-                />
-              </AppDialog>
-              <TextField
-                margin="normal"
-                  id="batchNumber"
-                  name="batchNumber"
-                  label="Batch Number"
-                  inputProps={{ 'data-testid': 'batchNumber-input' }}
-                  type="text"
-                  fullWidth
-                  variant="outlined"
-                  value={formData.batchNumber}
-                  onChange={handleChange}
-                  InputProps={{
-                    endAdornment: inputMode === 'voicePerField' && (
-                      <InputAdornment position="end">
-                        <VoiceRecognition
-                          onResult={(transcript) => setFormData((prev) => ({ ...prev, batchNumber: transcript }))}
-                          onStateChange={(state) => setListeningField(state === 'listening' ? 'batchNumber' : null)}
-                        />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                {listeningField === 'batchNumber' && (
-                  <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-                    Listening... Speak now.
-                  </Typography>
-                )}
-                <TextField
-                  margin="normal"
-                  id="createdDate"
-                  name="createdDate"
-                  label="Created Date"
-                  type="date"
-                  fullWidth
-                  variant="outlined"
-                  value={formData.createdDate}
-                  onChange={handleChange}
-                  disabled
-                  InputLabelProps={{ shrink: true }}
-                />
-                <TextField
-                  margin="normal"
-                  id="expiryDate"
-                  name="expiryDate"
-                  label="Expiry Date"
-                  type="date"
-                  fullWidth
-                  variant="outlined"
-                  value={formData.expiryDate}
-                  onChange={handleChange}
-                  InputLabelProps={{ shrink: true }}
-                  InputProps={{
-                    endAdornment: inputMode === 'voicePerField' && (
-                      <InputAdornment position="end">
-                        <VoiceRecognition
-                          onResult={(transcript) =>
-                            setFormData((prev) => ({ ...prev, expiryDate: transcript }))
-                          }
-                          onStateChange={(state) => setListeningField(state === 'listening' ? 'expiryDate' : null)}
-                        />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-                {listeningField === 'expiryDate' && (
-                  <Typography variant="caption" color="secondary" sx={{ pl: 2 }}>
-                    Listening... Speak now.
-                  </Typography>
-                )}
-              </>
-            )}
-          </fieldset>
-        </AccordionDetails>
-      </Accordion>
-
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button type="submit" variant="contained" disabled={isSubmitting}>
-          {isSubmitting ? <CircularProgress size={24} /> : (isEditMode ? 'Update Product' : 'Add Product')}
+        <Button type="submit" variant="contained" disabled={mutation.isPending}>
+          {mutation.isPending ? <CircularProgress size={24} /> : (isEditMode ? 'Update Product' : 'Add Product')}
         </Button>
       </DialogActions>
     </Box>

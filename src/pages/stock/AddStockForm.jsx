@@ -17,6 +17,8 @@ import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
+import IconButton from '@mui/material/IconButton';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const AddStockForm = ({ onClose }) => {
   const queryClient = useQueryClient();
@@ -47,11 +49,52 @@ const AddStockForm = ({ onClose }) => {
     enabled: !!productId,
   });
 
+  const handleSizePresetChange = (preset) => {
+    let newSizes = [];
+    switch (preset) {
+      case 'adult':
+        newSizes = [
+          { size: '6', quantity: 1 },
+          { size: '7', quantity: 1 },
+          { size: '8', quantity: 1 },
+          { size: '9', quantity: 1 },
+        ];
+        break;
+      case 'boy':
+        newSizes = [
+          { size: '4', quantity: 1 },
+          { size: '5', quantity: 1 },
+        ];
+        break;
+      case 'toddler':
+        newSizes = [
+          { size: '8', quantity: 1 },
+          { size: '9', quantity: 1 },
+          { size: '10', quantity: 1 },
+          { size: '11', quantity: 1 },
+          { size: '12', quantity: 1 },
+          { size: '1', quantity: 1 },
+          { size: '2', quantity: 1 },
+          { size: '3', quantity: 1 },
+        ];
+        break;
+      default:
+        newSizes = [];
+    }
+    setSizes(newSizes);
+  };
+
   useEffect(() => {
     const product = products.find((p) => p.id === productId);
     setSelectedProduct(product);
-    if (product && product.sizes) {
-      setSizes(product.sizes.map(s => ({ ...s, quantity: 1 })));
+    if (product) {
+      if (product.sizeProfile) {
+        handleSizePresetChange(product.sizeProfile);
+      } else if (product.sizes) {
+        setSizes(product.sizes.map(s => ({ ...s, quantity: 1 })));
+      } else {
+        setSizes([]);
+      }
     } else {
       setSizes([]);
     }
@@ -83,11 +126,26 @@ const AddStockForm = ({ onClose }) => {
     },
   });
 
-  const handleSizeQuantityChange = (size, quantity) => {
-    const newSizes = sizes.map((s) =>
-      s.size === size ? { ...s, quantity: Math.max(0, parseInt(quantity, 10)) } : s
-    );
+  const handleSizeQuantityChange = (index, quantity) => {
+    const newSizes = [...sizes];
+    newSizes[index].quantity = parseInt(quantity, 10) || 0;
     setSizes(newSizes);
+  };
+
+  const handleSizeChange = (index, size) => {
+    const newSizes = [...sizes];
+    newSizes[index].size = size;
+    setSizes(newSizes);
+  };
+
+  const handleDeleteSize = (index) => {
+    const newSizes = [...sizes];
+    newSizes.splice(index, 1);
+    setSizes(newSizes);
+  };
+
+  const handleAddSize = () => {
+    setSizes([...sizes, { size: '', quantity: 1 }]);
   };
 
   const handleSubmit = () => {
@@ -95,7 +153,7 @@ const AddStockForm = ({ onClose }) => {
       showNotification('Please fill in all fields except supplier.', 'error');
       return;
     }
-    const totalQuantity = sizes.reduce((acc, curr) => acc + curr.quantity, 0);
+    const totalQuantity = sizes.reduce((acc, curr) => acc + (curr.quantity || 0), 0);
     mutation.mutate({
       productId,
       supplierId,
@@ -156,22 +214,33 @@ const AddStockForm = ({ onClose }) => {
         <Button onClick={() => setAddSupplierModalOpen(true)}>Add New</Button>
       </Stack>
 
-      {selectedProduct && selectedProduct.sizes && (
+      {selectedProduct && (
         <Box>
           <Typography variant="h6">Sizes</Typography>
-          {sizes.map((size, index) => (
-            <TextField
-              key={index}
-              margin="normal"
-              label={`Size ${size.size}`}
-              type="number"
-              fullWidth
-              variant="outlined"
-              value={size.quantity}
-              onChange={(e) => handleSizeQuantityChange(size.size, e.target.value)}
-              InputProps={{ inputProps: { min: 1 } }}
-            />
-          ))}
+            {sizes.map((size, index) => (
+              <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <TextField
+                  label="Size"
+                  value={size.size}
+                  onChange={(e) => handleSizeChange(index, e.target.value)}
+                  sx={{ mr: 2, width: '100px' }}
+                />
+                <TextField
+                  label="Quantity"
+                  type="number"
+                  value={size.quantity}
+                  onChange={(e) => handleSizeQuantityChange(index, e.target.value)}
+                  inputProps={{ min: 1 }}
+                  sx={{ width: '100px' }}
+                />
+                <IconButton onClick={() => handleDeleteSize(index)} aria-label="delete size">
+                  <DeleteIcon />
+                </IconButton>
+              </Box>
+            ))}
+            <Button onClick={handleAddSize} variant="outlined" sx={{ mt: 1 }}>
+              Add Size
+            </Button>
         </Box>
       )}
 

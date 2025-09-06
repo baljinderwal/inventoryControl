@@ -3,10 +3,11 @@ import api from './api';
 const local = {
   getStockLevels: async () => {
     console.log('Fetching stock levels from local API endpoints');
+    const fetchOptions = { cache: 'no-cache' };
     const [productsResponse, stockResponse, suppliersResponse] = await Promise.all([
-      fetch('/products'),
-      fetch('/stock'),
-      fetch('/suppliers')
+      fetch('/products', fetchOptions),
+      fetch('/stock', fetchOptions),
+      fetch('/suppliers', fetchOptions)
     ]);
 
     if (!productsResponse.ok || !stockResponse.ok || !suppliersResponse.ok) {
@@ -199,10 +200,17 @@ const remote = {
   getStockLevels: async () => {
     console.log('Fetching stock levels from API');
     const stockUrl = '/stock';
+    const config = {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    };
     const [productsResponse, stockResponse, suppliersResponse] = await Promise.all([
-      api.get('/products'),
-      api.get(stockUrl),
-      api.get('/suppliers'),
+      api.get('/products', config),
+      api.get(stockUrl, config),
+      api.get('/suppliers', config),
     ]);
     const products = productsResponse.data;
     const stockData = stockResponse.data;

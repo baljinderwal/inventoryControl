@@ -42,7 +42,14 @@ const local = {
 const remote = {
   getProducts: async () => {
     console.log('Fetching products from API');
-    const response = await api.get('/products');
+    const config = {
+      headers: {
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    };
+    const response = await api.get('/products', config);
     return response.data;
   },
   getProduct: async (id) => {

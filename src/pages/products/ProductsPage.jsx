@@ -80,8 +80,8 @@ const ProductsPage = () => {
   }, [visibleColumns]);
 
   const { data: products = [], isLoading, isError, error } = useQuery({
-    queryKey: ['products', mode], // Refetch when mode changes
-    queryFn: services.products.getProducts,
+    queryKey: ['stock', mode], // Refetch when mode changes
+    queryFn: services.stock.getStockLevels,
   });
 
   const deleteMutation = useMutation({

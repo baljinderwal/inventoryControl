@@ -117,7 +117,7 @@ const local = {
     const stockEntries = await res.json();
     let stockEntry = stockEntries[0];
 
-    if (stockEntry) {
+    if (stockEntry && stockEntry.id) {
       stockEntry.quantity += quantity;
       stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate, supplierId });
       if (sizes && sizes.length > 0) {
@@ -287,7 +287,7 @@ const remote = {
     const stockRes = await api.get(`/stock?productId=${productId}&supplierId=${supplierId}`);
     let stockEntry = stockRes.data[0];
 
-    if (stockEntry) {
+    if (stockEntry && stockEntry.id) {
       stockEntry.quantity += quantity;
       stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate, supplierId });
       if (sizes && sizes.length > 0) {

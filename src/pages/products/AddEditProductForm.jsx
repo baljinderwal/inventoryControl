@@ -132,6 +132,7 @@ const AddEditProductForm = ({
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    let success = false;
 
     try {
       // Step 1: Prepare and add/update the product.
@@ -179,14 +180,17 @@ const AddEditProductForm = ({
       }
 
       showNotification(`Product ${isEditMode ? 'updated' : 'added'} successfully`, 'success');
-      queryClient.invalidateQueries({ queryKey: ['stock', mode] });
-      queryClient.invalidateQueries({ queryKey: ['products', mode] });
-      onClose();
+      success = true;
 
     } catch (err) {
       showNotification(`Error: ${err.message}`, 'error');
     } finally {
       setIsSubmitting(false);
+      queryClient.invalidateQueries({ queryKey: ['stock', mode] });
+      queryClient.invalidateQueries({ queryKey: ['products', mode] });
+      if (success) {
+        onClose();
+      }
     }
   };
 

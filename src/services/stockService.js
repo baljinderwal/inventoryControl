@@ -287,7 +287,7 @@ const remote = {
     }
 
     stockEntry.quantity = stockEntry.batches.reduce((sum, b) => sum + b.quantity, 0);
-    return await api.put(`/stock/${stockEntry.productId}`, stockEntry);
+    return await api.put(`/stock/${stockEntry.id}`, stockEntry);
   },
   addStock: async ({ productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate }) => {
     console.log('Adding new stock batch via API', { productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate });

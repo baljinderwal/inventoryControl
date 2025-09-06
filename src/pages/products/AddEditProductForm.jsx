@@ -321,39 +321,6 @@ const AddEditProductForm = ({
     setFormData((prev) => ({ ...prev, ...data }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const submissionData = {
-      ...formData,
-      price: parseFloat(formData.price) || 0,
-      costPrice: parseFloat(formData.costPrice) || 0,
-      discountedPrice: parseFloat(formData.discountedPrice) || 0,
-      lowStockThreshold: parseInt(formData.lowStockThreshold, 10) || 0,
-    };
-
-    if (addStock) {
-      submissionData.sizes = formData.sizes;
-      submissionData.batchNumber = formData.batchNumber;
-      submissionData.expiryDate = formData.expiryDate;
-      submissionData.createdDate = formData.createdDate;
-      submissionData.supplierId = formData.supplierId;
-    } else {
-      delete submissionData.sizes;
-      delete submissionData.batchNumber;
-      delete submissionData.expiryDate;
-      delete submissionData.createdDate;
-      delete submissionData.stock;
-    }
-
-    if (isEditMode) {
-      delete submissionData.stock;
-      delete submissionData.batchNumber;
-      delete submissionData.expiryDate;
-      delete submissionData.createdDate;
-    }
-    mutation.mutate(submissionData);
-  };
 
   const guidedVoiceFields = [
     { name: 'name', label: 'Product Name' },

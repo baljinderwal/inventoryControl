@@ -19,15 +19,60 @@ const local = {
   },
   addProduct: async (productData) => {
     console.log('Adding product in local mode', productData);
-    const response = await fetch('/products', {
+    const { batchNumber, expiryDate, sizes, colors, ...productDetails } = productData;
+
+    // Create product
+    const productResponse = await fetch('/products', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...productData, createdAt: new Date().toISOString() }),
+      body: JSON.stringify({ ...productDetails, createdAt: new Date().toISOString(), colors }),
     });
-    if (!response.ok) {
-      throw new Error('Failed to add product');
+    const newProduct = await productResponse.json();
+
+    // Create stock entry
+    const totalStock = sizes.reduce((acc, item) => acc + item.quantity, 0);
+    if (totalStock > 0) {
+      const newStockEntry = {
+        productId: newProduct.id,
+        quantity: totalStock,
+        sizes: sizes,
+        batches: [{
+          batchNumber: batchNumber || `B${newProduct.id}-INIT`,
+          expiryDate: expiryDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
+          quantity: totalStock,
+          sizes: sizes
+        }]
+      };
+      await fetch('/stock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newStockEntry)
+      });
     }
-    return await response.json();
+
+    // Add to timeseries for each size and color combination
+    if (sizes && sizes.length > 0 && colors && colors.length > 0) {
+      for (const size of sizes) {
+        for (const color of colors) {
+          try {
+            await fetch('https://inventorybackend-loop.onrender.com/timeseries/shoes', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                shoe_name: newProduct.name,
+                size: parseInt(size.size, 10),
+                color: color,
+                timestamp: new Date().toISOString()
+              }),
+            });
+          } catch (e) {
+            console.error('Failed to post timeseries data for size', size, 'and color', color, e);
+          }
+        }
+      }
+    }
+
+    return newProduct;
   },
   updateProduct: async (id, product) => {
     console.warn('Read-only mode: updateProduct disabled.', id, product);
@@ -52,8 +97,54 @@ const remote = {
   },
   addProduct: async (productData) => {
     console.log('Adding product via API', productData);
-    const response = await api.post('/products', productData);
-    return response.data;
+    const { batchNumber, expiryDate, sizes, colors, ...productDetails } = productData;
+
+    // Create product
+    const productResponse = await api.post('/products', { ...productDetails, colors });
+    const newProduct = productResponse.data;
+
+    // Create stock entry
+    const totalStock = sizes.reduce((acc, item) => acc + item.quantity, 0);
+    if (totalStock > 0) {
+      const newStockEntry = {
+        productId: newProduct.id,
+        quantity: totalStock,
+        sizes: sizes,
+        batches: [{
+          batchNumber: batchNumber || `B${newProduct.id}-INIT`,
+          expiryDate: expiryDate || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
+          quantity: totalStock,
+          sizes: sizes
+        }]
+      };
+      await api.post('/stock', newStockEntry);
+    }
+
+    // Add to timeseries for each size and color combination
+    if (sizes && sizes.length > 0 && colors && colors.length > 0) {
+      for (const size of sizes) {
+        for (const color of colors) {
+          try {
+            // This should be an API call to your own backend, which then calls the timeseries service
+            // For now, calling it directly for demonstration
+            await fetch('https://inventorybackend-loop.onrender.com/timeseries/shoes', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                shoe_name: newProduct.name,
+                size: parseInt(size.size, 10),
+                color: color,
+                timestamp: new Date().toISOString()
+              }),
+            });
+          } catch (e) {
+            console.error('Failed to post timeseries data for size', size, 'and color', color, e);
+          }
+        }
+      }
+    }
+
+    return newProduct;
   },
   updateProduct: async (id, product) => {
     console.log(`Updating product ${id} via API`, product);

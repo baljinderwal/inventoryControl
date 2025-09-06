@@ -50,8 +50,8 @@ const AddStockForm = ({ onClose }) => {
   useEffect(() => {
     const product = products.find((p) => p.id === productId);
     setSelectedProduct(product);
-    if (product && product.sizes) {
-      setSizes(product.sizes.map(s => ({ ...s, quantity: 1 })));
+    if (product) {
+      handleSizePresetChange(product.sizeProfile);
     } else {
       setSizes([]);
     }
@@ -70,6 +70,41 @@ const AddStockForm = ({ onClose }) => {
       setBatchNumber('B-1');
     }
   }, [productId, products, stockData]);
+
+  const handleSizePresetChange = (preset) => {
+    let newSizes = [];
+    switch (preset) {
+      case 'adult':
+        newSizes = [
+          { size: '6', quantity: 1 },
+          { size: '7', quantity: 1 },
+          { size: '8', quantity: 1 },
+          { size: '9', quantity: 1 },
+        ];
+        break;
+      case 'boy':
+        newSizes = [
+          { size: '4', quantity: 1 },
+          { size: '5', quantity: 1 },
+        ];
+        break;
+      case 'toddler':
+        newSizes = [
+          { size: '8', quantity: 1 },
+          { size: '9', quantity: 1 },
+          { size: '10', quantity: 1 },
+          { size: '11', quantity: 1 },
+          { size: '12', quantity: 1 },
+          { size: '1', quantity: 1 },
+          { size: '2', quantity: 1 },
+          { size: '3', quantity: 1 },
+        ];
+        break;
+      default:
+        newSizes = []; // Default to empty if profile is unknown or not set
+    }
+    setSizes(newSizes);
+  };
 
   const mutation = useMutation({
     mutationFn: (newStock) => services.stock.addStock(newStock),
@@ -156,7 +191,7 @@ const AddStockForm = ({ onClose }) => {
         <Button onClick={() => setAddSupplierModalOpen(true)}>Add New</Button>
       </Stack>
 
-      {selectedProduct && selectedProduct.sizes && (
+      {sizes.length > 0 && (
         <Box>
           <Typography variant="h6">Sizes</Typography>
           {sizes.map((size, index) => (

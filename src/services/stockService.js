@@ -252,8 +252,8 @@ const remote = {
       };
     });
   },
-  adjustStockLevel: async ({ productId, quantity, batchNumber, expiryDate }) => {
-    console.log('Adjusting stock level via API', { productId, quantity });
+  adjustStockLevel: async ({ productId, quantity, batchNumber, sizes }) => {
+    console.log('Adjusting stock level via API', { productId, quantity, batchNumber, sizes });
 
     const stockRes = await api.get(`/stock?productId=${productId}`);
     let stockEntry = stockRes.data[0];
@@ -263,7 +263,7 @@ const remote = {
         const newStockEntry = {
           productId,
           quantity,
-          batches: [{ batchNumber, expiryDate, quantity }]
+          batches: [{ batchNumber, quantity, sizes: sizes || [] }]
         };
         return await api.post('/stock', newStockEntry);
       } else {
@@ -271,29 +271,42 @@ const remote = {
       }
     }
 
-    if (quantity > 0) {
-      if (!batchNumber || !expiryDate) throw new Error("Batch number and expiry date are required for stock additions.");
-      const existingBatchIndex = stockEntry.batches.findIndex(b => b.batchNumber === batchNumber);
-      if (existingBatchIndex > -1) {
-        stockEntry.batches[existingBatchIndex].quantity += quantity;
-      } else {
-        stockEntry.batches.push({ batchNumber, expiryDate, quantity });
+    const batchIndex = stockEntry.batches.findIndex(b => b.batchNumber === batchNumber);
+    if (batchIndex === -1) {
+      throw new Error(`Batch ${batchNumber} not found for product ${productId}.`);
+    }
+    const batch = stockEntry.batches[batchIndex];
+
+    if (sizes && sizes.length > 0) {
+      // Size-specific adjustment
+      if (!batch.sizes) {
+        batch.sizes = [];
       }
+      sizes.forEach(adj => {
+        const sizeIndex = batch.sizes.findIndex(s => s.size === adj.size);
+        if (sizeIndex > -1) {
+          batch.sizes[sizeIndex].quantity += adj.quantity;
+          if (batch.sizes[sizeIndex].quantity < 0) {
+            throw new Error(`Not enough stock for size ${adj.size} in batch ${batchNumber}.`);
+          }
+        } else if (adj.quantity > 0) {
+          batch.sizes.push({ size: adj.size, quantity: adj.quantity });
+        }
+      });
+      batch.quantity = batch.sizes.reduce((sum, s) => sum + s.quantity, 0);
     } else {
-      let quantityToDeduct = Math.abs(quantity);
-      stockEntry.batches.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
-      for (const batch of stockEntry.batches) {
-        if (quantityToDeduct === 0) break;
-        const deduction = Math.min(quantityToDeduct, batch.quantity);
-        batch.quantity -= deduction;
-        quantityToDeduct -= deduction;
+      // Non-size-specific adjustment
+      batch.quantity += quantity;
+      if (batch.quantity < 0) {
+        throw new Error(`Not enough stock in batch ${batchNumber}.`);
       }
-      if (quantityToDeduct > 0) throw new Error("Not enough stock to fulfill the request.");
-      stockEntry.batches = stockEntry.batches.filter(b => b.quantity > 0);
     }
 
+    stockEntry.batches[batchIndex] = batch;
+    stockEntry.batches = stockEntry.batches.filter(b => b.quantity > 0);
     stockEntry.quantity = stockEntry.batches.reduce((sum, b) => sum + b.quantity, 0);
-    return await api.put(`/stock/${stockEntry.productId}`, stockEntry);
+
+    return await api.put(`/stock/${stockEntry.id}`, stockEntry);
   },
   addStock: async ({ productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate }) => {
     console.log('Adding new stock batch via API', { productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate });

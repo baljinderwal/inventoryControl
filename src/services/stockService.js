@@ -82,6 +82,9 @@ const local = {
 
     if (sizes && sizes.length > 0) {
       // Size-specific adjustment
+      if (!batch.sizes) {
+        batch.sizes = [];
+      }
       sizes.forEach(adj => {
         const sizeIndex = batch.sizes.findIndex(s => s.size === adj.size);
         if (sizeIndex > -1) {

@@ -292,10 +292,10 @@ const remote = {
   addStock: async ({ productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate }) => {
     console.log('Adding new stock batch via API', { productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate });
 
-    const stockRes = await api.get(`/stock?productId=${productId}&supplierId=${supplierId}`);
-    let stockEntry = stockRes.data[0];
+    const stockRes = await api.get(`/stock/${productId}`);
+    let stockEntry = stockRes.data;
 
-    if (stockEntry && stockEntry.id) {
+    if (stockEntry) {
       stockEntry.quantity += quantity;
       stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate, supplierId });
       if (sizes && sizes.length > 0) {
@@ -309,7 +309,7 @@ const remote = {
           }
         });
       }
-      return await api.put(`/stock/${stockEntry.id}`, stockEntry);
+      return await api.put(`/stock/${productId}`, stockEntry);
     } else {
       const newStockEntry = {
         productId,

@@ -48,8 +48,8 @@ const local = {
       };
     });
   },
-  adjustStockLevel: async ({ productId, quantity, batchNumber = 'B-LOCAL', expiryDate = new Date().toISOString() }) => {
-    console.log('Adjusting stock level in local mode', { productId, quantity });
+  adjustStockLevel: async ({ productId, quantity, batchNumber = 'B-LOCAL', expiryDate = new Date().toISOString(), sizes }) => {
+    console.log('Adjusting stock level in local mode', { productId, quantity, batchNumber, sizes });
 
     const res = await fetch(`/stock?productId=${productId}`);
     const stockEntries = await res.json();
@@ -60,7 +60,7 @@ const local = {
         const newStockEntry = {
           productId,
           quantity,
-          batches: [{ batchNumber, expiryDate, quantity }]
+          batches: [{ batchNumber, expiryDate, quantity, sizes: sizes || [] }]
         };
         const postRes = await fetch('/stock', {
           method: 'POST',
@@ -74,34 +74,37 @@ const local = {
       }
     }
 
-    if (quantity > 0) {
-      // Add stock - for simplicity, add to a new or existing batch
-      const existingBatchIndex = stockEntry.batches.findIndex(b => b.batchNumber === batchNumber);
-      if (existingBatchIndex > -1) {
-        stockEntry.batches[existingBatchIndex].quantity += quantity;
-      } else {
-        stockEntry.batches.push({ batchNumber, expiryDate, quantity });
-      }
+    const batchIndex = stockEntry.batches.findIndex(b => b.batchNumber === batchNumber);
+    if (batchIndex === -1) {
+      throw new Error(`Batch ${batchNumber} not found for product ${productId}.`);
+    }
+    const batch = stockEntry.batches[batchIndex];
+
+    if (sizes && sizes.length > 0) {
+      // Size-specific adjustment
+      sizes.forEach(adj => {
+        const sizeIndex = batch.sizes.findIndex(s => s.size === adj.size);
+        if (sizeIndex > -1) {
+          batch.sizes[sizeIndex].quantity += adj.quantity;
+          if (batch.sizes[sizeIndex].quantity < 0) {
+            throw new Error(`Not enough stock for size ${adj.size} in batch ${batchNumber}.`);
+          }
+        } else if (adj.quantity > 0) {
+          batch.sizes.push({ size: adj.size, quantity: adj.quantity });
+        }
+      });
+      // Recalculate batch quantity
+      batch.quantity = batch.sizes.reduce((sum, s) => sum + s.quantity, 0);
     } else {
-      // Remove stock - for simplicity, deduct from batches, oldest first (if expiry is valid) or just first.
-      let quantityToDeduct = Math.abs(quantity);
-
-      // Basic FEFO logic for local dev
-      stockEntry.batches.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
-
-      for (const batch of stockEntry.batches) {
-        if (quantityToDeduct === 0) break;
-        const deduction = Math.min(quantityToDeduct, batch.quantity);
-        batch.quantity -= deduction;
-        quantityToDeduct -= deduction;
+      // Non-size-specific adjustment
+      batch.quantity += quantity;
+      if (batch.quantity < 0) {
+        throw new Error(`Not enough stock in batch ${batchNumber}.`);
       }
-      if (quantityToDeduct > 0) {
-         console.error("Not enough stock to fulfill the request.");
-         throw new Error("Not enough stock to fulfill the request.");
-      }
-      stockEntry.batches = stockEntry.batches.filter(b => b.quantity > 0);
     }
 
+    stockEntry.batches[batchIndex] = batch;
+    stockEntry.batches = stockEntry.batches.filter(b => b.quantity > 0);
     stockEntry.quantity = stockEntry.batches.reduce((sum, b) => sum + b.quantity, 0);
 
     const putRes = await fetch(`/stock/${stockEntry.id}`, {

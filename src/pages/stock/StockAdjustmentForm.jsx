@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
@@ -8,6 +8,7 @@ import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
 import DialogActions from '@mui/material/DialogActions';
 import FormControl from '@mui/material/FormControl';
+import Grid from '@mui/material/Grid';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
@@ -23,29 +24,48 @@ const StockAdjustmentForm = ({
   const { showNotification } = useNotification();
   const { mode, services } = useApi();
 
-  const [adjustmentType, setAdjustmentType] = useState('out'); // 'in' or 'out'
+  const [adjustmentType, setAdjustmentType] = useState('out');
   const [quantity, setQuantity] = useState(1);
   const [batchNumber, setBatchNumber] = useState(batches.length > 0 ? batches[0].batchNumber : '');
   const [supplierId, setSupplierId] = useState('');
+  const [sizeQuantities, setSizeQuantities] = useState({});
+
+  const selectedBatch = useMemo(() => {
+    return batches.find(b => b.batchNumber === batchNumber);
+  }, [batchNumber, batches]);
+
+  const hasSizes = useMemo(() => {
+    return selectedBatch && selectedBatch.sizes && selectedBatch.sizes.length > 0;
+  }, [selectedBatch]);
+
+  useEffect(() => {
+    if (batchNumber) {
+      const newSelectedBatch = batches.find(b => b.batchNumber === batchNumber);
+      if (newSelectedBatch) {
+        setSupplierId(newSelectedBatch.supplierId || '');
+        if (newSelectedBatch.sizes && newSelectedBatch.sizes.length > 0) {
+          const initialQuantities = newSelectedBatch.sizes.reduce((acc, s) => {
+            acc[s.size] = 0;
+            return acc;
+          }, {});
+          setSizeQuantities(initialQuantities);
+        } else {
+          setSizeQuantities({});
+        }
+      }
+    }
+  }, [batchNumber, batches]);
 
   const { data: suppliers = [] } = useQuery({
     queryKey: ['suppliers', mode],
     queryFn: () => services.suppliers.getSuppliers(),
   });
 
-  useEffect(() => {
-    if (batchNumber) {
-      const selectedBatch = batches.find(b => b.batchNumber === batchNumber);
-      if (selectedBatch) {
-        setSupplierId(selectedBatch.supplierId || '');
-      }
-    }
-  }, [batchNumber, batches]);
-
   const adjustStockMutation = useMutation({
     mutationFn: services.stock.adjustStockLevel,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['stock'] });
+      queryClient.invalidateQueries({ queryKey: ['stock', mode] });
+      queryClient.invalidateQueries({ queryKey: ['product', product.id, mode] });
       showNotification('Stock level updated successfully', 'success');
       onClose();
     },
@@ -57,7 +77,7 @@ const StockAdjustmentForm = ({
   const updateSupplierMutation = useMutation({
     mutationFn: services.stock.updateBatchSupplier,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['stock'] });
+      queryClient.invalidateQueries({ queryKey: ['stock', mode] });
       showNotification('Supplier updated successfully', 'success');
     },
     onError: (err) => {
@@ -65,17 +85,43 @@ const StockAdjustmentForm = ({
     },
   });
 
+  const handleSizeQuantityChange = (size, value) => {
+    const newQuantities = { ...sizeQuantities, [size]: Math.max(0, parseInt(value, 10) || 0) };
+    setSizeQuantities(newQuantities);
+  };
+
   const handleSubmit = () => {
-    const adjQuantity = adjustmentType === 'in' ? quantity : -quantity;
     if (!batchNumber) {
       showNotification('Please select a batch to adjust.', 'error');
       return;
     }
-    adjustStockMutation.mutate({
-      productId: product.id,
-      quantity: adjQuantity,
-      batchNumber,
-    });
+
+    if (hasSizes) {
+      const sizesToAdjust = Object.entries(sizeQuantities)
+        .map(([size, q]) => ({ size, quantity: adjustmentType === 'in' ? q : -q }))
+        .filter(s => s.quantity !== 0);
+
+      if (sizesToAdjust.length === 0) {
+        showNotification('Please enter a quantity for at least one size.', 'error');
+        return;
+      }
+      adjustStockMutation.mutate({
+        productId: product.id,
+        batchNumber,
+        sizes: sizesToAdjust,
+      });
+    } else {
+      const adjQuantity = adjustmentType === 'in' ? quantity : -quantity;
+      if (quantity <= 0) {
+        showNotification('Please enter a quantity greater than 0.', 'error');
+        return;
+      }
+      adjustStockMutation.mutate({
+        productId: product.id,
+        quantity: adjQuantity,
+        batchNumber,
+      });
+    }
   };
 
   const handleSupplierUpdate = () => {
@@ -130,8 +176,8 @@ const StockAdjustmentForm = ({
         </Select>
       </FormControl>
 
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <FormControl fullWidth margin="normal" variant="outlined">
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+        <FormControl fullWidth margin="normal" variant="outlined" sx={{ my: 0 }}>
           <InputLabel id="supplier-select-label">Supplier</InputLabel>
           <Select
             labelId="supplier-select-label"
@@ -152,27 +198,50 @@ const StockAdjustmentForm = ({
         </FormControl>
         <Button
           onClick={handleSupplierUpdate}
-          disabled={updateSupplierMutation.isPending || !supplierId || supplierId === batches.find(b => b.batchNumber === batchNumber)?.supplierId}
+          disabled={updateSupplierMutation.isPending || !supplierId || supplierId === selectedBatch?.supplierId}
           variant="outlined"
         >
           Update Supplier
         </Button>
       </Box>
 
-      <TextField
-        autoFocus
-        margin="normal"
-        id="quantity"
-        label="Quantity to Adjust"
-        type="number"
-        fullWidth
-        variant="outlined"
-        value={quantity}
-        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10)))}
-        InputProps={{ inputProps: { min: 1 } }}
-      />
+      {hasSizes ? (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="subtitle1" gutterBottom>Adjust Quantities by Size</Typography>
+          <Grid container spacing={2}>
+            {selectedBatch.sizes.map((s) => (
+              <Grid item xs={6} sm={4} key={s.size}>
+                <TextField
+                  margin="dense"
+                  id={`size-${s.size}`}
+                  label={`${s.size} (Current: ${s.quantity})`}
+                  type="number"
+                  fullWidth
+                  variant="outlined"
+                  value={sizeQuantities[s.size] || 0}
+                  onChange={(e) => handleSizeQuantityChange(s.size, e.target.value)}
+                  InputProps={{ inputProps: { min: 0 } }}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      ) : (
+        <TextField
+          autoFocus
+          margin="normal"
+          id="quantity"
+          label="Quantity to Adjust"
+          type="number"
+          fullWidth
+          variant="outlined"
+          value={quantity}
+          onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
+          InputProps={{ inputProps: { min: 1 } }}
+        />
+      )}
 
-      <DialogActions>
+      <DialogActions sx={{ mt: 2 }}>
         <Button onClick={onClose}>Cancel</Button>
         <Button onClick={handleSubmit} variant="contained" disabled={adjustStockMutation.isPending}>
           {adjustStockMutation.isPending ? <CircularProgress size={24} /> : 'Submit Adjustment'}

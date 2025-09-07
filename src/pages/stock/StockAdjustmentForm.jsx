@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
+import { Add, Delete } from '@mui/icons-material';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -9,11 +10,14 @@ import CircularProgress from '@mui/material/CircularProgress';
 import DialogActions from '@mui/material/DialogActions';
 import FormControl from '@mui/material/FormControl';
 import Grid from '@mui/material/Grid';
+import IconButton from '@mui/material/IconButton';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
+import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+
 
 const StockAdjustmentForm = ({
   onClose,
@@ -29,6 +33,7 @@ const StockAdjustmentForm = ({
   const [batchNumber, setBatchNumber] = useState(batches.length > 0 ? batches[0].batchNumber : '');
   const [supplierId, setSupplierId] = useState('');
   const [sizeQuantities, setSizeQuantities] = useState({});
+  const [newSizes, setNewSizes] = useState([]);
 
   const selectedBatch = useMemo(() => {
     return batches.find(b => b.batchNumber === batchNumber);
@@ -54,7 +59,8 @@ const StockAdjustmentForm = ({
         }
       }
     }
-  }, [batchNumber, batches]);
+    setNewSizes([]);
+  }, [batchNumber, batches, adjustmentType]);
 
   const { data: suppliers = [] } = useQuery({
     queryKey: ['suppliers', mode],
@@ -98,13 +104,31 @@ const StockAdjustmentForm = ({
     setSizeQuantities(newQuantities);
   };
 
+  const handleAddNewSize = () => {
+    setNewSizes([...newSizes, { size: '', quantity: 1, id: Date.now() }]);
+  };
+
+  const handleNewSizeChange = (index, field, value) => {
+    const updatedSizes = [...newSizes];
+    if (field === 'quantity') {
+      updatedSizes[index][field] = Math.max(1, parseInt(value, 10) || 1);
+    } else {
+      updatedSizes[index][field] = value;
+    }
+    setNewSizes(updatedSizes);
+  };
+
+  const handleDeleteNewSize = (id) => {
+    setNewSizes(newSizes.filter(s => s.id !== id));
+  };
+
   const handleSubmit = () => {
     if (!batchNumber) {
       showNotification('Please select a batch to adjust.', 'error');
       return;
     }
 
-    if (hasSizes) {
+    if (hasSizes || newSizes.length > 0) {
         for (const size in sizeQuantities) {
             if (adjustmentType === 'out') {
                 const currentSize = selectedBatch.sizes.find(s => s.size === size);
@@ -115,9 +139,17 @@ const StockAdjustmentForm = ({
             }
         }
 
-      const sizesToAdjust = Object.entries(sizeQuantities)
+      let sizesToAdjust = Object.entries(sizeQuantities)
         .map(([size, q]) => ({ size, quantity: adjustmentType === 'in' ? q : -q }))
         .filter(s => s.quantity !== 0);
+
+      if (adjustmentType === 'in') {
+        const newSizesToAdjust = newSizes
+          .filter(s => s.size && s.quantity > 0)
+          .map(s => ({ size: s.size, quantity: s.quantity }));
+
+        sizesToAdjust = [...sizesToAdjust, ...newSizesToAdjust];
+      }
 
       if (sizesToAdjust.length === 0) {
         showNotification('Please enter a quantity for at least one size.', 'error');
@@ -261,6 +293,38 @@ const StockAdjustmentForm = ({
           onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
           InputProps={{ inputProps: { min: 1 } }}
         />
+      )}
+
+      {adjustmentType === 'in' && (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="subtitle1" gutterBottom>Add New Sizes</Typography>
+          {newSizes.map((s, index) => (
+            <Stack direction="row" spacing={1} key={s.id} sx={{ mb: 1, alignItems: 'center' }}>
+              <TextField
+                label="Size Name"
+                value={s.size}
+                onChange={(e) => handleNewSizeChange(index, 'size', e.target.value)}
+                variant="outlined"
+                size="small"
+              />
+              <TextField
+                label="Quantity"
+                type="number"
+                value={s.quantity}
+                onChange={(e) => handleNewSizeChange(index, 'quantity', e.target.value)}
+                variant="outlined"
+                size="small"
+                InputProps={{ inputProps: { min: 1 } }}
+              />
+              <IconButton onClick={() => handleDeleteNewSize(s.id)} size="small">
+                <Delete />
+              </IconButton>
+            </Stack>
+          ))}
+          <Button startIcon={<Add />} onClick={handleAddNewSize} variant="outlined" size="small">
+            Add Size
+          </Button>
+        </Box>
       )}
 
       <DialogActions sx={{ mt: 2 }}>

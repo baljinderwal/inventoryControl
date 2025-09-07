@@ -87,16 +87,13 @@ const AddStockForm = ({ onClose }) => {
   useEffect(() => {
     const product = products.find((p) => p.id === productId);
     setSelectedProduct(product);
+    setSizes([]); // Reset sizes when product changes
     if (product) {
       if (product.sizeProfile) {
         handleSizePresetChange(product.sizeProfile);
       } else if (product.sizes) {
         setSizes(product.sizes.map(s => ({ ...s, quantity: 1 })));
-      } else {
-        setSizes([]);
       }
-    } else {
-      setSizes([]);
     }
 
     const nextYear = new Date();
@@ -238,8 +235,8 @@ const AddStockForm = ({ onClose }) => {
                 </IconButton>
               </Box>
             ))}
-            <Button onClick={handleAddSize} variant="outlined" sx={{ mt: 1 }}>
-              Add Size
+            <Button onClick={handleAddSize} variant="contained" color="primary" sx={{ mt: 1 }}>
+              Add Another Size
             </Button>
         </Box>
       )}

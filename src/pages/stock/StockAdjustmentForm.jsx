@@ -86,7 +86,15 @@ const StockAdjustmentForm = ({
   });
 
   const handleSizeQuantityChange = (size, value) => {
-    const newQuantities = { ...sizeQuantities, [size]: Math.max(0, parseInt(value, 10) || 0) };
+    const newQuantity = Math.max(0, parseInt(value, 10) || 0);
+    if (adjustmentType === 'out') {
+      const currentSize = selectedBatch.sizes.find(s => s.size === size);
+      if (newQuantity > currentSize.quantity) {
+        showNotification(`Cannot remove more than available stock for size ${size} (${currentSize.quantity})`, 'error');
+        return;
+      }
+    }
+    const newQuantities = { ...sizeQuantities, [size]: newQuantity };
     setSizeQuantities(newQuantities);
   };
 
@@ -97,6 +105,16 @@ const StockAdjustmentForm = ({
     }
 
     if (hasSizes) {
+        for (const size in sizeQuantities) {
+            if (adjustmentType === 'out') {
+                const currentSize = selectedBatch.sizes.find(s => s.size === size);
+                if (sizeQuantities[size] > currentSize.quantity) {
+                    showNotification(`Quantity for size ${size} exceeds available stock.`, 'error');
+                    return;
+                }
+            }
+        }
+
       const sizesToAdjust = Object.entries(sizeQuantities)
         .map(([size, q]) => ({ size, quantity: adjustmentType === 'in' ? q : -q }))
         .filter(s => s.quantity !== 0);
@@ -111,6 +129,10 @@ const StockAdjustmentForm = ({
         sizes: sizesToAdjust,
       });
     } else {
+      if (adjustmentType === 'out' && quantity > selectedBatch.quantity) {
+        showNotification('Cannot remove more than the available batch quantity.', 'error');
+        return;
+      }
       const adjQuantity = adjustmentType === 'in' ? quantity : -quantity;
       if (quantity <= 0) {
         showNotification('Please enter a quantity greater than 0.', 'error');

@@ -311,8 +311,19 @@ const remote = {
   addStock: async ({ productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate }) => {
     console.log('Adding new stock batch via API', { productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate });
 
-    const stockRes = await api.get(`/stock/${productId}`);
-    let stockEntry = stockRes.data;
+    let stockEntry;
+    try {
+      const stockRes = await api.get(`/stock/${productId}`);
+      stockEntry = stockRes.data;
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        console.log(`Stock entry for product ${productId} not found. Creating a new one.`);
+        stockEntry = null;
+      } else {
+        // Re-throw other errors
+        throw error;
+      }
+    }
 
     if (stockEntry) {
       stockEntry.quantity += quantity;

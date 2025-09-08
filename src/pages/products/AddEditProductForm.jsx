@@ -134,7 +134,6 @@ const AddEditProductForm = ({
     setIsSubmitting(true);
 
     try {
-      // Step 1: Prepare and add/update the product.
       const productData = {
         name: formData.name,
         sku: formData.sku,
@@ -155,32 +154,66 @@ const AddEditProductForm = ({
         colors: formData.colors,
       };
 
-      let productResponse;
       if (isEditMode) {
-        productResponse = await services.products.updateProduct(product.id, productData);
+        // In edit mode, we just update and invalidate.
+        await services.products.updateProduct(product.id, productData);
+        showNotification('Product updated successfully', 'success');
+        queryClient.invalidateQueries({ queryKey: ['stock', mode] });
+        queryClient.invalidateQueries({ queryKey: ['products', mode] });
       } else {
-        productResponse = await services.products.addProduct(productData);
-      }
+        // In add mode, we manually update the cache for an instant UI update.
+        const productResponse = await services.products.addProduct(productData);
 
-      // Step 2: If stock is to be added, create a new stock entry.
-      if (addStock && !isEditMode) {
-        const sizes = formData.sizes || [];
-        const totalQuantity = sizes.reduce((sum, size) => sum + (size.quantity || 0), 0);
-        const stockData = {
-          productId: productResponse.id,
-          supplierId: formData.supplierId,
-          quantity: totalQuantity,
-          batchNumber: formData.batchNumber,
-          expiryDate: formData.expiryDate,
-          sizes: sizes,
-          createdDate: formData.createdDate,
+        let newStockQuantity = 0;
+        let newStockBatches = [];
+        let supplierName = '';
+
+        if (addStock) {
+          const sizes = formData.sizes || [];
+          const totalQuantity = sizes.reduce((sum, size) => sum + (size.quantity || 0), 0);
+          const stockData = {
+            productId: productResponse.id,
+            supplierId: formData.supplierId,
+            quantity: totalQuantity,
+            batchNumber: formData.batchNumber,
+            expiryDate: formData.expiryDate,
+            sizes: sizes,
+            createdDate: formData.createdDate,
+          };
+          await services.stock.addStock(stockData);
+
+          newStockQuantity = totalQuantity;
+          newStockBatches = [{ ...stockData, supplierId: formData.supplierId }];
+
+          if (formData.supplierId && suppliers) {
+            const foundSupplier = suppliers.find(s => s.id === formData.supplierId);
+            if (foundSupplier) supplierName = foundSupplier.name;
+          }
+        }
+
+        // Manually construct the new product object to match the structure in the query cache.
+        const newProductForCache = {
+          ...productData,
+          id: productResponse.id, // The most important part from the response
+          stock: newStockQuantity,
+          batches: newStockBatches,
+          supplierName: supplierName,
+          // Ensure all other expected fields are present, even if empty.
+          ...productResponse,
         };
-        await services.stock.addStock(stockData);
+
+        // Optimistically update the cache
+        queryClient.setQueryData(['stock', mode], (oldData) => {
+          return oldData ? [...oldData, newProductForCache] : [newProductForCache];
+        });
+
+        // Still invalidate to trigger a background refetch for eventual consistency.
+        queryClient.invalidateQueries({ queryKey: ['stock', mode] });
+        queryClient.invalidateQueries({ queryKey: ['products', mode] });
+
+        showNotification('Product added successfully', 'success');
       }
 
-      showNotification(`Product ${isEditMode ? 'updated' : 'added'} successfully`, 'success');
-      queryClient.invalidateQueries({ queryKey: ['stock', mode] });
-      queryClient.invalidateQueries({ queryKey: ['products', mode] });
       onClose();
 
     } catch (err) {

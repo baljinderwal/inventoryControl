@@ -255,8 +255,8 @@ const remote = {
   adjustStockLevel: async ({ productId, quantity, batchNumber, sizes }) => {
     console.log('Adjusting stock level via API', { productId, quantity, batchNumber, sizes });
 
-    const stockRes = await api.get(`/stock?productId=${productId}`);
-    let stockEntry = stockRes.data[0];
+    const stockRes = await api.get(`/stock/${productId}`);
+    let stockEntry = stockRes.data;
 
     if (!stockEntry) {
       if (quantity > 0) {
@@ -306,7 +306,7 @@ const remote = {
     stockEntry.batches = stockEntry.batches.filter(b => b.quantity > 0);
     stockEntry.quantity = stockEntry.batches.reduce((sum, b) => sum + b.quantity, 0);
 
-    return await api.put(`/stock/${stockEntry.id}`, stockEntry);
+    return await api.put(`/stock/${productId}`, stockEntry);
   },
   addStock: async ({ productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate }) => {
     console.log('Adding new stock batch via API', { productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate });

@@ -3,8 +3,6 @@ import { Outlet } from 'react-router-dom';
 import { Box, Toolbar, useMediaQuery, useTheme } from '@mui/material';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
-import { useSidebar } from '../../utils/SidebarContext';
-
 const sidebarWidth = 240;
 const collapsedSidebarWidth = 88;
 
@@ -12,33 +10,49 @@ const Layout = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const { isCollapsed } = useSidebar();
+  const [isCollapsed, setCollapsed] = useState(false);
 
   const handleMobileSidebarToggle = () => {
     setMobileSidebarOpen(!isMobileSidebarOpen);
   };
 
+  const handleSidebarToggle = () => {
+    setCollapsed(!isCollapsed);
+  };
+
+  const topbarSx = {
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+    ...(!isMobile && !isCollapsed && {
+      width: `calc(100% - ${sidebarWidth}px)`,
+      marginLeft: `${sidebarWidth}px`,
+    }),
+    ...(!isMobile && isCollapsed && {
+      width: `calc(100% - ${collapsedSidebarWidth}px)`,
+      marginLeft: `${collapsedSidebarWidth}px`,
+    }),
+  };
+
   return (
     <Box sx={{ display: 'flex' }}>
-      <Topbar onMobileSidebarOpen={handleMobileSidebarToggle} />
+      <Topbar
+        onMobileSidebarOpen={handleMobileSidebarToggle}
+        onSidebarToggle={handleSidebarToggle}
+        sx={topbarSx}
+      />
       <Sidebar
         width={sidebarWidth}
         isMobile={isMobile}
         isMobileSidebarOpen={isMobileSidebarOpen}
         onMobileSidebarClose={handleMobileSidebarToggle}
+        isCollapsed={isCollapsed}
+        collapsedWidth={collapsedSidebarWidth}
       />
       <Box
         component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          transition: (theme) => theme.transitions.create('margin', {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.enteringScreen,
-          }),
-          ml: { md: `${isCollapsed ? collapsedSidebarWidth : sidebarWidth}px` },
-          width: { md: `calc(100% - ${isCollapsed ? collapsedSidebarWidth : sidebarWidth}px)` },
-        }}
+        sx={{ flexGrow: 1, p: 3 }}
       >
         <Toolbar /> {/* Spacer for Topbar */}
         <Outlet />

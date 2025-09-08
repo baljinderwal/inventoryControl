@@ -25,7 +25,6 @@ import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 
 import { useAuth } from '../../utils/AuthContext';
-import { useSidebar } from '../../utils/SidebarContext';
 
 const collapsedDrawerWidth = 88;
 
@@ -59,9 +58,8 @@ const navItemVariants = {
 };
 
 
-const Sidebar = ({ width: drawerWidth, isMobile, isMobileSidebarOpen, onMobileSidebarClose }) => {
+const Sidebar = ({ width: drawerWidth, isMobile, isMobileSidebarOpen, onMobileSidebarClose, isCollapsed }) => {
   const { user } = useAuth();
-  const { isCollapsed } = useSidebar();
   const theme = useTheme();
   const location = useLocation();
   const [hasAnimated, setHasAnimated] = useState(false);

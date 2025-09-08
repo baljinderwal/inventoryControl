@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../utils/AuthContext';
-import { useSidebar } from '../../utils/SidebarContext';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -16,11 +15,10 @@ import NotificationBell from '../ui/NotificationBell';
 import Box from '@mui/material/Box';
 import { useTheme, useMediaQuery } from '@mui/material';
 
-const Topbar = ({ onMobileSidebarOpen }) => {
+const Topbar = ({ onMobileSidebarOpen, onSidebarToggle, sx }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const { toggleSidebar } = useSidebar();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
@@ -48,6 +46,7 @@ const Topbar = ({ onMobileSidebarOpen }) => {
       position="fixed"
       sx={{
         zIndex: (theme) => theme.zIndex.drawer + 1,
+        ...sx,
       }}
     >
       <Toolbar>
@@ -55,7 +54,7 @@ const Topbar = ({ onMobileSidebarOpen }) => {
           color="inherit"
           aria-label="toggle sidebar"
           edge="start"
-          onClick={isMobile ? onMobileSidebarOpen : toggleSidebar}
+          onClick={isMobile ? onMobileSidebarOpen : onSidebarToggle}
           sx={{ mr: 2 }}
         >
           <MenuIcon />

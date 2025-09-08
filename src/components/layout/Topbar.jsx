@@ -14,12 +14,15 @@ import ApiModeToggle from '../ui/ApiModeToggle';
 import ThemeSwitcher from '../ui/ThemeSwitcher';
 import NotificationBell from '../ui/NotificationBell';
 import Box from '@mui/material/Box';
+import { useTheme, useMediaQuery } from '@mui/material';
 
-const Topbar = () => {
+const Topbar = ({ onMobileSidebarOpen }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
   const { logout } = useAuth();
   const { toggleSidebar } = useSidebar();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -52,7 +55,7 @@ const Topbar = () => {
           color="inherit"
           aria-label="toggle sidebar"
           edge="start"
-          onClick={toggleSidebar}
+          onClick={isMobile ? onMobileSidebarOpen : toggleSidebar}
           sx={{ mr: 2 }}
         >
           <MenuIcon />

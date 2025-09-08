@@ -7,11 +7,10 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  useMediaQuery,
   useTheme,
   Tooltip,
   Box,
-  SwipeableDrawer,
+  Typography,
 } from '@mui/material';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -20,7 +19,6 @@ import BusinessIcon from '@mui/icons-material/Business';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import PeopleIcon from '@mui/icons-material/People';
-import SettingsIcon from '@mui/icons-material/Settings';
 import ReceiptIcon from '@mui/icons-material/Receipt';
 import PointOfSaleIcon from '@mui/icons-material/PointOfSale';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
@@ -29,7 +27,6 @@ import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 import { useAuth } from '../../utils/AuthContext';
 import { useSidebar } from '../../utils/SidebarContext';
 
-const drawerWidth = 240;
 const collapsedDrawerWidth = 88;
 
 const navigation = [
@@ -62,11 +59,10 @@ const navItemVariants = {
 };
 
 
-const Sidebar = () => {
+const Sidebar = ({ width: drawerWidth, isMobile, isMobileSidebarOpen, onMobileSidebarClose }) => {
   const { user } = useAuth();
-  const { isCollapsed, toggleSidebar } = useSidebar();
+  const { isCollapsed } = useSidebar();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
   const [hasAnimated, setHasAnimated] = useState(false);
 
@@ -85,10 +81,11 @@ const Sidebar = () => {
 
     return (
         <Motion.div variants={navItemVariants}>
-            <Tooltip title={isCollapsed ? item.name : ''} placement="right" arrow>
+            <Tooltip title={isCollapsed && !isMobile ? item.name : ''} placement="right" arrow>
                 <ListItemButton
                 component={NavLink}
                 to={item.href}
+                onClick={isMobile ? onMobileSidebarClose : undefined}
                 aria-label={item.name}
                 sx={{
                     px: 3,
@@ -120,7 +117,7 @@ const Sidebar = () => {
                     }),
                 }}
                 >
-                <ListItemIcon sx={{ minWidth: 0, mr: isCollapsed ? 0 : 3, justifyContent: 'center', transition: 'margin 0.2s', color: 'inherit' }}>
+                <ListItemIcon sx={{ minWidth: 0, mr: (isCollapsed && !isMobile) ? 0 : 3, justifyContent: 'center', transition: 'margin 0.2s', color: 'inherit' }}>
                     <Motion.div whileHover={{ scale: 1.1 }}>
                     <Icon />
                     </Motion.div>
@@ -129,7 +126,7 @@ const Sidebar = () => {
                     primary={item.name}
                     primaryTypographyProps={{
                         style: {
-                            opacity: isCollapsed ? 0 : 1,
+                            opacity: (isCollapsed && !isMobile) ? 0 : 1,
                             transition: 'opacity 0.2s ease-in-out',
                             whiteSpace: 'nowrap',
                         }
@@ -160,43 +157,46 @@ const Sidebar = () => {
     </Box>
   );
 
-  const drawerSx = {
-    width: (isCollapsed ? collapsedDrawerWidth : drawerWidth),
-    transition: theme.transitions.create('width', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    '& .MuiDrawer-paper': {
-      width: 'inherit',
-      transition: 'inherit',
-      top: { xs: 0, md: `64px`},
-      height: { xs: '100%', md: `calc(100% - 64px)`},
-      boxSizing: 'border-box',
-      overflowX: 'hidden',
-      borderRight: { md: `1px solid ${theme.palette.divider}` },
-      // Light theme styles
-      backgroundColor: 'background.paper',
-    },
-  };
-
   if (isMobile) {
     return (
-      <SwipeableDrawer
+      <Drawer
         anchor="left"
-        open={!isCollapsed}
-        onClose={toggleSidebar}
-        onOpen={toggleSidebar}
+        open={isMobileSidebarOpen}
+        onClose={onMobileSidebarClose}
+        variant="temporary"
         ModalProps={{ keepMounted: true }}
-        sx={drawerSx}
+        sx={{
+            width: drawerWidth,
+            '& .MuiDrawer-paper': {
+                width: drawerWidth,
+                boxSizing: 'border-box',
+            }
+        }}
       >
-        <Box sx={theme.mixins.toolbar} /> {/* Spacer */}
         {drawerContent}
-      </SwipeableDrawer>
+      </Drawer>
     );
   }
 
   return (
-    <Drawer variant="permanent" sx={drawerSx}>
+    <Drawer variant="permanent"
+        sx={{
+            width: (isCollapsed ? collapsedDrawerWidth : drawerWidth),
+            transition: theme.transitions.create('width', {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.enteringScreen,
+            }),
+            '& .MuiDrawer-paper': {
+            width: 'inherit',
+            transition: 'inherit',
+            top: { md: `64px`},
+            height: { md: `calc(100% - 64px)`},
+            boxSizing: 'border-box',
+            overflowX: 'hidden',
+            borderRight: { md: `1px solid ${theme.palette.divider}` },
+            backgroundColor: 'background.paper',
+            },
+      }}>
       {drawerContent}
     </Drawer>
   );

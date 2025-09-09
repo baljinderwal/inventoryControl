@@ -99,9 +99,13 @@ const remote = {
 
     let stockEntry;
     try {
-      const stockRes = await api.get(`/stock?productId=${productId}`);
-      if (stockRes.data.length > 0) {
-        stockEntry = stockRes.data[0];
+      const stockQueryRes = await api.get(`/stock?productId=${productId}`);
+      if (stockQueryRes.data.length > 0) {
+        // First get the ID from the query result.
+        const stockId = stockQueryRes.data[0].id;
+        // Then, fetch the full entry by its ID to ensure we have the complete object.
+        const stockFullRes = await api.get(`/stock/${stockId}`);
+        stockEntry = stockFullRes.data;
       } else {
         stockEntry = null;
       }
@@ -116,6 +120,7 @@ const remote = {
         stockEntry.batches = [];
       }
       stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate, supplierId });
+
       if (sizes && sizes.length > 0) {
         if (!stockEntry.sizes) stockEntry.sizes = [];
         sizes.forEach(size => {

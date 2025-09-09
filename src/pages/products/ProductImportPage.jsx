@@ -14,20 +14,19 @@ import {
 } from '@mui/material';
 import { UploadFile as UploadFileIcon, Description as DescriptionIcon } from '@mui/icons-material';
 import Papa from 'papaparse';
-import { useApi } from '../../utils/ApiModeContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNotification } from '../../utils/NotificationContext';
+import { productService } from '../../services/productService';
 
 const ProductImportPage = () => {
   const [csvFile, setCsvFile] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [importResults, setImportResults] = useState(null);
-  const { services } = useApi();
   const queryClient = useQueryClient();
-  const showNotification = useNotification();
+  const { showNotification } = useNotification();
 
   const mutation = useMutation({
-    mutationFn: (newProduct) => services.products.createProduct(newProduct),
+    mutationFn: (newProduct) => productService.addProduct(newProduct),
     onSuccess: () => {
       queryClient.invalidateQueries(['products']);
     },

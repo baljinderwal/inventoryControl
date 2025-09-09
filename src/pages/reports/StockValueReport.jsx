@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { Parser } from '@json2csv/plainjs';
-
+import { stockService } from '../../services/stockService';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
@@ -16,11 +15,9 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 
 const StockValueReport = () => {
-  const { mode, services } = useApi();
-
   const { data: products = [], isLoading, isError, error } = useQuery({
-    queryKey: ['stock', mode],
-    queryFn: () => services.stock.getStockLevels(),
+    queryKey: ['stock'],
+    queryFn: () => stockService.getStockLevels(),
   });
 
   const stockValueReport = useMemo(() => {

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
+import { stockService } from '../../services/stockService';
+import { supplierService } from '../../services/supplierService';
 import StockAdjustmentForm from './StockAdjustmentForm';
 import AddStockForm from './AddStockForm';
 import AppDialog from '../../components/ui/AppDialog';
@@ -32,17 +33,16 @@ const StockPage = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const { mode, services } = useApi();
   const { showNotification } = useNotification();
 
   const { data: stockLevels = [], isLoading: isLoadingStock, isError: isErrorStock, error: errorStock } = useQuery({
-    queryKey: ['stock', mode],
-    queryFn: services.stock.getStockLevels,
+    queryKey: ['stock'],
+    queryFn: stockService.getStockLevels,
   });
 
   const { data: suppliers = [], isLoading: isLoadingSuppliers } = useQuery({
-    queryKey: ['suppliers', mode],
-    queryFn: services.suppliers.getSuppliers,
+    queryKey: ['suppliers'],
+    queryFn: supplierService.getSuppliers,
   });
 
   const supplierMap = useMemo(() => {

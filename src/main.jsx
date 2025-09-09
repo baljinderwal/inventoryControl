@@ -8,7 +8,6 @@ import App from './App';
 import { AuthProvider } from './utils/AuthContext';
 import { NotificationProvider } from './utils/NotificationContext';
 import { NotificationCenterProvider } from './utils/NotificationCenterContext';
-import { ApiModeProvider } from './utils/ApiModeContext';
 import { CustomThemeProvider, useThemeContext } from './utils/ThemeContext';
 import './index.css';
 
@@ -112,11 +111,9 @@ const AppWrapper = () => {
         <CssBaseline />
         <BrowserRouter>
           <AuthProvider>
-            <ApiModeProvider>
-              <NotificationCenterProvider>
-                <App />
-              </NotificationCenterProvider>
-            </ApiModeProvider>
+            <NotificationCenterProvider>
+              <App />
+            </NotificationCenterProvider>
           </AuthProvider>
         </BrowserRouter>
       </NotificationProvider>

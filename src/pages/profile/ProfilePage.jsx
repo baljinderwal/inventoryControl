@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { profileService } from '../../services/profileService';
 import {
   Container,
@@ -16,18 +15,17 @@ import {
 import { motion } from 'framer-motion';
 
 const ProfilePage = () => {
-  const { mode } = useApi();
   const queryClient = useQueryClient();
 
   const { data: profile, isLoading, error } = useQuery({
-    queryKey: ['profile', mode],
-    queryFn: () => profileService[mode].getProfile(),
+    queryKey: ['profile'],
+    queryFn: () => profileService.getProfile(),
   });
 
   const mutation = useMutation({
-    mutationFn: (updatedProfile) => profileService[mode].updateProfile(updatedProfile),
+    mutationFn: (updatedProfile) => profileService.updateProfile(updatedProfile),
     onSuccess: () => {
-      queryClient.invalidateQueries(['profile', mode]);
+      queryClient.invalidateQueries(['profile']);
     },
   });
 

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
 import { Parser } from '@json2csv/plainjs';
+import { supplierService } from '../../services/supplierService';
 
 import MuiTable from '../../components/ui/Table';
 import AppDialog from '../../components/ui/AppDialog';
@@ -23,7 +23,6 @@ import Stack from '@mui/material/Stack';
 const SuppliersPage = () => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
-  const { mode, services } = useApi();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [supplierToEdit, setSupplierToEdit] = useState(null);
@@ -31,12 +30,12 @@ const SuppliersPage = () => {
   const [supplierToDelete, setSupplierToDelete] = useState(null);
 
   const { data: suppliers = [], isLoading, isError, error } = useQuery({
-    queryKey: ['suppliers', mode],
-    queryFn: services.suppliers.getSuppliers,
+    queryKey: ['suppliers'],
+    queryFn: supplierService.getSuppliers,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: services.suppliers.deleteSupplier,
+    mutationFn: supplierService.deleteSupplier,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       showNotification('Supplier deleted successfully', 'success');

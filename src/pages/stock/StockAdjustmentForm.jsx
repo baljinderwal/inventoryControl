@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
 import { Add, Delete } from '@mui/icons-material';
+import { supplierService } from '../../services/supplierService';
+import { stockService } from '../../services/stockService';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -26,7 +27,6 @@ const StockAdjustmentForm = ({
 }) => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
-  const { mode, services } = useApi();
 
   const [adjustmentType, setAdjustmentType] = useState('out');
   const [quantity, setQuantity] = useState(1);
@@ -63,15 +63,15 @@ const StockAdjustmentForm = ({
   }, [batchNumber, batches, adjustmentType]);
 
   const { data: suppliers = [] } = useQuery({
-    queryKey: ['suppliers', mode],
-    queryFn: () => services.suppliers.getSuppliers(),
+    queryKey: ['suppliers'],
+    queryFn: () => supplierService.getSuppliers(),
   });
 
   const adjustStockMutation = useMutation({
-    mutationFn: services.stock.adjustStockLevel,
+    mutationFn: stockService.adjustStockLevel,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['stock', mode] });
-      queryClient.invalidateQueries({ queryKey: ['product', product.id, mode] });
+      queryClient.invalidateQueries({ queryKey: ['stock'] });
+      queryClient.invalidateQueries({ queryKey: ['product', product.id] });
       showNotification('Stock level updated successfully', 'success');
       onClose();
     },
@@ -81,9 +81,9 @@ const StockAdjustmentForm = ({
   });
 
   const updateSupplierMutation = useMutation({
-    mutationFn: services.stock.updateBatchSupplier,
+    mutationFn: stockService.updateBatchSupplier,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['stock', mode] });
+      queryClient.invalidateQueries({ queryKey: ['stock'] });
       showNotification('Supplier updated successfully', 'success');
     },
     onError: (err) => {

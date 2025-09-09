@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
+import { stockService } from '../../services/stockService';
 import MuiTable from '../../components/ui/Table';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -8,10 +8,9 @@ import Alert from '@mui/material/Alert';
 import Paper from '@mui/material/Paper';
 
 const StockExpiryReport = () => {
-  const { mode, services } = useApi();
   const { data: stockLevels = [], isLoading, isError, error } = useQuery({
-    queryKey: ['stock', mode],
-    queryFn: services.stock.getStockLevels,
+    queryKey: ['stock'],
+    queryFn: stockService.getStockLevels,
   });
 
   const reportData = stockLevels

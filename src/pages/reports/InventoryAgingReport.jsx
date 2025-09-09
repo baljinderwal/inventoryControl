@@ -1,8 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { Parser } from '@json2csv/plainjs';
-
+import { reportService } from '../../services/reportService';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -31,11 +30,9 @@ const getAgingColor = (days) => {
 };
 
 const InventoryAgingReport = () => {
-  const { mode, services } = useApi();
-
   const { data: agingReport, isLoading, isError, error } = useQuery({
-    queryKey: ['inventoryAging', mode],
-    queryFn: () => services.reports.getInventoryAging(),
+    queryKey: ['inventoryAging'],
+    queryFn: () => reportService.getInventoryAging(),
   });
 
   const handleExport = () => {

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
-
+import { supplierService } from '../../services/supplierService';
+import { productService } from '../../services/productService';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import DialogActions from '@mui/material/DialogActions';
@@ -19,7 +19,6 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 const AddEditSupplierForm = ({ onClose, supplier, onSupplierAdded }) => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
-  const { services } = useApi();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -30,7 +29,7 @@ const AddEditSupplierForm = ({ onClose, supplier, onSupplierAdded }) => {
 
   const { data: productsData, isLoading: isLoadingProducts } = useQuery({
     queryKey: ['products'],
-    queryFn: services.products.getProducts,
+    queryFn: productService.getProducts,
   });
 
   const isEditMode = Boolean(supplier);
@@ -48,8 +47,8 @@ const AddEditSupplierForm = ({ onClose, supplier, onSupplierAdded }) => {
 
   const mutation = useMutation({
     mutationFn: isEditMode
-      ? (updatedSupplier) => services.suppliers.updateSupplier(supplier.id, updatedSupplier)
-      : services.suppliers.addSupplier,
+      ? (updatedSupplier) => supplierService.updateSupplier(supplier.id, updatedSupplier)
+      : supplierService.addSupplier,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       showNotification(`Supplier ${isEditMode ? 'updated' : 'added'} successfully`, 'success');

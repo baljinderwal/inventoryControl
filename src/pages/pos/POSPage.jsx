@@ -20,13 +20,15 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { Add, Delete } from '@mui/icons-material';
-import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
+import { customerService } from '../../services/customerService';
+import { stockService } from '../../services/stockService';
+import { salesOrderService } from '../../services/salesOrderService';
+import invoiceService from '../../services/invoiceService';
 import BarcodeScanner from '../../components/ui/BarcodeScanner';
 import { generateInvoicePDF } from '../../utils/generateInvoicePDF';
 
 const POSPage = () => {
-  const { mode, services } = useApi();
   const { showNotification } = useNotification();
   const queryClient = useQueryClient();
 
@@ -36,13 +38,13 @@ const POSPage = () => {
 
   // Data fetching
   const { data: customers, isLoading: isLoadingCustomers } = useQuery({
-    queryKey: ['customers', mode],
-    queryFn: () => services.customers.getCustomers(),
+    queryKey: ['customers'],
+    queryFn: () => customerService.getCustomers(),
   });
 
   const { data: stock, isLoading: isLoadingStock } = useQuery({
-    queryKey: ['stock', mode],
-    queryFn: () => services.stock.getStockLevels(),
+    queryKey: ['stock'],
+    queryFn: () => stockService.getStockLevels(),
   });
 
   const checkoutMutation = useMutation({
@@ -56,13 +58,13 @@ const POSPage = () => {
         total: saleData.total,
         createdAt: new Date().toISOString(),
       };
-      const newSO = await services.salesOrders.addSalesOrder(soData);
+      const newSO = await salesOrderService.addSalesOrder(soData);
 
       // 2. Adjust Stock Levels for each item
       // In a real-world scenario, this would be a single backend transaction
       await Promise.all(
         saleData.items.map(item =>
-          services.stock.adjustStockLevel({
+          stockService.adjustStockLevel({
             productId: item.id,
             quantity: -item.quantity,
           })
@@ -80,7 +82,7 @@ const POSPage = () => {
         invoiceDate: new Date().toISOString(),
         dueDate: new Date().toISOString(),
       };
-      const newInvoice = await services.invoices.createInvoice(invoiceData);
+      const newInvoice = await invoiceService.createInvoice(invoiceData);
 
       return { newSO, newInvoice };
     },

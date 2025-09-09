@@ -4,27 +4,6 @@ const transformCustomer = (customer) => ({
   ...customer,
 });
 
-const local = {
-  getCustomers: async () => {
-    console.log("Fetching local customers");
-    const response = await fetch('/db.json');
-    const data = await response.json();
-    return data.customers.map(transformCustomer);
-  },
-  addCustomer: async (customer) => {
-    console.warn("Read-only mode: addCustomer disabled.", customer);
-    return Promise.resolve({ ...customer, id: new Date().getTime() });
-  },
-  updateCustomer: async (id, customer) => {
-    console.warn("Read-only mode: updateCustomer disabled.", id, customer);
-    return Promise.resolve({ ...customer, id });
-  },
-  deleteCustomer: async (id) => {
-    console.warn("Read-only mode: deleteCustomer disabled.", id);
-    return Promise.resolve({ id });
-  },
-};
-
 const apiService = {
   getCustomers: async () => {
     const { data } = await api.get('/customers');
@@ -44,7 +23,4 @@ const apiService = {
   },
 };
 
-export const customerService = {
-  local,
-  api: apiService,
-};
+export const customerService = apiService;

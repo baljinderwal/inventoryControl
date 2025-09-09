@@ -1,25 +1,5 @@
 import api from './api';
 
-const local = {
-  getUsers: async () => {
-    const response = await fetch('/db.json');
-    const data = await response.json();
-    return data.users || [];
-  },
-  addUser: async (user) => {
-    console.warn('Read-only mode: addUser disabled.', user);
-    return Promise.resolve(user);
-  },
-  updateUser: async (id, user) => {
-    console.warn('Read-only mode: updateUser disabled.', id, user);
-    return Promise.resolve(user);
-  },
-  deleteUser: async (id) => {
-    console.warn('Read-only mode: deleteUser disabled.', id);
-    return Promise.resolve();
-  },
-};
-
 const remote = {
   getUsers: async () => {
     const response = await api.get('/users');
@@ -39,4 +19,4 @@ const remote = {
   },
 };
 
-export const userService = { local, api: remote };
+export const userService = remote;

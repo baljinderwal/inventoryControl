@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
+import { customerService } from '../../services/customerService';
 import MuiTable from '../../components/ui/Table';
 import AppDialog from '../../components/ui/AppDialog';
 import ConfirmationDialog from '../../components/ui/ConfirmationDialog';
@@ -20,7 +20,6 @@ import { Edit, Delete } from '@mui/icons-material';
 const CustomersPage = () => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
-  const { mode, services } = useApi();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [customerToEdit, setCustomerToEdit] = useState(null);
@@ -28,12 +27,12 @@ const CustomersPage = () => {
   const [customerToDelete, setCustomerToDelete] = useState(null);
 
   const { data: customers = [], isLoading, isError, error } = useQuery({
-    queryKey: ['customers', mode],
-    queryFn: services.customers.getCustomers,
+    queryKey: ['customers'],
+    queryFn: customerService.getCustomers,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: services.customers.deleteCustomer,
+    mutationFn: customerService.deleteCustomer,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
       showNotification('Customer deleted successfully', 'success');

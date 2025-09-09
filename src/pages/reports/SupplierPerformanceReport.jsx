@@ -1,8 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { Parser } from '@json2csv/plainjs';
-
+import { reportService } from '../../services/reportService';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -20,10 +19,9 @@ import {
 } from '@mui/material';
 
 const SupplierPerformanceReport = () => {
-  const { mode, services } = useApi();
   const { data: performanceReport, isLoading, isError, error } = useQuery({
-    queryKey: ['supplierPerformance', mode],
-    queryFn: services.reports.getSupplierPerformance,
+    queryKey: ['supplierPerformance'],
+    queryFn: reportService.getSupplierPerformance,
   });
 
   const handleExport = () => {

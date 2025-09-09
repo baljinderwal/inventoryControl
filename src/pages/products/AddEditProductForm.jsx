@@ -62,6 +62,7 @@ const AddEditProductForm = ({
   const [addStock, setAddStock] = useState(false);
   const [isAddSupplierDialogOpen, setAddSupplierDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [customSizeInput, setCustomSizeInput] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -92,6 +93,7 @@ const AddEditProductForm = ({
       { size: '9', quantity: 1 },
     ],
     colors: [],
+    customSizes: [],
   });
 
   const isEditMode = Boolean(product);
@@ -120,6 +122,7 @@ const AddEditProductForm = ({
         expiryDate: '',
         createdDate: product.createdDate || '',
         colors: product.colors || [],
+        customSizes: product.customSizes || [],
         sizes: product.sizes && product.sizes.length > 0 ? product.sizes : [
           { size: '6', quantity: 1 },
           { size: '7', quantity: 1 },
@@ -153,6 +156,7 @@ const AddEditProductForm = ({
         lowStockThreshold: parseInt(formData.lowStockThreshold, 10) || 0,
         imageUrl: formData.imageUrl,
         colors: formData.colors,
+        customSizes: formData.customSizes,
       };
 
       if (isEditMode) {
@@ -275,6 +279,26 @@ const AddEditProductForm = ({
     setFormData((prev) => ({
       ...prev,
       sizes: [...prev.sizes, { size: '', quantity: 1 }],
+    }));
+  };
+
+  const handleAddCustomSize = () => {
+    if (customSizeInput && !formData.customSizes.includes(customSizeInput)) {
+      const newCustomSize = customSizeInput;
+      setFormData(prev => ({
+        ...prev,
+        customSizes: [...prev.customSizes, newCustomSize],
+        sizes: [...prev.sizes, { size: newCustomSize, quantity: 1 }]
+      }));
+      setCustomSizeInput('');
+    }
+  };
+
+  const handleDeleteCustomSize = (sizeToDelete) => {
+    setFormData(prev => ({
+      ...prev,
+      customSizes: prev.customSizes.filter(size => size !== sizeToDelete),
+      sizes: prev.sizes.filter(s => s.size !== sizeToDelete)
     }));
   };
 
@@ -657,6 +681,33 @@ const AddEditProductForm = ({
               <MenuItem value="toddler">Toddler</MenuItem>
             </Select>
           </FormControl>
+
+          <Typography variant="subtitle1" sx={{ mt: 2, mb: 1 }}>Custom Sizes</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <TextField
+                    label="Add Custom Size"
+                    value={customSizeInput}
+                    onChange={(e) => setCustomSizeInput(e.target.value)}
+                    onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddCustomSize();
+                        }
+                    }}
+                    size="small"
+                    sx={{ mr: 1 }}
+                />
+                <Button onClick={handleAddCustomSize} variant="outlined">Add</Button>
+            </Box>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+                {formData.customSizes.map(size => (
+                    <Chip
+                        key={size}
+                        label={size}
+                        onDelete={() => handleDeleteCustomSize(size)}
+                    />
+                ))}
+            </Box>
 
           {/* Sales & Pricing */}
           <TextField

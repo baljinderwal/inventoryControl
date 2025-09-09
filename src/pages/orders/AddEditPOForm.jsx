@@ -30,6 +30,7 @@ import BarcodeScanner from '../../components/ui/BarcodeScanner';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import { getSizePreset } from '../../utils/sizePresets';
 
 
@@ -43,6 +44,9 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [showAllProducts, setShowAllProducts] = useState(false);
+  const [addSizeDialogOpen, setAddSizeDialogOpen] = useState(false);
+  const [currentProductForSize, setCurrentProductForSize] = useState(null);
+  const [newSize, setNewSize] = useState('');
 
   useEffect(() => {
     if (open) {
@@ -61,8 +65,9 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   useEffect(() => {
     if (!isEditMode) {
         setProductsList([{ productId: '', quantity: 1, size: null }]);
+        setShowAllProducts(false);
     }
-  }, [supplierId, showAllProducts]);
+  }, [supplierId]);
 
   const { data: suppliers, isLoading: isLoadingSuppliers } = useQuery({ queryKey: ['suppliers'], queryFn: supplierService.getSuppliers });
   const { data: products, isLoading: isLoadingProducts } = useQuery({ queryKey: ['stock'], queryFn: stockService.getStockLevels });
@@ -73,18 +78,23 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   }, [products]);
 
   const availableProducts = useMemo(() => {
-    if (showAllProducts && supplierId) return products || [];
-    if (!supplierId) return [];
-    if (!suppliers || !products) return [];
-
-    const selectedSupplier = suppliers.find(s => s.id === supplierId);
-    if (!selectedSupplier || !selectedSupplier.products) {
+    let baseProducts = [];
+    if (showAllProducts && supplierId) {
+      baseProducts = products || [];
+    } else if (supplierId) {
+      if (!suppliers || !products) return [];
+      const selectedSupplier = suppliers.find(s => s.id === supplierId);
+      if (selectedSupplier && selectedSupplier.products) {
+        const supplierProductIds = new Set(selectedSupplier.products);
+        baseProducts = products.filter(p => supplierProductIds.has(p.id));
+      }
+    } else {
       return [];
     }
 
-    const supplierProductIds = new Set(selectedSupplier.products);
-    return products.filter(p => supplierProductIds.has(p.id));
-  }, [supplierId, suppliers, products, showAllProducts]);
+    const selectedProductIds = new Set(productsList.map(p => p.productId).filter(Boolean));
+    return baseProducts.filter(p => !selectedProductIds.has(p.id));
+  }, [supplierId, suppliers, products, showAllProducts, productsList]);
 
   const handleAddFromSuggestion = (product) => {
     if (productsList.some(p => p.productId === product.id)) {
@@ -92,10 +102,12 @@ const AddEditPOForm = ({ open, onClose, po }) => {
       return;
     }
 
-    const sizes = product.sizeProfile ? getSizePreset(product.sizeProfile) : [];
+    const presetSizes = product.sizeProfile ? getSizePreset(product.sizeProfile) : [];
+    const customSizes = product.customSizes || [];
+    const allSizes = [...new Set([...presetSizes, ...customSizes])];
 
-    if (sizes.length > 0) {
-      const newProducts = sizes.map(size => ({
+    if (allSizes.length > 0) {
+      const newProducts = allSizes.map(size => ({
         productId: product.id,
         quantity: 1, // Default quantity for each size
         size: size,
@@ -141,10 +153,13 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
     if (field === 'productId') {
       const product = availableProducts.find(p => p.id === value);
-      if (product && product.sizeProfile) {
-        const sizes = getSizePreset(product.sizeProfile);
-        if (sizes.length > 0) {
-          const newSizedProducts = sizes.map(size => ({
+      if (product && (product.sizeProfile || (product.customSizes && product.customSizes.length > 0))) {
+        const presetSizes = product.sizeProfile ? getSizePreset(product.sizeProfile) : [];
+        const customSizes = product.customSizes || [];
+        const allSizes = [...new Set([...presetSizes, ...customSizes])];
+
+        if (allSizes.length > 0) {
+          const newSizedProducts = allSizes.map(size => ({
             productId: product.id,
             quantity: 1,
             size: size,
@@ -167,9 +182,40 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
   const handleAddProduct = () => setProductsList([...productsList, { productId: '', quantity: 1, size: null }]);
 
+  const handleOpenAddSizeDialog = (productId) => {
+    setCurrentProductForSize(productId);
+    setAddSizeDialogOpen(true);
+  };
+
+  const handleCloseAddSizeDialog = () => {
+    setAddSizeDialogOpen(false);
+    setCurrentProductForSize(null);
+    setNewSize('');
+  };
+
+  const handleAddNewSize = () => {
+    if (newSize && currentProductForSize) {
+      // Check if the size already exists for this product
+      const sizeExists = productsList.some(
+        p => p.productId === currentProductForSize && p.size === newSize
+      );
+
+      if (sizeExists) {
+        showNotification(`Size "${newSize}" already exists for this product.`, 'info');
+        return;
+      }
+
+      setProductsList(prev => [
+        ...prev,
+        { productId: currentProductForSize, quantity: 1, size: newSize }
+      ]);
+      handleCloseAddSizeDialog();
+    }
+  };
+
   const handleRemoveProduct = (index, productId) => {
-    const product = availableProducts.find(p => p.id === productId);
-    const isSized = product && product.sizeProfile && getSizePreset(product.sizeProfile).length > 0;
+    const product = products.find(p => p.id === productId);
+    const isSized = product && (product.sizeProfile || (product.customSizes && product.customSizes.length > 0));
 
     let newProductsList;
     if (isSized) {
@@ -250,7 +296,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
       }
 
       if (!groups[item.productId]) {
-        const product = availableProducts.find(p => p.id === item.productId);
+        const product = products.find(p => p.id === item.productId);
         groups[item.productId] = {
           productName: product ? product.name : 'Unknown Product',
           product,
@@ -271,7 +317,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
 
     return groups;
-  }, [productsList, availableProducts]);
+  }, [productsList, products]);
   return (
     <AppDialog title={isEditMode ? `Edit PO #${po.id}` : "Create New Purchase Order"} open={open} onClose={onClose} maxWidth="md">
       <form onSubmit={handleSubmit}>
@@ -292,7 +338,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
               <Switch
                 checked={showAllProducts}
                 onChange={(e) => setShowAllProducts(e.target.checked)}
-                disabled={!supplierId || isEditMode}
+                disabled={!supplierId}
               />
             }
             label="Show All Products"
@@ -351,18 +397,25 @@ const AddEditPOForm = ({ open, onClose, po }) => {
                       </Select>
                     </FormControl>
                   )}
-                  <TextField
-                    label="Quantity"
-                    type="number"
-                    value={item.quantity}
-                    onChange={(e) => handleProductChange(item.originalIndex, 'quantity', parseInt(e.target.value, 10))}
-                    required
-                    sx={{ flex: 1 }}
-                    InputProps={{ inputProps: { min: 1 } }}
-                  />
+                  {item.productId && (
+                    <TextField
+                      label="Quantity"
+                      type="number"
+                      value={item.quantity}
+                      onChange={(e) => handleProductChange(item.originalIndex, 'quantity', parseInt(e.target.value, 10))}
+                      required
+                      sx={{ flex: 1 }}
+                      InputProps={{ inputProps: { min: 1 } }}
+                    />
+                  )}
                 </Box>
               );
             })}
+            {group.product && (group.product.sizeProfile || (group.product.customSizes && group.product.customSizes.length > 0)) && (
+              <Button onClick={() => handleOpenAddSizeDialog(productId)} size="small" sx={{ mt: 1 }}>
+                Add Size
+              </Button>
+            )}
           </Paper>
         ))}
         <Button startIcon={<Add />} onClick={handleAddProduct}>Add Product</Button>
@@ -375,6 +428,32 @@ const AddEditPOForm = ({ open, onClose, po }) => {
             <DialogContent>
             {isScannerOpen && <BarcodeScanner onScan={handleScan} />}
             </DialogContent>
+        </Dialog>
+
+        <Dialog open={addSizeDialogOpen} onClose={handleCloseAddSizeDialog}>
+            <DialogTitle>Add New Size</DialogTitle>
+            <DialogContent>
+                <TextField
+                    autoFocus
+                    margin="dense"
+                    label="New Size"
+                    type="text"
+                    fullWidth
+                    variant="standard"
+                    value={newSize}
+                    onChange={(e) => setNewSize(e.target.value)}
+                    onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddNewSize();
+                        }
+                    }}
+                />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleCloseAddSizeDialog}>Cancel</Button>
+                <Button onClick={handleAddNewSize}>Add</Button>
+            </DialogActions>
         </Dialog>
 
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>

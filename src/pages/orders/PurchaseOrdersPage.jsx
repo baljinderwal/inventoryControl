@@ -10,10 +10,12 @@ import { Box, Typography, Button, CircularProgress, Chip, IconButton, Stack } fr
 import { Add, CheckCircle, Delete, Edit, Download, PictureAsPdf } from '@mui/icons-material';
 import { generatePOPDF } from '../../utils/generatePOPDF';
 import AddEditPOForm from './AddEditPOForm';
+import ReceivePOForm from './ReceivePOForm';
 import ConfirmationDialog from '../../components/ui/ConfirmationDialog';
 
 const PurchaseOrdersPage = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isReceiveFormOpen, setIsReceiveFormOpen] = useState(false);
   const [selectedPO, setSelectedPO] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [poToDelete, setPOToDelete] = useState(null);
@@ -45,28 +47,23 @@ const PurchaseOrdersPage = () => {
     }
   };
 
-  // IMPORTANT: The logic for receiving a PO is now more complex with batch tracking.
-  // This mutation would need to be updated to handle batch numbers and expiry dates
-  // for each item received, likely via a new form/modal.
-  // For now, this is a placeholder and will not correctly update stock in API mode.
-  const receivePOMutation = useMutation({
-    mutationFn: async (po) => {
-      // In API mode, this is a placeholder. A real implementation would need a modal
-      // to capture batch/expiry info for each product line.
-      console.error('API for receiving PO and adjusting stock with batches is not implemented.');
-      showNotification('Receiving PO is not fully implemented for batch tracking.', 'warning');
-      // Just updating the status for now as a visual cue.
-      return poService.updatePO(po.id, { status: 'Completed', completedAt: new Date().toISOString() });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['purchaseOrders'] });
-      queryClient.invalidateQueries({ queryKey: ['stock'] });
-      showNotification('Purchase Order marked as received. Note: Stock not adjusted.', 'info');
-    },
-    onError: (err) => {
-      showNotification(`Error receiving Purchase Order: ${err.message}`, 'error');
-    }
-  });
+  const handleOpenReceiveForm = (po) => {
+    // We need to enrich the PO products with the product name for the form
+    const enrichedPO = {
+      ...po,
+      products: po.products.map(item => {
+        const product = productsData.find(p => p.id === item.productId);
+        return { ...item, productName: product?.name || 'Unknown Product' };
+      })
+    };
+    setSelectedPO(enrichedPO);
+    setIsReceiveFormOpen(true);
+  };
+
+  const handleCloseReceiveForm = () => {
+    setSelectedPO(null);
+    setIsReceiveFormOpen(false);
+  };
 
   const deletePOMutation = useMutation({
     mutationFn: poService.deletePO,
@@ -148,7 +145,7 @@ const PurchaseOrdersPage = () => {
       actions: (
         <Stack direction="row" spacing={1}>
           {po.status === 'Pending' && (
-            <Button variant="contained" color="success" size="small" startIcon={<CheckCircle />} disabled={receivePOMutation.isLoading} onClick={() => receivePOMutation.mutate(po)}>
+            <Button variant="contained" color="success" size="small" startIcon={<CheckCircle />} onClick={() => handleOpenReceiveForm(po)}>
               Receive
             </Button>
           )}
@@ -178,6 +175,7 @@ const PurchaseOrdersPage = () => {
       {isError && <Typography color="error">Error fetching purchase orders: {error.message}</Typography>}
       {!isLoading && !isError && <MuiTable headers={tableHeaders} data={tableData || []} />}
       {isFormOpen && <AddEditPOForm open={isFormOpen} onClose={handleCloseForm} po={selectedPO} />}
+      {isReceiveFormOpen && <ReceivePOForm open={isReceiveFormOpen} onClose={handleCloseReceiveForm} po={selectedPO} />}
       <ConfirmationDialog
         open={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}

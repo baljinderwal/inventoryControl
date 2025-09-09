@@ -284,9 +284,11 @@ const AddEditProductForm = ({
 
   const handleAddCustomSize = () => {
     if (customSizeInput && !formData.customSizes.includes(customSizeInput)) {
+      const newCustomSize = customSizeInput;
       setFormData(prev => ({
         ...prev,
-        customSizes: [...prev.customSizes, customSizeInput]
+        customSizes: [...prev.customSizes, newCustomSize],
+        sizes: [...prev.sizes, { size: newCustomSize, quantity: 1 }]
       }));
       setCustomSizeInput('');
     }
@@ -295,7 +297,8 @@ const AddEditProductForm = ({
   const handleDeleteCustomSize = (sizeToDelete) => {
     setFormData(prev => ({
       ...prev,
-      customSizes: prev.customSizes.filter(size => size !== sizeToDelete)
+      customSizes: prev.customSizes.filter(size => size !== sizeToDelete),
+      sizes: prev.sizes.filter(s => s.size !== sizeToDelete)
     }));
   };
 

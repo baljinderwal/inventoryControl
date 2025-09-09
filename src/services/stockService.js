@@ -92,19 +92,19 @@ const remote = {
     stockEntry.batches = stockEntry.batches.filter(b => b.quantity > 0);
     stockEntry.quantity = stockEntry.batches.reduce((sum, b) => sum + b.quantity, 0);
 
-    return await api.put(`/stock/${stockEntry.id}`, stockEntry);
+    return await api.put(`/stock/${productId}`, stockEntry);
   },
   addStock: async ({ productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate }) => {
     console.log('Adding new stock batch via API', { productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate });
 
     let stockEntry;
     try {
-      const stockQueryRes = await api.get(`/stock?productId=${productId}`);
+      const stockQueryRes = await api.get(`/stock/${productId}`);
       if (stockQueryRes.data.length > 0) {
         // First get the ID from the query result.
         const stockId = stockQueryRes.data[0].id;
         // Then, fetch the full entry by its ID to ensure we have the complete object.
-        const stockFullRes = await api.get(`/stock/${stockId}`);
+        const stockFullRes = await api.get(`/stock/${productId}`);
         stockEntry = stockFullRes.data;
       } else {
         stockEntry = null;

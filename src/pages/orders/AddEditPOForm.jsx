@@ -296,7 +296,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
       }
 
       if (!groups[item.productId]) {
-        const product = availableProducts.find(p => p.id === item.productId);
+        const product = products.find(p => p.id === item.productId);
         groups[item.productId] = {
           productName: product ? product.name : 'Unknown Product',
           product,
@@ -317,7 +317,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
 
     return groups;
-  }, [productsList, availableProducts]);
+  }, [productsList, products]);
   return (
     <AppDialog title={isEditMode ? `Edit PO #${po.id}` : "Create New Purchase Order"} open={open} onClose={onClose} maxWidth="md">
       <form onSubmit={handleSubmit}>

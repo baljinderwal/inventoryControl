@@ -22,6 +22,8 @@ import {
   Divider,
   Badge,
   Paper,
+  FormControlLabel,
+  Switch,
 } from '@mui/material';
 import { Add, Delete, Lightbulb, QrCodeScanner } from '@mui/icons-material';
 import BarcodeScanner from '../../components/ui/BarcodeScanner';
@@ -40,33 +42,27 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   const [productsList, setProductsList] = useState([{ productId: '', quantity: 1, size: null }]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const isInitialMount = useRef(true);
+  const [showAllProducts, setShowAllProducts] = useState(false);
 
   useEffect(() => {
-    if (open) { // Reset state when dialog opens
+    if (open) {
       if (isEditMode && po) {
         setSupplierId(po.supplier.id || '');
         setProductsList(po.products.map(p => ({ productId: p.productId, quantity: p.quantity, size: p.size || null })));
+        setShowAllProducts(false); // Default to supplier-specific products in edit mode
       } else {
         setSupplierId('');
         setProductsList([{ productId: '', quantity: 1, size: null }]);
+        setShowAllProducts(false);
       }
     }
   }, [po, isEditMode, open]);
 
   useEffect(() => {
-    // When supplier changes, reset the products list to prevent invalid combinations.
-    // Use a ref to skip the very first render.
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
+    if (!isEditMode) {
+        setProductsList([{ productId: '', quantity: 1, size: null }]);
     }
-
-    // Do not run on initial mount when supplierId is empty in create mode
-    if (supplierId) {
-      setProductsList([{ productId: '', quantity: 1, size: null }]);
-    }
-  }, [supplierId]);
+  }, [supplierId, showAllProducts]);
 
   const { data: suppliers, isLoading: isLoadingSuppliers } = useQuery({ queryKey: ['suppliers'], queryFn: supplierService.getSuppliers });
   const { data: products, isLoading: isLoadingProducts } = useQuery({ queryKey: ['stock'], queryFn: stockService.getStockLevels });
@@ -77,7 +73,8 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   }, [products]);
 
   const availableProducts = useMemo(() => {
-    if (!supplierId) return products || [];
+    if (showAllProducts && supplierId) return products || [];
+    if (!supplierId) return [];
     if (!suppliers || !products) return [];
 
     const selectedSupplier = suppliers.find(s => s.id === supplierId);
@@ -87,7 +84,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
     const supplierProductIds = new Set(selectedSupplier.products);
     return products.filter(p => supplierProductIds.has(p.id));
-  }, [supplierId, suppliers, products]);
+  }, [supplierId, suppliers, products, showAllProducts]);
 
   const handleAddFromSuggestion = (product) => {
     if (productsList.some(p => p.productId === product.id)) {
@@ -242,6 +239,19 @@ const AddEditPOForm = ({ open, onClose, po }) => {
             {isLoadingSuppliers ? <CircularProgress size={24} /> : suppliers?.map(s => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)}
           </Select>
         </FormControl>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showAllProducts}
+                onChange={(e) => setShowAllProducts(e.target.checked)}
+                disabled={!supplierId || isEditMode}
+              />
+            }
+            label="Show All Products"
+          />
+        </Box>
 
         {!isEditMode && (
           <Box sx={{ my: 2 }}>

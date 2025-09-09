@@ -167,9 +167,23 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
   const handleAddProduct = () => setProductsList([...productsList, { productId: '', quantity: 1, size: null }]);
 
-  const handleRemoveProduct = (index) => {
-    if (productsList.length > 1) {
-      setProductsList(productsList.filter((_, i) => i !== index));
+  const handleRemoveProduct = (index, productId) => {
+    const product = availableProducts.find(p => p.id === productId);
+    const isSized = product && product.sizeProfile && getSizePreset(product.sizeProfile).length > 0;
+
+    let newProductsList;
+    if (isSized) {
+      // If the product has sizes, remove all items with the same productId
+      newProductsList = productsList.filter(p => p.productId !== productId);
+    } else {
+      // Otherwise, just remove the single item at the given index
+      newProductsList = productsList.filter((_, i) => i !== index);
+    }
+
+    if (newProductsList.length === 0) {
+      setProductsList([{ productId: '', quantity: 1, size: null }]);
+    } else {
+      setProductsList(newProductsList);
     }
   };
 
@@ -225,7 +239,39 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   };
 
   const isLoadingMutation = addPOMutation.isLoading || updatePOMutation.isLoading;
+  const groupedProducts = useMemo(() => {
+    const groups = {};
+    const unselectedProducts = [];
 
+    productsList.forEach((item, index) => {
+      if (!item.productId) {
+        unselectedProducts.push({ ...item, originalIndex: index });
+        return;
+      }
+
+      if (!groups[item.productId]) {
+        const product = availableProducts.find(p => p.id === item.productId);
+        groups[item.productId] = {
+          productName: product ? product.name : 'Unknown Product',
+          product,
+          items: [],
+        };
+      }
+      groups[item.productId].items.push({ ...item, originalIndex: index });
+    });
+
+    // Add a placeholder for the "Add Product" functionality
+    if (unselectedProducts.length > 0) {
+        groups['new-product'] = {
+            productName: 'New Product',
+            product: null,
+            items: unselectedProducts,
+        };
+    }
+
+
+    return groups;
+  }, [productsList, availableProducts]);
   return (
     <AppDialog title={isEditMode ? `Edit PO #${po.id}` : "Create New Purchase Order"} open={open} onClose={onClose} maxWidth="md">
       <form onSubmit={handleSubmit}>
@@ -276,37 +322,48 @@ const AddEditPOForm = ({ open, onClose, po }) => {
         )}
 
         <Typography variant="h6" sx={{ mt: 3, mb: 2, fontWeight: 600, color: 'text.primary' }}>Products</Typography>
-        {productsList.map((productItem, index) => (
-          <Box key={`${productItem.productId}-${productItem.size || index}`} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-            <FormControl sx={{ flex: 4 }} required>
-              <InputLabel>Product</InputLabel>
-              <Select
-                value={productItem.productId}
-                onChange={(e) => handleProductChange(index, 'productId', e.target.value)}
-                label="Product"
-                disabled={!supplierId || !!productItem.size}
-              >
-                {isLoadingProducts ? <CircularProgress size={24} /> : availableProducts.map(p => <MenuItem key={p.id} value={p.id}>{p.name} (In Stock: {p.stock})</MenuItem>)}
-              </Select>
-            </FormControl>
-            {productItem.size && (
-              <TextField
-                label="Size"
-                value={productItem.size}
-                disabled
-                sx={{ flex: 1 }}
-              />
-            )}
-            <TextField
-              label="Quantity"
-              type="number"
-              value={productItem.quantity}
-              onChange={(e) => handleProductChange(index, 'quantity', parseInt(e.target.value, 10))}
-              required sx={{ flex: 1 }}
-              InputProps={{ inputProps: { min: 1 } }}
-            />
-            <IconButton onClick={() => handleRemoveProduct(index)} disabled={productsList.length === 1}><Delete /></IconButton>
-          </Box>
+
+        {Object.entries(groupedProducts).map(([productId, group]) => (
+          <Paper key={productId} variant="outlined" sx={{ p: 2, mb: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{group.productName}</Typography>
+              <IconButton onClick={() => handleRemoveProduct(group.items[0].originalIndex, productId)} size="small">
+                <Delete />
+              </IconButton>
+            </Box>
+
+            {group.items.map((item, itemIndex) => {
+              const isSized = item.size !== null;
+              return (
+                <Box key={`${item.productId}-${item.size || itemIndex}`} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: isSized ? 2 : 0 }}>
+                  {isSized ? (
+                    <TextField label="Size" value={item.size} disabled sx={{ flex: 2 }} />
+                  ) : (
+                    <FormControl sx={{ flex: 4 }} required>
+                      <InputLabel>Product</InputLabel>
+                      <Select
+                        value={item.productId}
+                        onChange={(e) => handleProductChange(item.originalIndex, 'productId', e.target.value)}
+                        label="Product"
+                        disabled={!supplierId || isSized}
+                      >
+                        {isLoadingProducts ? <CircularProgress size={24} /> : availableProducts.map(p => <MenuItem key={p.id} value={p.id}>{p.name} (In Stock: {p.stock})</MenuItem>)}
+                      </Select>
+                    </FormControl>
+                  )}
+                  <TextField
+                    label="Quantity"
+                    type="number"
+                    value={item.quantity}
+                    onChange={(e) => handleProductChange(item.originalIndex, 'quantity', parseInt(e.target.value, 10))}
+                    required
+                    sx={{ flex: 1 }}
+                    InputProps={{ inputProps: { min: 1 } }}
+                  />
+                </Box>
+              );
+            })}
+          </Paper>
         ))}
         <Button startIcon={<Add />} onClick={handleAddProduct}>Add Product</Button>
         <Button startIcon={<QrCodeScanner />} onClick={() => setIsScannerOpen(true)} sx={{ ml: 1 }}>

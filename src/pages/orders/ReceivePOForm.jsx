@@ -68,10 +68,11 @@ const ReceivePOForm = ({ open, onClose, po }) => {
     const data = {
       poId: po.id,
       batchNumber,
-      products: productEntries.map(({ productId, quantity, expiryDate }) => ({
+      products: productEntries.map(({ productId, quantity, expiryDate, sizes }) => ({
         productId,
         quantity,
-        expiryDate
+        expiryDate,
+        sizes
       }))
     };
     mutation.mutate(data);
@@ -93,34 +94,60 @@ const ReceivePOForm = ({ open, onClose, po }) => {
           fullWidth
           margin="normal"
         />
-        <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>Products</Typography>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Product</TableCell>
-                <TableCell align="right">Quantity</TableCell>
-                <TableCell align="right">Expiry Date</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {productEntries.map((item) => (
-                <TableRow key={item.productId}>
-                  <TableCell>{item.productName || item.productId}</TableCell>
-                  <TableCell align="right">{item.quantity}</TableCell>
-                  <TableCell align="right">
-                    <TextField
-                      type="date"
-                      value={item.expiryDate}
-                      onChange={(e) => handleExpiryDateChange(item.productId, e.target.value)}
-                      InputLabelProps={{ shrink: true }}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+
+        {productEntries.map((product) => (
+          <Box key={product.productId} sx={{ mb: 4 }}>
+            <Typography variant="h6" component="h3" sx={{ mb: 1 }}>
+              {product.productName}
+            </Typography>
+            <TableContainer component={Paper}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Size</TableCell>
+                    <TableCell align="right">Quantity</TableCell>
+                    <TableCell>Expiry Date</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {(product.sizes && product.sizes.length > 0) ? (
+                    product.sizes.map((sizeItem, index) => (
+                      <TableRow key={index}>
+                        <TableCell component="th" scope="row">
+                          {sizeItem.size}
+                        </TableCell>
+                        <TableCell align="right">{sizeItem.quantity}</TableCell>
+                        <TableCell>
+                          <TextField
+                            type="date"
+                            value={product.expiryDate}
+                            onChange={(e) => handleExpiryDateChange(product.productId, e.target.value)}
+                            variant="standard"
+                            InputLabelProps={{ shrink: true }}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell>N/A</TableCell>
+                      <TableCell align="right">{product.quantity}</TableCell>
+                      <TableCell>
+                        <TextField
+                          type="date"
+                          value={product.expiryDate}
+                          onChange={(e) => handleExpiryDateChange(product.productId, e.target.value)}
+                          variant="standard"
+                          InputLabelProps={{ shrink: true }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+        ))}
       </Box>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>

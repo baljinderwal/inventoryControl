@@ -53,7 +53,12 @@ const PurchaseOrdersPage = () => {
       ...po,
       products: po.products.map(item => {
         const product = productsData.find(p => p.id === item.productId);
-        return { ...item, productName: product?.name || 'Unknown Product' };
+        // Important: We preserve the 'sizes' array from the PO item itself,
+        // as it contains the quantities for this specific order.
+        return {
+          ...item,
+          productName: product?.name || 'Unknown Product'
+        };
       })
     };
     setSelectedPO(enrichedPO);

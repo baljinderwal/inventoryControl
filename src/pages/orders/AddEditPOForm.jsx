@@ -247,15 +247,48 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    const validProducts = productsList
-      .map(item => ({
-        productId: (item.productId),
-        quantity: Number(item.quantity) || 0,
-        size: item.size || null,
-      }))
-      .filter(item => item.productId && item.quantity > 0);
+    const productGroups = productsList.reduce((acc, item) => {
+      if (!item.productId || !(Number(item.quantity) > 0)) {
+        return acc;
+      }
+      if (!acc[item.productId]) {
+        acc[item.productId] = {
+          productId: item.productId,
+          sizes: [],
+          totalQuantity: 0,
+        };
+      }
+      if (item.size) {
+        acc[item.productId].sizes.push({
+          size: item.size,
+          quantity: Number(item.quantity),
+        });
+      }
+      acc[item.productId].totalQuantity += Number(item.quantity);
+      return acc;
+    }, {});
 
-    if (!supplierId || validProducts.length === 0) {
+    const formattedProducts = Object.values(productGroups).map(group => {
+      const product = products.find(p => p.id === group.productId);
+      const hasSizes = product && (product.sizeProfile || (product.customSizes && product.customSizes.length > 0));
+
+      if (hasSizes) {
+        return {
+          productId: group.productId,
+          quantity: group.totalQuantity,
+          sizes: group.sizes,
+        };
+      } else {
+        // For non-sized products, there's only one entry per productId
+        return {
+          productId: group.productId,
+          quantity: group.totalQuantity,
+        };
+      }
+    });
+
+
+    if (!supplierId || formattedProducts.length === 0) {
       showNotification('Please select a supplier and add at least one valid product.', 'warning');
       return;
     }
@@ -270,7 +303,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
       supplierId: supplierId,
       supplier: { id: supplier.id, name: supplier.name },
       status: 'Pending',
-      products: validProducts,
+      products: formattedProducts,
     };
 
     if (!isEditMode) {

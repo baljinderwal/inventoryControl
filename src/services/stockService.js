@@ -53,7 +53,7 @@ const remote = {
   adjustStockLevel: async ({ productId, quantity, batchNumber, sizes }) => {
     console.log('Adjusting stock level via API', { productId, quantity, batchNumber, sizes });
 
-    const stockRes = await api.get(`/stock?productId=${productId}`);
+    const stockRes = await api.get(`/stock/${productId}`);
     if (stockRes.data.length === 0) {
       throw new Error(`No stock entry found for product ${productId}.`);
     }
@@ -132,7 +132,7 @@ const remote = {
           }
         });
       }
-      return await api.put(`/stock/${stockEntry.id}`, stockEntry);
+      return await api.put(`/stock/${productId}`, stockEntry);
     } else {
       const newStockEntry = {
         productId,
@@ -146,7 +146,7 @@ const remote = {
   },
   updateBatchSupplier: async ({ productId, batchNumber, supplierId }) => {
     console.log('Updating batch supplier via API', { productId, batchNumber, supplierId });
-    const stockRes = await api.get(`/stock?productId=${productId}`);
+    const stockRes = await api.get(`/stock/${productId}`);
     let stockEntry = stockRes.data[0];
 
     if (!stockEntry) {
@@ -160,7 +160,7 @@ const remote = {
 
     stockEntry.batches[batchIndex].supplierId = supplierId;
 
-    return await api.put(`/stock/${stockEntry.id}`, stockEntry);
+    return await api.put(`/stock/${productId}`, stockEntry);
   },
   getProductWithStock: async (id) => {
     console.log(`Fetching product ${id} with stock from API`);

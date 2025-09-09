@@ -74,18 +74,23 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   }, [products]);
 
   const availableProducts = useMemo(() => {
-    if (showAllProducts && supplierId) return products || [];
-    if (!supplierId) return [];
-    if (!suppliers || !products) return [];
-
-    const selectedSupplier = suppliers.find(s => s.id === supplierId);
-    if (!selectedSupplier || !selectedSupplier.products) {
+    let baseProducts = [];
+    if (showAllProducts && supplierId) {
+      baseProducts = products || [];
+    } else if (supplierId) {
+      if (!suppliers || !products) return [];
+      const selectedSupplier = suppliers.find(s => s.id === supplierId);
+      if (selectedSupplier && selectedSupplier.products) {
+        const supplierProductIds = new Set(selectedSupplier.products);
+        baseProducts = products.filter(p => supplierProductIds.has(p.id));
+      }
+    } else {
       return [];
     }
 
-    const supplierProductIds = new Set(selectedSupplier.products);
-    return products.filter(p => supplierProductIds.has(p.id));
-  }, [supplierId, suppliers, products, showAllProducts]);
+    const selectedProductIds = new Set(productsList.map(p => p.productId).filter(Boolean));
+    return baseProducts.filter(p => !selectedProductIds.has(p.id));
+  }, [supplierId, suppliers, products, showAllProducts, productsList]);
 
   const handleAddFromSuggestion = (product) => {
     if (productsList.some(p => p.productId === product.id)) {

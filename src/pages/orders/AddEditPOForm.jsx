@@ -30,6 +30,7 @@ import BarcodeScanner from '../../components/ui/BarcodeScanner';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import { getSizePreset } from '../../utils/sizePresets';
 
 
@@ -43,6 +44,9 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [showAllProducts, setShowAllProducts] = useState(false);
+  const [addSizeDialogOpen, setAddSizeDialogOpen] = useState(false);
+  const [currentProductForSize, setCurrentProductForSize] = useState(null);
+  const [newSize, setNewSize] = useState('');
 
   useEffect(() => {
     if (open) {
@@ -177,6 +181,37 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   };
 
   const handleAddProduct = () => setProductsList([...productsList, { productId: '', quantity: 1, size: null }]);
+
+  const handleOpenAddSizeDialog = (productId) => {
+    setCurrentProductForSize(productId);
+    setAddSizeDialogOpen(true);
+  };
+
+  const handleCloseAddSizeDialog = () => {
+    setAddSizeDialogOpen(false);
+    setCurrentProductForSize(null);
+    setNewSize('');
+  };
+
+  const handleAddNewSize = () => {
+    if (newSize && currentProductForSize) {
+      // Check if the size already exists for this product
+      const sizeExists = productsList.some(
+        p => p.productId === currentProductForSize && p.size === newSize
+      );
+
+      if (sizeExists) {
+        showNotification(`Size "${newSize}" already exists for this product.`, 'info');
+        return;
+      }
+
+      setProductsList(prev => [
+        ...prev,
+        { productId: currentProductForSize, quantity: 1, size: newSize }
+      ]);
+      handleCloseAddSizeDialog();
+    }
+  };
 
   const handleRemoveProduct = (index, productId) => {
     const product = products.find(p => p.id === productId);
@@ -376,6 +411,11 @@ const AddEditPOForm = ({ open, onClose, po }) => {
                 </Box>
               );
             })}
+            {group.product && (group.product.sizeProfile || (group.product.customSizes && group.product.customSizes.length > 0)) && (
+              <Button onClick={() => handleOpenAddSizeDialog(productId)} size="small" sx={{ mt: 1 }}>
+                Add Size
+              </Button>
+            )}
           </Paper>
         ))}
         <Button startIcon={<Add />} onClick={handleAddProduct}>Add Product</Button>
@@ -388,6 +428,32 @@ const AddEditPOForm = ({ open, onClose, po }) => {
             <DialogContent>
             {isScannerOpen && <BarcodeScanner onScan={handleScan} />}
             </DialogContent>
+        </Dialog>
+
+        <Dialog open={addSizeDialogOpen} onClose={handleCloseAddSizeDialog}>
+            <DialogTitle>Add New Size</DialogTitle>
+            <DialogContent>
+                <TextField
+                    autoFocus
+                    margin="dense"
+                    label="New Size"
+                    type="text"
+                    fullWidth
+                    variant="standard"
+                    value={newSize}
+                    onChange={(e) => setNewSize(e.target.value)}
+                    onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddNewSize();
+                        }
+                    }}
+                />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleCloseAddSizeDialog}>Cancel</Button>
+                <Button onClick={handleAddNewSize}>Add</Button>
+            </DialogActions>
         </Dialog>
 
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 1 }}>

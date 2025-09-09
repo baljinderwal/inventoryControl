@@ -98,10 +98,12 @@ const AddEditPOForm = ({ open, onClose, po }) => {
       return;
     }
 
-    const sizes = product.sizeProfile ? getSizePreset(product.sizeProfile) : [];
+    const presetSizes = product.sizeProfile ? getSizePreset(product.sizeProfile) : [];
+    const customSizes = product.customSizes || [];
+    const allSizes = [...new Set([...presetSizes, ...customSizes])];
 
-    if (sizes.length > 0) {
-      const newProducts = sizes.map(size => ({
+    if (allSizes.length > 0) {
+      const newProducts = allSizes.map(size => ({
         productId: product.id,
         quantity: 1, // Default quantity for each size
         size: size,
@@ -147,10 +149,13 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
     if (field === 'productId') {
       const product = availableProducts.find(p => p.id === value);
-      if (product && product.sizeProfile) {
-        const sizes = getSizePreset(product.sizeProfile);
-        if (sizes.length > 0) {
-          const newSizedProducts = sizes.map(size => ({
+      if (product && (product.sizeProfile || (product.customSizes && product.customSizes.length > 0))) {
+        const presetSizes = product.sizeProfile ? getSizePreset(product.sizeProfile) : [];
+        const customSizes = product.customSizes || [];
+        const allSizes = [...new Set([...presetSizes, ...customSizes])];
+
+        if (allSizes.length > 0) {
+          const newSizedProducts = allSizes.map(size => ({
             productId: product.id,
             quantity: 1,
             size: size,
@@ -175,7 +180,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
   const handleRemoveProduct = (index, productId) => {
     const product = products.find(p => p.id === productId);
-    const isSized = product && product.sizeProfile && getSizePreset(product.sizeProfile).length > 0;
+    const isSized = product && (product.sizeProfile || (product.customSizes && product.customSizes.length > 0));
 
     let newProductsList;
     if (isSized) {

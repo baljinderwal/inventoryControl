@@ -28,6 +28,7 @@ import BarcodeScanner from '../../components/ui/BarcodeScanner';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
+import { getSizePreset } from '../../utils/sizePresets';
 
 
 const AddEditPOForm = ({ open, onClose, po }) => {
@@ -36,7 +37,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   const { showNotification } = useNotification();
 
   const [supplierId, setSupplierId] = useState('');
-  const [productsList, setProductsList] = useState([{ productId: '', quantity: 1 }]);
+  const [productsList, setProductsList] = useState([{ productId: '', quantity: 1, size: null }]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const isInitialMount = useRef(true);
@@ -45,10 +46,10 @@ const AddEditPOForm = ({ open, onClose, po }) => {
     if (open) { // Reset state when dialog opens
       if (isEditMode && po) {
         setSupplierId(po.supplier.id || '');
-        setProductsList(po.products.map(p => ({ productId: p.productId, quantity: p.quantity })));
+        setProductsList(po.products.map(p => ({ productId: p.productId, quantity: p.quantity, size: p.size || null })));
       } else {
         setSupplierId('');
-        setProductsList([{ productId: '', quantity: 1 }]);
+        setProductsList([{ productId: '', quantity: 1, size: null }]);
       }
     }
   }, [po, isEditMode, open]);
@@ -63,7 +64,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
     // Do not run on initial mount when supplierId is empty in create mode
     if (supplierId) {
-      setProductsList([{ productId: '', quantity: 1 }]);
+      setProductsList([{ productId: '', quantity: 1, size: null }]);
     }
   }, [supplierId]);
 
@@ -93,11 +94,27 @@ const AddEditPOForm = ({ open, onClose, po }) => {
       showNotification(`${product.name} is already in the list.`, 'info');
       return;
     }
-    const newProduct = { productId: product.id, quantity: product.lowStockThreshold * 2 || 20 };
-    if (productsList.length === 1 && !productsList[0].productId) {
-      setProductsList([newProduct]);
+
+    const sizes = product.sizeProfile ? getSizePreset(product.sizeProfile) : [];
+
+    if (sizes.length > 0) {
+      const newProducts = sizes.map(size => ({
+        productId: product.id,
+        quantity: 1, // Default quantity for each size
+        size: size,
+      }));
+      setProductsList(prev => [...prev.filter(p => p.productId), ...newProducts]);
     } else {
-      setProductsList([...productsList, newProduct]);
+      const newProduct = {
+        productId: product.id,
+        quantity: product.lowStockThreshold * 2 || 20,
+        size: null
+      };
+      if (productsList.length === 1 && !productsList[0].productId) {
+        setProductsList([newProduct]);
+      } else {
+        setProductsList([...productsList, newProduct]);
+      }
     }
   };
 
@@ -124,11 +141,34 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
   const handleProductChange = (index, field, value) => {
     const newProducts = [...productsList];
+
+    if (field === 'productId') {
+      const product = availableProducts.find(p => p.id === value);
+      if (product && product.sizeProfile) {
+        const sizes = getSizePreset(product.sizeProfile);
+        if (sizes.length > 0) {
+          const newSizedProducts = sizes.map(size => ({
+            productId: product.id,
+            quantity: 1,
+            size: size,
+          }));
+          // Replace the current item with the new sized products
+          newProducts.splice(index, 1, ...newSizedProducts);
+          setProductsList(newProducts);
+          return;
+        }
+      }
+    }
+
+    // Default behavior
     newProducts[index][field] = value;
+    if (field === 'productId') {
+        newProducts[index]['size'] = null; // Reset size if a non-sized product is selected
+    }
     setProductsList(newProducts);
   };
 
-  const handleAddProduct = () => setProductsList([...productsList, { productId: '', quantity: 1 }]);
+  const handleAddProduct = () => setProductsList([...productsList, { productId: '', quantity: 1, size: null }]);
 
   const handleRemoveProduct = (index) => {
     if (productsList.length > 1) {
@@ -153,7 +193,8 @@ const AddEditPOForm = ({ open, onClose, po }) => {
     const validProducts = productsList
       .map(item => ({
         productId: (item.productId),
-        quantity: (item.quantity) || 0,
+        quantity: Number(item.quantity) || 0,
+        size: item.size || null,
       }))
       .filter(item => item.productId && item.quantity > 0);
 
@@ -226,14 +267,34 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
         <Typography variant="h6" sx={{ mt: 3, mb: 2, fontWeight: 600, color: 'text.primary' }}>Products</Typography>
         {productsList.map((productItem, index) => (
-          <Box key={index} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+          <Box key={`${productItem.productId}-${productItem.size || index}`} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
             <FormControl sx={{ flex: 4 }} required>
               <InputLabel>Product</InputLabel>
-              <Select value={productItem.productId} onChange={(e) => handleProductChange(index, 'productId', e.target.value)} label="Product" disabled={!supplierId}>
+              <Select
+                value={productItem.productId}
+                onChange={(e) => handleProductChange(index, 'productId', e.target.value)}
+                label="Product"
+                disabled={!supplierId || !!productItem.size}
+              >
                 {isLoadingProducts ? <CircularProgress size={24} /> : availableProducts.map(p => <MenuItem key={p.id} value={p.id}>{p.name} (In Stock: {p.stock})</MenuItem>)}
               </Select>
             </FormControl>
-            <TextField label="Quantity" type="number" value={productItem.quantity} onChange={(e) => handleProductChange(index, 'quantity', e.target.value)} required sx={{ flex: 1 }} InputProps={{ inputProps: { min: 1 } }} />
+            {productItem.size && (
+              <TextField
+                label="Size"
+                value={productItem.size}
+                disabled
+                sx={{ flex: 1 }}
+              />
+            )}
+            <TextField
+              label="Quantity"
+              type="number"
+              value={productItem.quantity}
+              onChange={(e) => handleProductChange(index, 'quantity', parseInt(e.target.value, 10))}
+              required sx={{ flex: 1 }}
+              InputProps={{ inputProps: { min: 1 } }}
+            />
             <IconButton onClick={() => handleRemoveProduct(index)} disabled={productsList.length === 1}><Delete /></IconButton>
           </Box>
         ))}

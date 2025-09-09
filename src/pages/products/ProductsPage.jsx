@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
 import { Parser } from '@json2csv/plainjs';
+import { stockService } from '../../services/stockService';
+import { productService } from '../../services/productService';
 import { useNavigate, Link } from 'react-router-dom';
 
 import MuiTable from '../../components/ui/Table';
@@ -35,7 +36,6 @@ import Tooltip from '@mui/material/Tooltip';
 const ProductsPage = () => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
-  const { mode, services } = useApi();
   const navigate = useNavigate();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,12 +80,12 @@ const ProductsPage = () => {
   }, [visibleColumns]);
 
   const { data: products = [], isLoading, isError, error } = useQuery({
-    queryKey: ['stock', mode], // Refetch when mode changes
-    queryFn: services.stock.getStockLevels,
+    queryKey: ['stock'], // Refetch when mode changes
+    queryFn: stockService.getStockLevels,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: services.products.deleteProduct,
+    mutationFn: productService.deleteProduct,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stock'] });
       queryClient.invalidateQueries({ queryKey: ['products'] }); // Just in case

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
+import { salesOrderService } from '../../services/salesOrderService';
+import invoiceService from '../../services/invoiceService';
 import MuiTable from '../../components/ui/Table';
 import AppDialog from '../../components/ui/AppDialog';
 import ConfirmationDialog from '../../components/ui/ConfirmationDialog';
@@ -21,7 +22,6 @@ import { Edit, Delete, Visibility, Description } from '@mui/icons-material';
 const SalesOrdersPage = () => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
-  const { mode, services } = useApi();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [soToEdit, setSoToEdit] = useState(null);
@@ -31,12 +31,12 @@ const SalesOrdersPage = () => {
   const [soToView, setSoToView] = useState(null);
 
   const { data: salesOrders = [], isLoading, isError, error } = useQuery({
-    queryKey: ['salesOrders', mode],
-    queryFn: services.salesOrders.getSalesOrders,
+    queryKey: ['salesOrders'],
+    queryFn: salesOrderService.getSalesOrders,
   });
 
   const deleteMutation = useMutation({
-    mutationFn: services.salesOrders.deleteSalesOrder,
+    mutationFn: salesOrderService.deleteSalesOrder,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['salesOrders'] });
       showNotification('Sales Order deleted successfully', 'success');
@@ -80,7 +80,7 @@ const SalesOrdersPage = () => {
   };
 
   const generateInvoiceMutation = useMutation({
-    mutationFn: services.invoices.createInvoice,
+    mutationFn: invoiceService.createInvoice,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['invoices'] });
       showNotification(`Invoice #${data.id} created successfully!`, 'success');

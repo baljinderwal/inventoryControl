@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
+import { supplierService } from '../../services/supplierService';
+import { stockService } from '../../services/stockService';
+import { poService } from '../../services/poService';
 import AppDialog from '../../components/ui/AppDialog';
 import {
   Button,
@@ -32,7 +34,6 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   const isEditMode = Boolean(po);
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
-  const { mode, services } = useApi();
 
   const [supplierId, setSupplierId] = useState('');
   const [productsList, setProductsList] = useState([{ productId: '', quantity: 1 }]);
@@ -66,8 +67,8 @@ const AddEditPOForm = ({ open, onClose, po }) => {
     }
   }, [supplierId]);
 
-  const { data: suppliers, isLoading: isLoadingSuppliers } = useQuery({ queryKey: ['suppliers', mode], queryFn: services.suppliers.getSuppliers });
-  const { data: products, isLoading: isLoadingProducts } = useQuery({ queryKey: ['stock', mode], queryFn: services.stock.getStockLevels });
+  const { data: suppliers, isLoading: isLoadingSuppliers } = useQuery({ queryKey: ['suppliers'], queryFn: supplierService.getSuppliers });
+  const { data: products, isLoading: isLoadingProducts } = useQuery({ queryKey: ['stock'], queryFn: stockService.getStockLevels });
 
   const lowStockProducts = React.useMemo(() => {
     if (!products) return [];
@@ -112,12 +113,12 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   };
 
   const addPOMutation = useMutation({
-    mutationFn: services.po.addPO,
+    mutationFn: poService.addPO,
     ...mutationOptions,
   });
 
   const updatePOMutation = useMutation({
-    mutationFn: (poData) => services.po.updatePO(po.id, poData),
+    mutationFn: (poData) => poService.updatePO(po.id, poData),
     ...mutationOptions,
   });
 

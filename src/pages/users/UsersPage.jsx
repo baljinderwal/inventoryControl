@@ -1,8 +1,8 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
 import { useAuth } from '../../utils/AuthContext';
+import { userService } from '../../services/userService';
 import {
   Container,
   Typography,
@@ -26,16 +26,15 @@ const UsersPage = () => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
   const { user } = useAuth();
-  const { mode, services } = useApi();
 
   const { data: users = [], isLoading, isError, error } = useQuery({
-    queryKey: ['users', mode],
-    queryFn: services.users.getUsers,
+    queryKey: ['users'],
+    queryFn: userService.getUsers,
     enabled: user?.role === 'Admin', // Only run query if user is Admin
   });
 
   const deleteMutation = useMutation({
-    mutationFn: services.users.deleteUser,
+    mutationFn: userService.deleteUser,
     onSuccess: (deletedUserId) => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       showNotification('User deleted successfully', 'success');

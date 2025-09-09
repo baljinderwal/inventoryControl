@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
+import { reportService } from '../../services/reportService';
 import {
   Paper, Typography, Box, CircularProgress, Alert, Grid, Card, CardContent,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField
@@ -14,11 +14,10 @@ const ProfitabilityPage = () => {
     return d.toISOString().split('T')[0];
   });
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0]);
-  const { mode, services } = useApi();
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['profitabilityReportData', mode],
-    queryFn: services.reports.getProfitabilityReportData,
+    queryKey: ['profitabilityReportData'],
+    queryFn: reportService.getProfitabilityReportData,
   });
 
   const profitabilityData = useMemo(() => {

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
 import { Parser } from '@json2csv/plainjs';
+import { poService } from '../../services/poService';
+import { stockService } from '../../services/stockService';
+import { supplierService } from '../../services/supplierService';
 import MuiTable from '../../components/ui/Table';
 import { Box, Typography, Button, CircularProgress, Chip, IconButton, Stack } from '@mui/material';
 import { Add, CheckCircle, Delete, Edit, Download, PictureAsPdf } from '@mui/icons-material';
@@ -18,22 +20,21 @@ const PurchaseOrdersPage = () => {
 
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
-  const { mode, services } = useApi();
 
   const { data: purchaseOrders, isLoading, isError, error } = useQuery({
-    queryKey: ['purchaseOrders', mode],
-    queryFn: services.po.getPOs,
+    queryKey: ['purchaseOrders'],
+    queryFn: poService.getPOs,
   });
 
   // Note: We are using getStockLevels to get product data with stock info
   const { data: productsData, isSuccess: productsLoaded } = useQuery({
-    queryKey: ['stock', mode],
-    queryFn: services.stock.getStockLevels,
+    queryKey: ['stock'],
+    queryFn: stockService.getStockLevels,
   });
 
   const { data: suppliersData, isSuccess: suppliersLoaded } = useQuery({
-    queryKey: ['suppliers', mode],
-    queryFn: services.suppliers.getSuppliers,
+    queryKey: ['suppliers'],
+    queryFn: supplierService.getSuppliers,
   });
 
   const handleGeneratePDF = (po) => {
@@ -50,16 +51,12 @@ const PurchaseOrdersPage = () => {
   // For now, this is a placeholder and will not correctly update stock in API mode.
   const receivePOMutation = useMutation({
     mutationFn: async (po) => {
-      if (mode === 'local') {
-        console.warn('Read-only mode: Receiving PO is disabled.');
-        return Promise.resolve();
-      }
       // In API mode, this is a placeholder. A real implementation would need a modal
       // to capture batch/expiry info for each product line.
       console.error('API for receiving PO and adjusting stock with batches is not implemented.');
       showNotification('Receiving PO is not fully implemented for batch tracking.', 'warning');
       // Just updating the status for now as a visual cue.
-      return services.po.updatePO(po.id, { status: 'Completed', completedAt: new Date().toISOString() });
+      return poService.updatePO(po.id, { status: 'Completed', completedAt: new Date().toISOString() });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['purchaseOrders'] });
@@ -72,7 +69,7 @@ const PurchaseOrdersPage = () => {
   });
 
   const deletePOMutation = useMutation({
-    mutationFn: services.po.deletePO,
+    mutationFn: poService.deletePO,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['purchaseOrders'] });
       showNotification('Purchase Order deleted successfully!', 'success');

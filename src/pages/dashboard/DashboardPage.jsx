@@ -4,9 +4,8 @@ import { motion } from 'framer-motion';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useApi } from '../../utils/ApiModeContext';
 import { useNotificationCenter } from '../../utils/NotificationCenterContext';
-
+import { stockService } from '../../services/stockService';
 import StatsCard from '../../components/ui/StatsCard';
 import DashboardWidget from './DashboardWidget';
 import AppDialog from '../../components/ui/AppDialog';
@@ -71,13 +70,12 @@ const SortableWidget = ({ id, widget, children }) => {
 };
 
 const DashboardPage = () => {
-  const { mode, services } = useApi();
   const { addNotification, notifications } = useNotificationCenter();
   const [isCustomizeDialogOpen, setIsCustomizeDialogOpen] = useState(false);
 
   const { data: products, isLoading, error } = useQuery({
-    queryKey: ['stock', mode],
-    queryFn: services.stock.getStockLevels,
+    queryKey: ['stock'],
+    queryFn: stockService.getStockLevels,
   });
 
   const lowStockProducts = useMemo(() => {

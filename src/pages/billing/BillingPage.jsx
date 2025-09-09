@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { Box, Typography, CircularProgress, Alert, FormControl, InputLabel, Select, MenuItem, Stack } from '@mui/material';
 import BillingDashboard from './BillingDashboard';
 import InvoiceTableView from './InvoiceTableView';
+import { customerService } from '../../services/customerService';
+import invoiceService from '../../services/invoiceService';
 
 
 const BillingPage = () => {
-  const { mode, services } = useApi();
   const [view, setView] = useState('dashboard'); // 'dashboard' or 'table'
 
   const { data: customers = [], isLoading: isLoadingCustomers, isError: isErrorCustomers, error: errorCustomers } = useQuery({
-    queryKey: ['customers', mode],
-    queryFn: () => services.customers.getCustomers(),
+    queryKey: ['customers'],
+    queryFn: () => customerService.getCustomers(),
   });
 
   const { data: invoices = [], isLoading: isLoadingInvoices, isError: isErrorInvoices, error: errorInvoices } = useQuery({
-    queryKey: ['invoices', mode],
-    queryFn: () => services.invoices.getInvoices(),
+    queryKey: ['invoices'],
+    queryFn: () => invoiceService.getInvoices(),
   });
 
   const handleViewChange = (event) => {

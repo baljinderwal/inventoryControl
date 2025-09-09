@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link as RouterLink } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
-
+import { stockService } from '../../services/stockService';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -31,12 +30,11 @@ import AddEditProductForm from './AddEditProductForm';
 
 const ProductDetailPage = () => {
   const { id } = useParams();
-  const { mode, services } = useApi();
   const [isFormOpen, setIsFormOpen] = useState(false);
 
   const { data: product, isLoading, isError, error } = useQuery({
-    queryKey: ['product', id, mode],
-    queryFn: () => services.stock.getProductWithStock(parseInt(id, 10)),
+    queryKey: ['product', id],
+    queryFn: () => stockService.getProductWithStock(parseInt(id, 10)),
     enabled: !!id,
   });
 

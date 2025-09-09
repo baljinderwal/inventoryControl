@@ -10,7 +10,6 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
-import ApiModeToggle from '../ui/ApiModeToggle';
 import ThemeSwitcher from '../ui/ThemeSwitcher';
 import NotificationBell from '../ui/NotificationBell';
 import Box from '@mui/material/Box';
@@ -61,7 +60,6 @@ const Topbar = () => {
           Inventory Control
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <ApiModeToggle />
           <ThemeSwitcher />
           <NotificationBell />
           <IconButton

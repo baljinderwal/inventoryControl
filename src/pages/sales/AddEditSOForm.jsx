@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
 import { useNotificationCenter } from '../../utils/NotificationCenterContext';
+import { customerService } from '../../services/customerService';
+import { stockService } from '../../services/stockService';
+import { salesOrderService } from '../../services/salesOrderService';
 import AppDialog from '../../components/ui/AppDialog';
 import {
   Button,
@@ -24,7 +26,6 @@ const AddEditSOForm = ({ open, onClose, so }) => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
   const { addNotification } = useNotificationCenter();
-  const { mode, services } = useApi();
 
   const [customerId, setCustomerId] = useState('');
   const [productsList, setProductsList] = useState([{ productId: '', quantity: 1 }]);
@@ -45,8 +46,8 @@ const AddEditSOForm = ({ open, onClose, so }) => {
     }
   }, [so, isEditMode, open]);
 
-  const { data: customers, isLoading: isLoadingCustomers } = useQuery({ queryKey: ['customers', mode], queryFn: services.customers.getCustomers });
-  const { data: products, isLoading: isLoadingProducts } = useQuery({ queryKey: ['stock', mode], queryFn: services.stock.getStockLevels });
+  const { data: customers, isLoading: isLoadingCustomers } = useQuery({ queryKey: ['customers'], queryFn: customerService.getCustomers });
+  const { data: products, isLoading: isLoadingProducts } = useQuery({ queryKey: ['stock'], queryFn: stockService.getStockLevels });
 
   const mutationOptions = {
     onSuccess: (data) => {
@@ -67,12 +68,12 @@ const AddEditSOForm = ({ open, onClose, so }) => {
   };
 
   const addSOMutation = useMutation({
-    mutationFn: services.salesOrders.addSalesOrder,
+    mutationFn: salesOrderService.addSalesOrder,
     ...mutationOptions,
   });
 
   const updateSOMutation = useMutation({
-    mutationFn: (soData) => services.salesOrders.updateSalesOrder(so.id, soData),
+    mutationFn: (soData) => salesOrderService.updateSalesOrder(so.id, soData),
     ...mutationOptions,
   });
 
@@ -131,7 +132,7 @@ const AddEditSOForm = ({ open, onClose, so }) => {
           if (product.stock < item.quantity) {
             throw new Error(`Not enough stock for ${item.productName}. Required: ${item.quantity}, Available: ${product.stock}`);
           }
-          return services.stock.adjustStockLevel({
+          return stockService.adjustStockLevel({
             productId: item.productId,
             quantity: -item.quantity,
           });
@@ -163,7 +164,7 @@ const AddEditSOForm = ({ open, onClose, so }) => {
     if (newCustomer && newCustomer.id) {
       // The useQuery for customers will refetch automatically due to query invalidation in AddEditCustomerForm.
       // We can then set the new customer.
-       queryClient.invalidateQueries({ queryKey: ['customers', mode] }).then(() => {
+       queryClient.invalidateQueries({ queryKey: ['customers'] }).then(() => {
         setCustomerId(newCustomer.id);
       });
     }

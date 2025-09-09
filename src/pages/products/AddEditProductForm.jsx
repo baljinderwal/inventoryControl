@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
+import { supplierService } from '../../services/supplierService';
+import { productService } from '../../services/productService';
+import { stockService } from '../../services/stockService';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import ButtonGroup from '@mui/material/ButtonGroup';
@@ -45,11 +47,10 @@ const AddEditProductForm = ({
 }) => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
-  const { mode, services } = useApi();
 
   const { data: suppliers } = useQuery({
-    queryKey: ['suppliers', mode],
-    queryFn: () => services.suppliers.getSuppliers(),
+    queryKey: ['suppliers'],
+    queryFn: () => supplierService.getSuppliers(),
   });
 
   const [listeningField, setListeningField] = useState(null);
@@ -156,13 +157,13 @@ const AddEditProductForm = ({
 
       if (isEditMode) {
         // In edit mode, we just update and invalidate.
-        await services.products.updateProduct(product.id, productData);
+        await productService.updateProduct(product.id, productData);
         showNotification('Product updated successfully', 'success');
-        queryClient.invalidateQueries({ queryKey: ['stock', mode] });
-        queryClient.invalidateQueries({ queryKey: ['products', mode] });
+        queryClient.invalidateQueries({ queryKey: ['stock'] });
+        queryClient.invalidateQueries({ queryKey: ['products'] });
       } else {
         // In add mode, we manually update the cache for an instant UI update.
-        const productResponse = await services.products.addProduct(productData);
+        const productResponse = await productService.addProduct(productData);
 
         let newStockQuantity = 0;
         let newStockBatches = [];
@@ -180,7 +181,7 @@ const AddEditProductForm = ({
             sizes: sizes,
             createdDate: formData.createdDate,
           };
-          await services.stock.addStock(stockData);
+          await stockService.addStock(stockData);
 
           newStockQuantity = totalQuantity;
           newStockBatches = [{ ...stockData, supplierId: formData.supplierId }];
@@ -203,13 +204,13 @@ const AddEditProductForm = ({
         };
 
         // Optimistically update the cache
-        queryClient.setQueryData(['stock', mode], (oldData) => {
+        queryClient.setQueryData(['stock'], (oldData) => {
           return oldData ? [...oldData, newProductForCache] : [newProductForCache];
         });
 
         // Still invalidate to trigger a background refetch for eventual consistency.
-        queryClient.invalidateQueries({ queryKey: ['stock', mode] });
-        queryClient.invalidateQueries({ queryKey: ['products', mode] });
+        queryClient.invalidateQueries({ queryKey: ['stock'] });
+        queryClient.invalidateQueries({ queryKey: ['products'] });
 
         showNotification('Product added successfully', 'success');
       }
@@ -1009,7 +1010,7 @@ const AddEditProductForm = ({
                 <AddEditSupplierForm
                   onSupplierAdded={(newSupplier) => {
                     setAddSupplierDialogOpen(false);
-                    queryClient.invalidateQueries(['suppliers', mode]);
+                    queryClient.invalidateQueries(['suppliers']);
                     setFormData((prev) => ({ ...prev, supplierId: newSupplier.id }));
                   }}
                   onClose={() => setAddSupplierDialogOpen(false)}

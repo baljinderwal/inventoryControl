@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
+import { productService } from '../../services/productService';
+import { supplierService } from '../../services/supplierService';
+import { stockService } from '../../services/stockService';
 import AddEditSupplierForm from '../suppliers/AddEditSupplierForm';
 import AppDialog from '../../components/ui/AppDialog';
 
@@ -23,7 +25,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 const AddStockForm = ({ onClose }) => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
-  const { mode, services } = useApi();
 
   const [productId, setProductId] = useState('');
   const [supplierId, setSupplierId] = useState('');
@@ -34,18 +35,18 @@ const AddStockForm = ({ onClose }) => {
   const [isAddSupplierModalOpen, setAddSupplierModalOpen] = useState(false);
 
   const { data: products = [], isLoading: isLoadingProducts, isError: isErrorProducts, error: errorProducts } = useQuery({
-    queryKey: ['products', mode],
-    queryFn: () => services.products.getProducts(),
+    queryKey: ['products'],
+    queryFn: () => productService.getProducts(),
   });
 
   const { data: suppliers = [], isLoading: isLoadingSuppliers, isError: isErrorSuppliers, error: errorSuppliers } = useQuery({
-    queryKey: ['suppliers', mode],
-    queryFn: () => services.suppliers.getSuppliers(),
+    queryKey: ['suppliers'],
+    queryFn: () => supplierService.getSuppliers(),
   });
 
   const { data: stockData } = useQuery({
-    queryKey: ['stock', productId, mode],
-    queryFn: () => services.stock.getProductWithStock(productId),
+    queryKey: ['stock', productId],
+    queryFn: () => stockService.getProductWithStock(productId),
     enabled: !!productId,
   });
 
@@ -112,7 +113,7 @@ const AddStockForm = ({ onClose }) => {
   }, [productId, products, stockData]);
 
   const mutation = useMutation({
-    mutationFn: (newStock) => services.stock.addStock(newStock),
+    mutationFn: (newStock) => stockService.addStock(newStock),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stock'] });
       showNotification('Stock added successfully', 'success');

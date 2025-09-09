@@ -13,16 +13,15 @@ import {
   TextField
 } from '@mui/material';
 import Barcode from 'react-barcode';
-import { useApi } from '../../utils/ApiModeContext';
+import { productService } from '../../services/productService';
 
 const BarcodeGeneratorPage = () => {
-  const { mode, services } = useApi();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [copyCount, setCopyCount] = useState(1);
 
   const { data: products, isLoading, isError, error } = useQuery({
-    queryKey: ['products', mode],
-    queryFn: () => services.products.getProducts(),
+    queryKey: ['products'],
+    queryFn: () => productService.getProducts(),
   });
 
   const handleProductChange = (event) => {

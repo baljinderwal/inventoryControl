@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useApi } from '../../utils/ApiModeContext';
 import { useNotification } from '../../utils/NotificationContext';
+import { customerService } from '../../services/customerService';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -11,7 +11,6 @@ import TextField from '@mui/material/TextField';
 const AddEditCustomerForm = ({ onClose, customer }) => {
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
-  const { services } = useApi();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -35,8 +34,8 @@ const AddEditCustomerForm = ({ onClose, customer }) => {
 
   const mutation = useMutation({
     mutationFn: isEditMode
-      ? (updatedCustomer) => services.customers.updateCustomer(customer.id, updatedCustomer)
-      : services.customers.addCustomer,
+      ? (updatedCustomer) => customerService.updateCustomer(customer.id, updatedCustomer)
+      : customerService.addCustomer,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
       showNotification(`Customer ${isEditMode ? 'updated' : 'added'} successfully`, 'success');

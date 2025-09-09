@@ -53,7 +53,11 @@ const PurchaseOrdersPage = () => {
       ...po,
       products: po.products.map(item => {
         const product = productsData.find(p => p.id === item.productId);
-        return { ...item, productName: product?.name || 'Unknown Product' };
+        return {
+          ...item,
+          productName: product?.name || 'Unknown Product',
+          sizes: product?.sizes || []
+        };
       })
     };
     setSelectedPO(enrichedPO);

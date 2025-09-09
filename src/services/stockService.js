@@ -53,21 +53,11 @@ const remote = {
   adjustStockLevel: async ({ productId, quantity, batchNumber, sizes }) => {
     console.log('Adjusting stock level via API', { productId, quantity, batchNumber, sizes });
 
-    const stockRes = await api.get(`/stock/${productId}`);
-    let stockEntry = stockRes.data;
-
-    if (!stockEntry) {
-      if (quantity > 0) {
-        const newStockEntry = {
-          productId,
-          quantity,
-          batches: [{ batchNumber, quantity, sizes: sizes || [] }]
-        };
-        return await api.post('/stock', newStockEntry);
-      } else {
-        throw new Error("Cannot deduct stock from a product that has no stock entry.");
-      }
+    const stockRes = await api.get(`/stock?productId=${productId}`);
+    if (stockRes.data.length === 0) {
+      throw new Error(`No stock entry found for product ${productId}.`);
     }
+    let stockEntry = stockRes.data[0];
 
     const batchIndex = stockEntry.batches.findIndex(b => b.batchNumber === batchNumber);
     if (batchIndex === -1) {
@@ -77,9 +67,7 @@ const remote = {
 
     if (sizes && sizes.length > 0) {
       // Size-specific adjustment
-      if (!batch.sizes) {
-        batch.sizes = [];
-      }
+      if (!batch.sizes) batch.sizes = [];
       sizes.forEach(adj => {
         const sizeIndex = batch.sizes.findIndex(s => s.size === adj.size);
         if (sizeIndex > -1) {
@@ -104,27 +92,29 @@ const remote = {
     stockEntry.batches = stockEntry.batches.filter(b => b.quantity > 0);
     stockEntry.quantity = stockEntry.batches.reduce((sum, b) => sum + b.quantity, 0);
 
-    return await api.put(`/stock/${productId}`, stockEntry);
+    return await api.put(`/stock/${stockEntry.id}`, stockEntry);
   },
   addStock: async ({ productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate }) => {
     console.log('Adding new stock batch via API', { productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate });
 
     let stockEntry;
     try {
-      const stockRes = await api.get(`/stock/${productId}`);
-      stockEntry = stockRes.data;
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        console.log(`Stock entry for product ${productId} not found. Creating a new one.`);
-        stockEntry = null;
+      const stockRes = await api.get(`/stock?productId=${productId}`);
+      if (stockRes.data.length > 0) {
+        stockEntry = stockRes.data[0];
       } else {
-        // Re-throw other errors
-        throw error;
+        stockEntry = null;
       }
+    } catch (error) {
+      console.error("Error fetching stock for product", productId, error);
+      stockEntry = null;
     }
 
     if (stockEntry) {
       stockEntry.quantity += quantity;
+      if (!stockEntry.batches) {
+        stockEntry.batches = [];
+      }
       stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate, supplierId });
       if (sizes && sizes.length > 0) {
         if (!stockEntry.sizes) stockEntry.sizes = [];
@@ -137,7 +127,7 @@ const remote = {
           }
         });
       }
-      return await api.put(`/stock/${productId}`, stockEntry);
+      return await api.put(`/stock/${stockEntry.id}`, stockEntry);
     } else {
       const newStockEntry = {
         productId,

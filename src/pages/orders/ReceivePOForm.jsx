@@ -68,10 +68,11 @@ const ReceivePOForm = ({ open, onClose, po }) => {
     const data = {
       poId: po.id,
       batchNumber,
-      products: productEntries.map(({ productId, quantity, expiryDate }) => ({
+      products: productEntries.map(({ productId, quantity, expiryDate, sizes }) => ({
         productId,
         quantity,
-        expiryDate
+        expiryDate,
+        sizes
       }))
     };
     mutation.mutate(data);

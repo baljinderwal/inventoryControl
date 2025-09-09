@@ -1,4 +1,5 @@
 import api from './api';
+import { stockService } from './stockService';
 
 const remote = {
   getPOs: async () => {
@@ -20,6 +21,30 @@ const remote = {
   deletePO: async (id) => {
     const response = await api.delete(`/orders/${id}`);
     return response.data;
+  },
+  receivePO: async ({ poId, batchNumber, products }) => {
+    // 1. Update PO status to 'Completed'
+    const updatedPO = await remote.updatePO(poId, {
+      status: 'Completed',
+      completedAt: new Date().toISOString(),
+    });
+
+    // 2. Add stock for each product in the PO
+    const stockAddPromises = products.map(product => {
+      return stockService.addStock({
+        productId: product.productId,
+        quantity: product.quantity,
+        batchNumber: batchNumber,
+        expiryDate: product.expiryDate,
+        supplierId: updatedPO.supplierId,
+        createdDate: new Date().toISOString(),
+        sizes: product.sizes || [], // Assuming sizes might be part of the PO product data
+      });
+    });
+
+    await Promise.all(stockAddPromises);
+
+    return updatedPO;
   },
 };
 

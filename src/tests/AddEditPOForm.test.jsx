@@ -28,14 +28,14 @@ const queryClient = new QueryClient({
 });
 
 const mockSuppliers = [
-  { id: '1', name: 'Supplier A', products: ['1', '2'] },
-  { id: '2', name: 'Supplier B', products: ['3'] },
+  { id: 1, name: 'Supplier A', products: [1, 2] },
+  { id: 2, name: 'Supplier B', products: [3] },
 ];
 
 const mockProducts = [
-  { id: '1', name: 'Product A', stock: 10, sizeProfile: null },
-  { id: '2', name: 'Product B (Adult)', stock: 5, sizeProfile: 'adult' },
-  { id: '3', name: 'Product C', stock: 20, sizeProfile: null },
+  { id: 1, name: 'Product A', stock: 10, sizeProfile: null },
+  { id: 2, name: 'Product B (Adult)', stock: 5, sizeProfile: 'adult' },
+  { id: 3, name: 'Product C', stock: 20, sizeProfile: null },
 ];
 
 const Wrapper = ({ children }) => (

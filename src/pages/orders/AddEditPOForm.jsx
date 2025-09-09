@@ -80,7 +80,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
     if (!supplierId) return products || [];
     if (!suppliers || !products) return [];
 
-    const selectedSupplier = suppliers.find(s => s.id === supplierId);
+    const selectedSupplier = suppliers.find(s => s.id === Number(supplierId));
     if (!selectedSupplier || !selectedSupplier.products) {
       return [];
     }
@@ -143,7 +143,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
     const newProducts = [...productsList];
 
     if (field === 'productId') {
-      const product = availableProducts.find(p => p.id === value);
+      const product = availableProducts.find(p => p.id === Number(value));
       if (product && product.sizeProfile) {
         const sizes = getSizePreset(product.sizeProfile);
         if (sizes.length > 0) {
@@ -192,7 +192,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
     const validProducts = productsList
       .map(item => ({
-        productId: (item.productId),
+        productId: Number(item.productId),
         quantity: Number(item.quantity) || 0,
         size: item.size || null,
       }))
@@ -203,14 +203,14 @@ const AddEditPOForm = ({ open, onClose, po }) => {
       return;
     }
 
-    const supplier = suppliers?.find(s => s.id === (supplierId));
+    const supplier = suppliers?.find(s => s.id === Number(supplierId));
     if (!supplier) {
       showNotification('Could not find supplier details. Please refresh and try again.', 'error');
       return;
     }
 
     const poData = {
-      supplierId: supplierId,
+      supplierId: Number(supplierId),
       supplier: { id: supplier.id, name: supplier.name },
       status: 'Pending',
       products: validProducts,

@@ -54,10 +54,20 @@ const remote = {
     console.log('Adjusting stock level via API', { productId, quantity, batchNumber, sizes });
 
     const stockRes = await api.get(`/stock/${productId}`);
-    if (stockRes.data.length === 0) {
-      throw new Error(`No stock entry found for product ${productId}.`);
+    let stockEntry = stockRes.data;
+
+    if (!stockEntry) {
+      if (quantity > 0) {
+        const newStockEntry = {
+          productId,
+          quantity,
+          batches: [{ batchNumber, quantity, sizes: sizes || [] }]
+        };
+        return await api.post('/stock', newStockEntry);
+      } else {
+        throw new Error("Cannot deduct stock from a product that has no stock entry.");
+      }
     }
-    let stockEntry = stockRes.data[0];
 
     const batchIndex = stockEntry.batches.findIndex(b => b.batchNumber === batchNumber);
     if (batchIndex === -1) {
@@ -67,7 +77,9 @@ const remote = {
 
     if (sizes && sizes.length > 0) {
       // Size-specific adjustment
-      if (!batch.sizes) batch.sizes = [];
+      if (!batch.sizes) {
+        batch.sizes = [];
+      }
       sizes.forEach(adj => {
         const sizeIndex = batch.sizes.findIndex(s => s.size === adj.size);
         if (sizeIndex > -1) {
@@ -99,28 +111,21 @@ const remote = {
 
     let stockEntry;
     try {
-      const stockQueryRes = await api.get(`/stock/${productId}`);
-      if (stockQueryRes.data.length > 0) {
-        // First get the ID from the query result.
-        const stockId = stockQueryRes.data[0].id;
-        // Then, fetch the full entry by its ID to ensure we have the complete object.
-        const stockFullRes = await api.get(`/stock/${productId}`);
-        stockEntry = stockFullRes.data;
-      } else {
-        stockEntry = null;
-      }
+      const stockRes = await api.get(`/stock/${productId}`);
+      stockEntry = stockRes.data;
     } catch (error) {
-      console.error("Error fetching stock for product", productId, error);
-      stockEntry = null;
+      if (error.response && error.response.status === 404) {
+        console.log(`Stock entry for product ${productId} not found. Creating a new one.`);
+        stockEntry = null;
+      } else {
+        // Re-throw other errors
+        throw error;
+      }
     }
 
     if (stockEntry) {
       stockEntry.quantity += quantity;
-      if (!stockEntry.batches) {
-        stockEntry.batches = [];
-      }
       stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate, supplierId });
-
       if (sizes && sizes.length > 0) {
         if (!stockEntry.sizes) stockEntry.sizes = [];
         sizes.forEach(size => {
@@ -146,7 +151,7 @@ const remote = {
   },
   updateBatchSupplier: async ({ productId, batchNumber, supplierId }) => {
     console.log('Updating batch supplier via API', { productId, batchNumber, supplierId });
-    const stockRes = await api.get(`/stock/${productId}`);
+    const stockRes = await api.get(`/stock?productId=${productId}`);
     let stockEntry = stockRes.data[0];
 
     if (!stockEntry) {
@@ -160,7 +165,7 @@ const remote = {
 
     stockEntry.batches[batchIndex].supplierId = supplierId;
 
-    return await api.put(`/stock/${productId}`, stockEntry);
+    return await api.put(`/stock/${stockEntry.id}`, stockEntry);
   },
   getProductWithStock: async (id) => {
     console.log(`Fetching product ${id} with stock from API`);

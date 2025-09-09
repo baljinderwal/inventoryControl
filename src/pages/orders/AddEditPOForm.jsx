@@ -61,8 +61,9 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   useEffect(() => {
     if (!isEditMode) {
         setProductsList([{ productId: '', quantity: 1, size: null }]);
+        setShowAllProducts(false);
     }
-  }, [supplierId, showAllProducts]);
+  }, [supplierId]);
 
   const { data: suppliers, isLoading: isLoadingSuppliers } = useQuery({ queryKey: ['suppliers'], queryFn: supplierService.getSuppliers });
   const { data: products, isLoading: isLoadingProducts } = useQuery({ queryKey: ['stock'], queryFn: stockService.getStockLevels });
@@ -168,7 +169,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   const handleAddProduct = () => setProductsList([...productsList, { productId: '', quantity: 1, size: null }]);
 
   const handleRemoveProduct = (index, productId) => {
-    const product = availableProducts.find(p => p.id === productId);
+    const product = products.find(p => p.id === productId);
     const isSized = product && product.sizeProfile && getSizePreset(product.sizeProfile).length > 0;
 
     let newProductsList;
@@ -292,7 +293,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
               <Switch
                 checked={showAllProducts}
                 onChange={(e) => setShowAllProducts(e.target.checked)}
-                disabled={!supplierId || isEditMode}
+                disabled={!supplierId}
               />
             }
             label="Show All Products"
@@ -351,15 +352,17 @@ const AddEditPOForm = ({ open, onClose, po }) => {
                       </Select>
                     </FormControl>
                   )}
-                  <TextField
-                    label="Quantity"
-                    type="number"
-                    value={item.quantity}
-                    onChange={(e) => handleProductChange(item.originalIndex, 'quantity', parseInt(e.target.value, 10))}
-                    required
-                    sx={{ flex: 1 }}
-                    InputProps={{ inputProps: { min: 1 } }}
-                  />
+                  {item.productId && (
+                    <TextField
+                      label="Quantity"
+                      type="number"
+                      value={item.quantity}
+                      onChange={(e) => handleProductChange(item.originalIndex, 'quantity', parseInt(e.target.value, 10))}
+                      required
+                      sx={{ flex: 1 }}
+                      InputProps={{ inputProps: { min: 1 } }}
+                    />
+                  )}
                 </Box>
               );
             })}

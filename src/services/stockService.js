@@ -28,6 +28,7 @@ const remote = {
           quantity: 0,
           batches: [],
           supplierIds: new Set(),
+          sizes: [],
         };
       }
       acc[item.productId].quantity += item.quantity;
@@ -35,11 +36,21 @@ const remote = {
       if (item.supplierId) {
         acc[item.productId].supplierIds.add(item.supplierId);
       }
+      if (item.sizes) {
+        item.sizes.forEach(size => {
+          const existingSize = acc[item.productId].sizes.find(s => s.size === size.size);
+          if (existingSize) {
+            existingSize.quantity += size.quantity;
+          } else {
+            acc[item.productId].sizes.push({ ...size });
+          }
+        });
+      }
       return acc;
     }, {});
 
     return products.map(product => {
-      const stockInfo = stockByProduct[product.id] || { quantity: 0, batches: [], supplierIds: new Set() };
+      const stockInfo = stockByProduct[product.id] || { quantity: 0, batches: [], supplierIds: new Set(), sizes: [] };
       const supplierNames = [...stockInfo.supplierIds].map(id => supplierMap.get(id) || 'N/A').join(', ');
 
       return {
@@ -47,6 +58,7 @@ const remote = {
         stock: stockInfo.quantity,
         batches: stockInfo.batches,
         supplierName: supplierNames,
+        sizes: stockInfo.sizes,
       };
     });
   },

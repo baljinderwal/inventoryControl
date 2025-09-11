@@ -154,17 +154,21 @@ const remote = {
     if (stockEntry) {
       stockEntry.quantity += quantity;
       stockEntry.batches.push({ batchNumber, expiryDate, quantity, sizes, createdDate, supplierId });
-      if (sizes && sizes.length > 0) {
-        if (!stockEntry.sizes) stockEntry.sizes = [];
-        sizes.forEach(size => {
-          const existingSize = stockEntry.sizes.find(s => s.size === size.size);
-          if (existingSize) {
-            existingSize.quantity += size.quantity;
-          } else {
-            stockEntry.sizes.push(size);
-          }
-        });
-      }
+      // Recalculate sizes at the top-level stock entry
+      const newSizes = stockEntry.batches.reduce((acc, currentBatch) => {
+        if (currentBatch.sizes) {
+          currentBatch.sizes.forEach(sizeInfo => {
+            const existingSize = acc.find(s => s.size === sizeInfo.size);
+            if (existingSize) {
+              existingSize.quantity += sizeInfo.quantity;
+            } else {
+              acc.push({ size: sizeInfo.size, quantity: sizeInfo.quantity });
+            }
+          });
+        }
+        return acc;
+      }, []);
+      stockEntry.sizes = newSizes;
       return await api.put(`/stock/${productId}`, stockEntry);
     } else {
       const newStockEntry = {

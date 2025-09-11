@@ -116,6 +116,22 @@ const remote = {
     stockEntry.batches = stockEntry.batches.filter(b => b.quantity > 0);
     stockEntry.quantity = stockEntry.batches.reduce((sum, b) => sum + b.quantity, 0);
 
+    // Recalculate sizes at the top-level stock entry
+    const newSizes = stockEntry.batches.reduce((acc, currentBatch) => {
+      if (currentBatch.sizes) {
+        currentBatch.sizes.forEach(sizeInfo => {
+          const existingSize = acc.find(s => s.size === sizeInfo.size);
+          if (existingSize) {
+            existingSize.quantity += sizeInfo.quantity;
+          } else {
+            acc.push({ size: sizeInfo.size, quantity: sizeInfo.quantity });
+          }
+        });
+      }
+      return acc;
+    }, []);
+    stockEntry.sizes = newSizes;
+
     return await api.put(`/stock/${productId}`, stockEntry);
   },
   addStock: async ({ productId, supplierId, quantity, batchNumber, expiryDate, sizes, createdDate }) => {

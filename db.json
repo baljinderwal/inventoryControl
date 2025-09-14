@@ -1,35 +1,10 @@
 {
-  "products": [
-    { "id": 1, "name": "Wireless Mouse", "sku": "WM-001", "brand": "Logitech", "model": "MX Master 3", "category": "Electronics", "price": 25.99, "costPrice": 15.50, "lowStockThreshold": 20, "createdAt": "2024-11-10T10:00:00Z", "barcode": "8901234567890", "imageUrl": "https://picsum.photos/seed/1/200", "colors": ["Black", "White"], "gender": "Unisex", "weight": "141g", "countryOfOrigin": "China", "description": "Advanced wireless mouse with ergonomic design.", "sizeProfile": "adult", "sizes": [{ "size": "S", "quantity": 0 }, { "size": "M", "quantity": 0 }, { "size": "L", "quantity": 0 }] },
-    { "id": 2, "name": "Mechanical Keyboard", "sku": "MK-001", "brand": "Corsair", "model": "K95 RGB Platinum", "category": "Electronics", "price": 120.00, "costPrice": 80.00, "lowStockThreshold": 50, "createdAt": "2025-01-15T11:30:00Z", "barcode": "8902345678901", "imageUrl": "https://picsum.photos/seed/2/200", "colors": ["Black", "Silver"], "gender": "Unisex", "weight": "1.31kg", "countryOfOrigin": "Taiwan", "description": "Mechanical gaming keyboard with Cherry MX switches.", "sizes": [{ "size": "One Size", "quantity": 0 }] },
-    { "id": 3, "name": "USB-C Hub", "sku": "UCH-001", "brand": "Anker", "model": "PowerExpand+ 7-in-1", "category": "Accessories", "price": 45.50, "costPrice": 30.00, "lowStockThreshold": 25, "createdAt": "2025-05-20T14:00:00Z", "barcode": "8903456789012", "imageUrl": "https://picsum.photos/seed/3/200", "colors": ["Gray"], "gender": "Unisex", "weight": "99.8g", "countryOfOrigin": "China", "description": "7-in-1 USB-C hub with HDMI, USB-A, and SD card reader." },
-    { "id": 4, "name": "14\" Laptop Sleeve", "sku": "LS-014", "brand": "AmazonBasics", "model": "Laptop Sleeve", "category": "Accessories", "price": 18.99, "costPrice": 10.00, "lowStockThreshold": 50, "createdAt": "2024-09-05T09:00:00Z", "barcode": "8904567890123", "imageUrl": "", "colors": ["Black", "Gray"], "gender": "Unisex", "weight": "200g", "countryOfOrigin": "Vietnam", "description": "Simple and protective laptop sleeve.", "sizes": [{ "size": "14\"", "quantity": 0 }] },
-    { "id": 5, "name": "27\" 4K Monitor", "sku": "M-4K-027", "brand": "Dell", "model": "UltraSharp U2721Q", "category": "Monitors", "price": 499.99, "costPrice": 350.00, "lowStockThreshold": 50, "createdAt": "2025-07-22T18:00:00Z", "barcode": "8905678901234", "imageUrl": "https://picsum.photos/seed/5/200", "colors": ["Black"], "gender": "Unisex", "weight": "6.6kg", "countryOfOrigin": "Mexico", "description": "27-inch 4K UHD monitor with great color accuracy." },
-    { "id": 6, "name": "Ergonomic Chair", "sku": "EC-001", "brand": "Herman Miller", "model": "Aeron", "category": "Furniture", "price": 299.00, "costPrice": 200.00, "lowStockThreshold": 35, "createdAt": "2024-03-12T12:00:00Z", "barcode": "8906789012345", "imageUrl": "", "colors": ["Black", "Blue", "Red"], "gender": "Unisex", "weight": "22.2kg", "countryOfOrigin": "USA", "description": "Iconic ergonomic office chair." },
-    { "id": 7, "name": "Standing Desk", "sku": "SD-001", "brand": "Vari", "model": "Electric Standing Desk", "category": "Furniture", "price": 350.00, "costPrice": 250.00, "lowStockThreshold": 20, "createdAt": "2025-06-30T16:45:00Z", "barcode": "8907890123456", "imageUrl": "https://picsum.photos/seed/7/200", "colors": ["White", "Wood"], "gender": "Unisex", "weight": "50kg", "countryOfOrigin": "USA", "description": "Electric height-adjustable standing desk." },
-    { "id": 8, "name": "Webcam 1080p", "sku": "WC-1080", "brand": "Logitech", "model": "C920", "category": "Electronics", "price": 65.00, "costPrice": 40.00, "lowStockThreshold": 100, "createdAt": "2025-08-01T08:00:00Z", "barcode": "8908901234567", "imageUrl": "https://picsum.photos/seed/8/200", "colors": ["Black"], "gender": "Unisex", "weight": "162g", "countryOfOrigin": "China", "description": "Full HD 1080p webcam for video conferencing." }
-  ],
-  "suppliers": [
-    { "id": 1, "name": "ElectroSupply", "contact": "John Doe", "email": "john.doe@electrosupply.com", "products": [1, 2, 8] },
-    { "id": 2, "name": "OfficeWorks", "contact": "Jane Smith", "email": "jane.smith@officeworks.com", "products": [3, 4, 6, 7] },
-    { "id": 3, "name": "MonitorCorp", "contact": "Sam Wilson", "email": "sam.wilson@monitorcorp.com", "products": [5] }
-  ],
+  "products": [{"name":"product 10002","sku":"SKU-A413E63A","barcode":"463557454319","category":"shoes","brand":"Relaxo","model":"tennis","sizeProfile":"boy","gender":"Male","weight":"100","countryOfOrigin":"India","description":"sdf","price":13140,"costPrice":8760,"discountedPrice":11826,"lowStockThreshold":9,"imageUrl":"","colors":["Gray"],"id":"bca7a3b6-382a-45bf-a3bb-e0b995f0de15"}],
+  "suppliers": [{"name":"BaljinderSupplier2","contact":"Bal Supplier2","email":"balSupplier2@gmail.com","id":"0b4f9362-f13e-44a2-8fb2-28d48ac133bb","products":["b1a30c2e-82b4-41f3-9258-b37845e4e326"]}],
   "orders": [
-    { "id": 1, "supplier": { "id": 1, "name": "ElectroSupply" }, "createdAt": "2025-08-01T10:15:00Z", "status": "Completed", "products": [{ "productId": 1, "quantity": 50 }, { "productId": 8, "quantity": 20 }], "completedAt": "2025-08-03T14:30:00Z" },
-    { "id": 2, "supplier": { "id": 2, "name": "OfficeWorks" }, "createdAt": "2025-08-05T09:00:00Z", "status": "Pending", "products": [{ "productId": 4, "quantity": 100 }, { "productId": 6, "quantity": 5 }] },
-    { "id": 3, "supplier": { "id": 3, "name": "MonitorCorp" }, "createdAt": "2025-08-07T11:20:00Z", "status": "Completed", "products": [{ "productId": 5, "quantity": 10 }], "completedAt": "2025-08-09T16:00:00Z" },
-    { "id": 4, "supplier": { "id": 2, "name": "OfficeWorks" }, "createdAt": "2025-08-10T13:45:00Z", "status": "Pending", "products": [{ "productId": 3, "quantity": 40 }, { "productId": 7, "quantity": 8 }] },
-    { "id": 5, "supplier": { "id": 1, "name": "ElectroSupply" }, "createdAt": "2025-08-12T08:30:00Z", "status": "Pending", "products": [{ "productId": 2, "quantity": 15 }, { "productId": 8, "quantity": 25 }] }
-  ],
+    {"supplierId":"3335b1a7-8c14-4bd0-a4fe-d32a97457b65","supplier":{"id":"3335b1a7-8c14-4bd0-a4fe-d32a97457b65","name":"BaljinderSupplier"},"status":"Pending","products":[{"productId":"7049f0b1-95ae-4127-a144-24ce19dcf986","quantity":4,"sizes":[{"size":"6","quantity":1},{"size":"7","quantity":1},{"size":"8","quantity":1},{"size":"9","quantity":1}]}],"createdAt":"2025-09-09T17:39:12.614Z","total":8670,"discount":0,"appliedPromotions":[],"id":"0cdd772e-043a-4b60-93d6-3ee5240f942c","originalTotal":8670,"userId":"d423a805-1f83-4374-b256-834f55033bb5"}],
   "stock": [
-    { "id": 1, "productId": 1, "supplierId": 1, "quantity": 150, "sizes": [{ "size": "S", "quantity": 50 }, { "size": "M", "quantity": 50 }, { "size": "L", "quantity": 50 }], "batches": [{ "batchNumber": "B001", "expiryDate": "2026-11-10T10:00:00Z", "quantity": 150, "supplierId": 1, "sizes": [{ "size": "S", "quantity": 50 }, { "size": "M", "quantity": 50 }, { "size": "L", "quantity": 50 }], "createdDate": "2024-11-10T10:00:00Z" }] },
-    { "id": 2, "productId": 2, "supplierId": 1, "quantity": 75, "sizes": [{ "size": "One Size", "quantity": 75 }], "batches": [{ "batchNumber": "B002", "expiryDate": "2026-01-15T11:30:00Z", "quantity": 75, "supplierId": 1, "sizes": [{ "size": "One Size", "quantity": 75 }], "createdDate": "2025-01-15T11:30:00Z" }] },
-    { "id": 3, "productId": 3, "supplierId": 2, "quantity": 120, "batches": [{ "batchNumber": "B003", "expiryDate": "2026-05-20T14:00:00Z", "quantity": 120, "supplierId": 2, "createdDate": "2025-05-20T14:00:00Z" }] },
-    { "id": 4, "productId": 4, "supplierId": 2, "quantity": 0, "sizes": [{ "size": "14\"", "quantity": 0 }], "batches": [] },
-    { "id": 5, "productId": 5, "supplierId": 3, "quantity": 50, "batches": [{ "batchNumber": "B005", "expiryDate": "2026-07-22T18:00:00Z", "quantity": 50, "supplierId": 3, "createdDate": "2025-07-22T18:00:00Z" }] },
-    { "id": 6, "productId": 6, "supplierId": 2, "quantity": 30, "batches": [{ "batchNumber": "B006", "expiryDate": "2025-03-12T12:00:00Z", "quantity": 30, "supplierId": 2, "createdDate": "2024-03-12T12:00:00Z" }] },
-    { "id": 7, "productId": 7, "supplierId": 2, "quantity": 40, "batches": [{ "batchNumber": "B007", "expiryDate": "2026-06-30T16:45:00Z", "quantity": 40, "supplierId": 2, "createdDate": "2025-06-30T16:45:00Z" }] },
-    { "id": 8, "productId": 8, "supplierId": 1, "quantity": 90, "batches": [{ "batchNumber": "B008", "expiryDate": "2026-08-01T08:00:00Z", "quantity": 90, "supplierId": 1, "createdDate": "2025-08-01T08:00:00Z" }] }
+    {"productId":"bca7a3b6-382a-45bf-a3bb-e0b995f0de15","supplierId":"69ad8b31-e563-4799-91c3-651ab0edf019","quantity":204,"sizes":[{"size":"4","quantity":2},{"size":"5","quantity":2}],"batches":[{"batchNumber":"B-1001","expiryDate":"2026-09-09","quantity":201,"sizes":[{"size":"4","quantity":101},{"size":"5","quantity":100}],"createdDate":"2025-09-09","supplierId":"69ad8b31-e563-4799-91c3-651ab0edf019"},{"batchNumber":"B-1004","expiryDate":"2026-09-09","quantity":2,"sizes":[{"size":"4","quantity":1},{"size":"5","quantity":1}],"createdDate":"2025-09-09T03:48:28.000Z","supplierId":"cc0fa881-d326-4cf6-b5d5-6ebbe9cc95da"},{"batchNumber":"B-1757421290207","expiryDate":"2026-09-09","quantity":1,"sizes":[],"createdDate":"2025-09-09T12:35:10.068Z","supplierId":"cc0fa881-d326-4cf6-b5d5-6ebbe9cc95da"}]}
   ],
   "users": [
     { "id": 1, "name": "Admin User", "email": "admin@example.com", "password": "password", "role": "Admin" },
@@ -39,10 +14,7 @@
   "sales": [
     { "id": 1, "date": "2025-08-13T14:30:00Z", "items": [{ "productId": 1, "productName": "Wireless Mouse", "quantity": 2, "price": 25.99, "total": 51.98 }], "totalRevenue": 51.98 }
   ],
-  "customers": [
-    { "id": 1, "name": "John Smith", "email": "john.smith@example.com", "phone": "555-1234", "address": "123 Main St, Anytown, USA" },
-    { "id": 2, "name": "Jane Doe", "email": "jane.doe@example.com", "phone": "555-5678", "address": "456 Oak Ave, Othertown, USA" }
-  ],
+  "customers": [{"name":"Baljinder Customer 2","email":"balcustomer2@gmail.com","phone":"1111111111","address":"aaaabbbcccccddd","id":"cec8677e-8ba4-4439-8d0b-7e2f71b2b6d2"}],
   "salesOrders": [
     {
       "id": 1,

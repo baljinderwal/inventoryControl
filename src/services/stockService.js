@@ -29,23 +29,48 @@ const remote = {
           batches: [],
           supplierIds: new Set(),
           sizes: [],
+          expiryDates: new Set()
         };
       }
-      acc[item.productId].quantity += item.quantity;
-      acc[item.productId].batches.push(...item.batches);
+
+      // Add total quantity
+      acc[item.productId].quantity = item.quantity;
+
+      // Add batches
+      acc[item.productId].batches = item.batches.map(batch => ({
+        batchNumber: batch.batchNumber,
+        expiryDate: batch.expiryDate,
+        quantity: batch.quantity,
+        createdDate: batch.createdDate,
+        supplierId: batch.supplierId,
+        sizes: batch.sizes || []
+      }));
+
+      // Add supplier IDs from both main level and batch level
       if (item.supplierId) {
         acc[item.productId].supplierIds.add(item.supplierId);
       }
-      if (item.sizes) {
-        item.sizes.forEach(size => {
-          const existingSize = acc[item.productId].sizes.find(s => s.size === size.size);
-          if (existingSize) {
-            existingSize.quantity += size.quantity;
-          } else {
-            acc[item.productId].sizes.push({ ...size });
-          }
-        });
+      item.batches.forEach(batch => {
+        if (batch.supplierId) {
+          acc[item.productId].supplierIds.add(batch.supplierId);
+        }
+      });
+
+      // Calculate total quantities by size
+      if (item.sizes && item.sizes.length > 0) {
+        acc[item.productId].sizes = item.sizes.map(size => ({
+          size: size.size,
+          quantity: size.quantity
+        }));
       }
+
+      // Add expiry dates
+      item.batches.forEach(batch => {
+        if (batch.expiryDate) {
+          acc[item.productId].expiryDates.add(batch.expiryDate);
+        }
+      });
+
       return acc;
     }, {});
 

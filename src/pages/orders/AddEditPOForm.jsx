@@ -72,7 +72,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   const { data: suppliers, isLoading: isLoadingSuppliers } = useQuery({ queryKey: ['suppliers'], queryFn: supplierService.getSuppliers });
   const { data: products, isLoading: isLoadingProducts } = useQuery({ queryKey: ['stock'], queryFn: stockService.getStockLevels });
 
-  const lowStockProducts = React.useMemo(() => {
+  const lowStockProducts = useMemo(() => {
     if (!products) return [];
     return products.filter(p => p.stock <= p.lowStockThreshold);
   }, [products]);
@@ -318,6 +318,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
   };
 
   const isLoadingMutation = addPOMutation.isLoading || updatePOMutation.isLoading;
+  
   const groupedProducts = useMemo(() => {
     const groups = {};
     const unselectedProducts = [];
@@ -351,6 +352,7 @@ const AddEditPOForm = ({ open, onClose, po }) => {
 
     return groups;
   }, [productsList, products]);
+  
   return (
     <AppDialog title={isEditMode ? `Edit PO #${po.id}` : "Create New Purchase Order"} open={open} onClose={onClose} maxWidth="md">
       <form onSubmit={handleSubmit}>

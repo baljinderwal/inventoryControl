@@ -5,13 +5,13 @@ import { Parser } from '@json2csv/plainjs';
 import { poService } from '../../services/poService';
 import { stockService } from '../../services/stockService';
 import { supplierService } from '../../services/supplierService';
-import MuiTable from '../../components/ui/Table';
-import { Box, Typography, Button, CircularProgress, Chip, IconButton, Stack } from '@mui/material';
-import { Add, CheckCircle, Delete, Edit, Download, PictureAsPdf } from '@mui/icons-material';
+import { Box, Typography, CircularProgress } from '@mui/material';
 import { generatePOPDF } from '../../utils/generatePOPDF';
 import AddEditPOForm from './AddEditPOForm';
 import ReceivePOForm from './ReceivePOForm';
 import ConfirmationDialog from '../../components/ui/ConfirmationDialog';
+import PurchaseOrderActions from '../../components/orders/PurchaseOrderActions';
+import PurchaseOrderTable from '../../components/orders/PurchaseOrderTable';
 
 const PurchaseOrdersPage = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -125,60 +125,30 @@ const PurchaseOrdersPage = () => {
     document.body.removeChild(link);
   };
 
-  const tableHeaders = [
-    { id: 'id', label: 'PO ID' },
-    { id: 'supplier', label: 'Supplier' },
-    { id: 'date', label: 'Date' },
-    { id: 'totalValue', label: 'Total Value' },
-    { id: 'status', label: 'Status' },
-    { id: 'itemCount', label: 'Items' },
-    { id: 'actions', label: 'Actions' },
-  ];
-
-  const tableData = purchaseOrders?.map(po => {
-    const totalValue = productsLoaded ? po.products.reduce((acc, item) => {
-      const product = productsData.find(p => p.id === item.productId);
-      return acc + (product?.price || 0) * item.quantity;
-    }, 0) : 0;
-    return {
-      id: po.id,
-      supplier: po.supplier?.name || 'N/A',
-      date: new Date(po.createdAt).toLocaleDateString(),
-      totalValue: `$${totalValue.toFixed(2)}`,
-      status: <Chip label={po.status} color={po.status === 'Completed' ? 'success' : 'warning'} size="small" />,
-      itemCount: po.products.length,
-      actions: (
-        <Stack direction="row" spacing={1}>
-          {po.status === 'Pending' && (
-            <Button variant="contained" color="success" size="small" startIcon={<CheckCircle />} onClick={() => handleOpenReceiveForm(po)}>
-              Receive
-            </Button>
-          )}
-          <IconButton size="small" onClick={() => handleOpenForm(po)} disabled={po.status === 'Completed'}><Edit fontSize="inherit" /></IconButton>
-          <IconButton size="small" onClick={() => handleDeleteClick(po)} color="error"><Delete fontSize="inherit" /></IconButton>
-          <IconButton size="small" onClick={() => handleGeneratePDF(po)} color="primary"><PictureAsPdf fontSize="inherit" /></IconButton>
-        </Stack>
-      )
-    };
-  });
-
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Typography variant="h4" component="h1">Purchase Orders</Typography>
-        <Stack direction="row" spacing={2}>
-          <Button variant="outlined" startIcon={<Download />} onClick={handleExport} disabled={!purchaseOrders || purchaseOrders.length === 0}>
-            Export as CSV
-          </Button>
-          <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenForm()}>
-            New PO
-          </Button>
-        </Stack>
+        <PurchaseOrderActions
+          onExport={handleExport}
+          onNewPO={() => handleOpenForm()}
+          isExportDisabled={!purchaseOrders || purchaseOrders.length === 0}
+        />
       </Box>
 
       {isLoading && <CircularProgress />}
       {isError && <Typography color="error">Error fetching purchase orders: {error.message}</Typography>}
-      {!isLoading && !isError && <MuiTable headers={tableHeaders} data={tableData || []} />}
+      {!isLoading && !isError && (
+        <PurchaseOrderTable
+          purchaseOrders={purchaseOrders}
+          productsLoaded={productsLoaded}
+          productsData={productsData}
+          onReceive={handleOpenReceiveForm}
+          onEdit={handleOpenForm}
+          onDelete={handleDeleteClick}
+          onGeneratePDF={handleGeneratePDF}
+        />
+      )}
       {isFormOpen && <AddEditPOForm open={isFormOpen} onClose={handleCloseForm} po={selectedPO} />}
       {isReceiveFormOpen && <ReceivePOForm open={isReceiveFormOpen} onClose={handleCloseReceiveForm} po={selectedPO} />}
       <ConfirmationDialog

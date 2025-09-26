@@ -13,16 +13,27 @@ import ConfirmationDialog from '../../components/ui/ConfirmationDialog';
 import PurchaseOrderActions from '../../components/orders/PurchaseOrderActions';
 import PurchaseOrderTable from '../../components/orders/PurchaseOrderTable';
 
+/**
+ * The main page for managing purchase orders.
+ * It serves as a container component that fetches data and manages state,
+ * passing props to its children components.
+ */
 const PurchaseOrdersPage = () => {
+  // State for controlling the visibility of the Add/Edit PO form
   const [isFormOpen, setIsFormOpen] = useState(false);
+  // State for controlling the visibility of the Receive PO form
   const [isReceiveFormOpen, setIsReceiveFormOpen] = useState(false);
+  // State for the currently selected PO for editing or receiving
   const [selectedPO, setSelectedPO] = useState(null);
+  // State for controlling the visibility of the delete confirmation dialog
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  // State for the PO that is about to be deleted
   const [poToDelete, setPOToDelete] = useState(null);
 
   const queryClient = useQueryClient();
   const { showNotification } = useNotification();
 
+  // Fetch all purchase orders
   const { data: purchaseOrders, isLoading, isError, error } = useQuery({
     queryKey: ['purchaseOrders'],
     queryFn: poService.getPOs,
@@ -34,11 +45,16 @@ const PurchaseOrdersPage = () => {
     queryFn: stockService.getStockLevels,
   });
 
+  // Fetch all suppliers
   const { data: suppliersData, isSuccess: suppliersLoaded } = useQuery({
     queryKey: ['suppliers'],
     queryFn: supplierService.getSuppliers,
   });
 
+  /**
+   * Handles the generation of a PDF for a purchase order.
+   * @param {object} po - The purchase order to generate a PDF for.
+   */
   const handleGeneratePDF = (po) => {
     if (productsLoaded && suppliersLoaded) {
       generatePOPDF(po, productsData, suppliersData);
@@ -47,6 +63,11 @@ const PurchaseOrdersPage = () => {
     }
   };
 
+  /**
+   * Opens the receive form for a purchase order.
+   * Enriches the PO with product names before opening the form.
+   * @param {object} po - The purchase order to receive.
+   */
   const handleOpenReceiveForm = (po) => {
     // We need to enrich the PO products with the product name for the form
     const enrichedPO = {
@@ -65,11 +86,15 @@ const PurchaseOrdersPage = () => {
     setIsReceiveFormOpen(true);
   };
 
+  /**
+   * Closes the receive form.
+   */
   const handleCloseReceiveForm = () => {
     setSelectedPO(null);
     setIsReceiveFormOpen(false);
   };
 
+  // Mutation for deleting a purchase order
   const deletePOMutation = useMutation({
     mutationFn: poService.deletePO,
     onSuccess: () => {
@@ -85,21 +110,35 @@ const PurchaseOrdersPage = () => {
     }
   });
 
+  /**
+   * Opens the Add/Edit PO form.
+   * @param {object | null} po - The purchase order to edit, or null to create a new one.
+   */
   const handleOpenForm = (po = null) => {
     setSelectedPO(po);
     setIsFormOpen(true);
   };
 
+  /**
+   * Closes the Add/Edit PO form.
+   */
   const handleCloseForm = () => {
     setSelectedPO(null);
     setIsFormOpen(false);
   };
 
+  /**
+   * Opens the delete confirmation dialog for a purchase order.
+   * @param {object} po - The purchase order to delete.
+   */
   const handleDeleteClick = (po) => {
     setPOToDelete(po);
     setIsConfirmOpen(true);
   };
 
+  /**
+   * Handles the export of purchase orders to a CSV file.
+   */
   const handleExport = () => {
     if (!purchaseOrders || !productsLoaded) return;
     const exportData = purchaseOrders.map(po => {

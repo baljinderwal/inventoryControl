@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, Link as RouterLink } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { stockService } from '../../services/stockService';
+import couponService from '../../services/couponService';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
@@ -24,13 +25,39 @@ import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import EditIcon from '@mui/icons-material/Edit';
 
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
+
 import AppDialog from '../../components/ui/AppDialog';
 import AddEditProductForm from './AddEditProductForm';
+import CouponsPage from './CouponsPage';
 
 
 const ProductDetailPage = () => {
   const { id } = useParams();
+  const queryClient = useQueryClient();
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedTab, setSelectedTab] = useState(0);
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedDiscount, setAppliedDiscount] = useState(null);
+
+  const { data: coupons, isLoading: isLoadingCoupons } = useQuery({
+    queryKey: ['coupons'],
+    queryFn: couponService.getCoupons,
+  });
+
+  const handleTabChange = (event, newValue) => {
+    setSelectedTab(newValue);
+  };
+
+  const handleApplyCoupon = () => {
+    const coupon = coupons.find(c => c.code === couponCode);
+    if (coupon) {
+      setAppliedDiscount(coupon);
+    } else {
+      alert('Invalid coupon code.');
+    }
+  };
 
   const { data: product, isLoading, isError, error } = useQuery({
     queryKey: ['product', id],
@@ -99,9 +126,37 @@ const ProductDetailPage = () => {
               <Typography variant="body2" color="text.secondary"><strong>Weight:</strong> {product.weight}</Typography>
               <Typography variant="body2" color="text.secondary"><strong>Country of Origin:</strong> {product.countryOfOrigin}</Typography>
               <Typography variant="body2" color="text.secondary"><strong>Description:</strong> {product.description}</Typography>
-              <Typography variant="body2" color="text.secondary"><strong>Price:</strong> ${product.price?.toFixed(2)}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                <strong>Price:</strong>
+                {appliedDiscount ? (
+                  <>
+                    <span style={{ textDecoration: 'line-through' }}>${product.price?.toFixed(2)}</span>
+                    <strong style={{ color: 'green', marginLeft: '10px' }}>
+                      ${appliedDiscount.discountType === 'percentage'
+                        ? (product.price * (1 - appliedDiscount.discountValue / 100)).toFixed(2)
+                        : (product.price - appliedDiscount.discountValue).toFixed(2)}
+                    </strong>
+                  </>
+                ) : (
+                  `$${product.price?.toFixed(2)}`
+                )}
+              </Typography>
               <Typography variant="body2" color="text.secondary"><strong>Cost Price:</strong> ${product.costPrice?.toFixed(2)}</Typography>
               <Typography variant="body2" color="text.secondary"><strong>Low Stock Threshold:</strong> {product.lowStockThreshold}</Typography>
+
+              <Box sx={{ mt: 2 }}>
+                <TextField
+                  label="Coupon Code"
+                  variant="outlined"
+                  size="small"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                />
+                <Button variant="contained" onClick={handleApplyCoupon} sx={{ ml: 1 }}>
+                  Apply
+                </Button>
+              </Box>
+
               {product.colors && product.colors.length > 0 && (
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="body2" color="text.secondary"><strong>Colors:</strong></Typography>
@@ -118,13 +173,28 @@ const ProductDetailPage = () => {
 
         {/* Right Column: Stock Information */}
         <Grid item xs={12} md={8}>
-          <Typography variant="h6" gutterBottom>Stock Level</Typography>
-          <Card>
-            <CardContent>
-              <Typography variant="h2">{product.stock}</Typography>
-              <Typography variant="body2" color="text.secondary">Total units available</Typography>
-            </CardContent>
-          </Card>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs value={selectedTab} onChange={handleTabChange} aria-label="product details tabs">
+              <Tab label="Details" />
+              <Tab label="Coupons" />
+            </Tabs>
+          </Box>
+          {selectedTab === 0 && (
+            <Box sx={{ pt: 3 }}>
+              <Typography variant="h6" gutterBottom>Stock Level</Typography>
+              <Card>
+                <CardContent>
+                  <Typography variant="h2">{product.stock}</Typography>
+                  <Typography variant="body2" color="text.secondary">Total units available</Typography>
+                </CardContent>
+              </Card>
+            </Box>
+          )}
+          {selectedTab === 1 && (
+            <Box sx={{ pt: 3 }}>
+              {isLoadingCoupons ? <CircularProgress /> : <CouponsPage coupons={coupons || []} />}
+            </Box>
+          )}
         </Grid>
       </Grid>
 
